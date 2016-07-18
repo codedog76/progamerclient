@@ -1,25 +1,22 @@
 package activities;
 
-import android.app.ProgressDialog;
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.progamer.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import database.DatabaseHandler;
 import fragments.LoginFragment;
 import fragments.RegisterFragment;
-import models.User;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -31,6 +28,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        assignViews();
         assignViews();
         assignFonts();
     }
