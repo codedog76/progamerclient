@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="activities.PuzzleActivity">
+
+    <include
+        android:id="@+id/app_actionbar"
+        layout="@layout/app_actionbar" />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/puzzleTopView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/app_actionbar"
+        android:layout_margin="6dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/puzzleInstructionsTitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Instructions" />
+
+            <TextView
+                android:id="@+id/puzzleInstructionsText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas at velit eu libero tincidunt porta. Praesent gravida velit sed turpis rutrum vulputate." />
+
+            <TextView
+                android:id="@+id/puzzleExpectedOutputTitleText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Expected Output" />
+
+            <TextView
+                android:id="@+id/puzzleExpectedOutputText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas at velit eu libero tincidunt porta. Praesent gravida velit sed turpis rutrum vulputate." />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/puzzleTopView"
+        android:layout_margin="6dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PUZZLE, PUZZLE ,PUZZLE, PUZZLE, PUZZLE, PUZZLE ,PUZZLE, PUZZLE, PUZZLE, PUZZLE ,PUZZLE, PUZZLE, PUZZLE, PUZZLE ,PUZZLE, PUZZLE, PUZZLE, PUZZLE ,PUZZLE, PUZZLE, PUZZLE, PUZZLE ,PUZZLE, PUZZLE, PUZZLE, PUZZLE ,PUZZLE, PUZZLE," />
+
+    </android.support.v7.widget.CardView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/green_100"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/puzzleTimerText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Time: 00:00" />
+
+            <TextView
+                android:id="@+id/puzzleAttemptsText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Attempts: 1" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/puzzleCheckButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_margin="6dp"
+            android:background="@drawable/round_corner_button_login"
+            android:text="@string/puzzle_check_button"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+</RelativeLayout>
