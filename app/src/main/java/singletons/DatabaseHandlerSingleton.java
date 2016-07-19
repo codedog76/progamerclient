@@ -9,6 +9,7 @@ import database.DatabaseHandler;
 import models.Level;
 import models.Puzzle;
 import models.User;
+import models.UserLevel;
 
 public class DatabaseHandlerSingleton {
 
@@ -42,8 +43,15 @@ public class DatabaseHandlerSingleton {
     }
 
     public void insertOrUpdateLevel(Level level) {
-        if (level != null)
-            getDatabaseHandler().insertOrUpdateLevel(getLoggedUser(), level);
+        if (level != null) {
+            getDatabaseHandler().insertOrUpdateLevel(level);
+        }
+    }
+
+    public void insertOrUpdateUserLevel(UserLevel userLevel) {
+        if (userLevel != null) {
+            getDatabaseHandler().insertOrUpdateUserLevel(userLevel);
+        }
     }
 
     public void insertOrUpdatePuzzle(Puzzle puzzle) {
@@ -76,6 +84,10 @@ public class DatabaseHandlerSingleton {
         }
     }
 
+    public boolean checkHasLevels() {
+        return mDatabaseHandler.checkHasLevels();
+    }
+
     public User getLoggedUser() {
         if (current_user == null) {
             current_user = getDatabaseHandler().getLoggedInUser();
@@ -85,7 +97,7 @@ public class DatabaseHandlerSingleton {
         }
     }
 
-    public ArrayList<Level> getUserLevels() {
-        return getDatabaseHandler().getUserLevels(getLoggedUser());
+    public ArrayList<Level> getLevels() {
+        return getDatabaseHandler().getLevels();
     }
 }

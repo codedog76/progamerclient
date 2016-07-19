@@ -202,7 +202,7 @@ public class LeaderboardOverallFragment extends Fragment implements LeaderboardA
 
     public int findPosition() {
         for (User user : userList) {
-            if (user.getUser_student_number().equals(databaseHandlerSingleton.getLoggedUser().getUser_student_number())) {
+            if (user.getUser_student_number_id().equals(databaseHandlerSingleton.getLoggedUser().getUser_student_number_id())) {
                 currentUser = user;
                 return userList.indexOf(user);
             }

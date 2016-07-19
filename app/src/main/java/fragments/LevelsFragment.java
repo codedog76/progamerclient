@@ -47,24 +47,7 @@ public class LevelsFragment extends Fragment implements LevelAdapter.clickListen
         assignSingletons();
         assignViews(view);
         assignAdapter();
-        //todo:remove this
-        int sum = 0;
-        int count = 0;
-        for (int x = 1; x <= 3; x++) {
-            Level level = new Level();
-            level.setLevel_id(x);
-            level.setLevel_title("Introduction " + x);
-            mDatabaseHandlerSingleton.insertOrUpdateLevel(level);
-            for (int a = 1; a <= 3; a++) {
-                Puzzle puzzle = new Puzzle();
-                puzzle.setPuzzle_id(count);
-                count++;
-                puzzle.setPuzzle_level_id(x);
-                sum += (a * x);
-                mDatabaseHandlerSingleton.insertOrUpdatePuzzle(puzzle);
-            }
-        }
-        addList(mDatabaseHandlerSingleton.getUserLevels());
+        addList(mDatabaseHandlerSingleton.getLevels());
     }
 
     private void assignSingletons() {

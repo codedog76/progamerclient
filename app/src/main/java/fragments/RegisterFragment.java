@@ -290,7 +290,7 @@ public class RegisterFragment extends Fragment {
         if (validInput()) {
             progressDialog.show();
             User user = new User();
-            user.setUser_student_number(registerStudentNumberText.getText().toString());
+            user.setUser_student_number_id(registerStudentNumberText.getText().toString());
             user.setUser_nickname(registerStudentNicknameText.getText().toString());
             user.setUser_password(registerConfirmPasswordText.getText().toString());
             user.setUser_avatar(currentAvatar);
@@ -311,9 +311,23 @@ public class RegisterFragment extends Fragment {
 
     private void doLogin() {
         User user = new User();
-        user.setUser_student_number(registerStudentNumberText.getText().toString());
+        user.setUser_student_number_id(registerStudentNumberText.getText().toString());
         user.setUser_password(registerConfirmPasswordText.getText().toString());
         networkManagerSingleton.loginJSONRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
+            @Override
+            public void getResult(Boolean response, String message) {
+                if (response) {
+                    loadLevelData();
+                } else {
+                    progressDialog.hide();
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void loadLevelData() {
+        networkManagerSingleton.downloadLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
             @Override
             public void getResult(Boolean response, String message) {
                 if (response) {

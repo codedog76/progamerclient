@@ -160,15 +160,13 @@ public class LoginFragment extends Fragment {
         if (validInput()) {
             progressDialog.show();
             User user = new User();
-            user.setUser_student_number(loginStudentNumberText.getText().toString());
+            user.setUser_student_number_id(loginStudentNumberText.getText().toString());
             user.setUser_password(loginPasswordText.getText().toString());
             networkManagerSingleton.loginJSONRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
                 @Override
                 public void getResult(Boolean response, String message) {
                     if (response) {
-                        Intent intent = new Intent(getContext(), MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+                        loadLevelData();
                     } else {
                         progressDialog.hide();
                         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
@@ -176,6 +174,22 @@ public class LoginFragment extends Fragment {
                 }
             });
         }
+    }
+
+    private void loadLevelData() {
+        networkManagerSingleton.downloadLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
+            @Override
+            public void getResult(Boolean response, String message) {
+                if (response) {
+                    Intent intent = new Intent(getContext(), MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                } else {
+                    progressDialog.hide();
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private boolean validInput() {

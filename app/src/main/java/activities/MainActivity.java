@@ -1,5 +1,6 @@
 package activities;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -25,6 +26,7 @@ import fragments.LevelsFragment;
 import fragments.NavigationDrawerFragment;
 import services.SyncService;
 import singletons.DatabaseHandlerSingleton;
+import singletons.NetworkManagerSingleton;
 
 public class MainActivity extends AppCompatActivity implements NavigationDrawerFragment.drawerListener {
 
@@ -34,9 +36,11 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
     private TextView navLevelsTextView, navLeaderboardTextView, navLogoutTextView, navSettingsTextView, navNicknameTextView, navStudentNumberTextView;
     private ImageView navLevelsImageView, navLeaderboardImageView, navProfileImageView;
     private Boolean levelsFragmentSelected, leaderboardFragmentSelected;
+    private ProgressDialog progressDialog;
     private NavigationDrawerFragment drawerFragment;
     private Toolbar toolbar;
     private DatabaseHandlerSingleton databaseHandlerSingleton;
+    private NetworkManagerSingleton networkManagerSingleton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +54,25 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         assignListeners();
         loadLevelsFragment();
         startService(new Intent(this, SyncService.class));
+        assignProgressDialog();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        progressDialog.dismiss();
     }
 
     public void assignSingletons() {
         databaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
+        networkManagerSingleton = NetworkManagerSingleton.getInstance(this);
+    }
+
+    private void assignProgressDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading..");
+        progressDialog.setCancelable(false);
+        progressDialog.setCanceledOnTouchOutside(false);
     }
 
     private void assignViews() {
@@ -97,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         drawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout), toolbar);
         drawerFragment.setListener(this);
         navNicknameTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_nickname());
-        navStudentNumberTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_student_number());
+        navStudentNumberTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
         int id = getResources().getIdentifier("avatar_"+String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_avatar()), "drawable", getPackageName());
         navProfileImageView.setImageDrawable(ContextCompat.getDrawable(this, id));
     }

@@ -72,7 +72,7 @@ public class UserProfileActivity extends AppCompatActivity {
         if (bundle != null) {
             if (bundle.getBoolean("is_logged_user", false)) {
                 userProfileStudentNameTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_nickname());
-                userProfileStudentNumberTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_student_number());
+                userProfileStudentNumberTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
                 userProfileOverallRank.setText(String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_overall_score_rank()));
                 userProfileAttemptsRank.setText(String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_overall_attempts_rank()));
                 userProfileTimeRank.setText(String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_overall_time_rank()));
@@ -86,7 +86,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         public void getResult(User object, Boolean response, String message) {
                             if(response) {
                                 userProfileStudentNameTextView.setText(object.getUser_nickname());
-                                userProfileStudentNumberTextView.setText(object.getUser_student_number());
+                                userProfileStudentNumberTextView.setText(object.getUser_student_number_id());
                                 userProfileOverallRank.setText(String.valueOf(object.getUser_overall_score_rank()));
                                 userProfileAttemptsRank.setText(String.valueOf(object.getUser_overall_attempts_rank()));
                                 userProfileTimeRank.setText(String.valueOf(object.getUser_overall_time_rank()));

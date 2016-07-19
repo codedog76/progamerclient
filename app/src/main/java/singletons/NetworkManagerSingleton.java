@@ -28,7 +28,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import models.Level;
+import models.Puzzle;
 import models.User;
+import models.UserLevel;
 
 public class NetworkManagerSingleton {
     private static NetworkManagerSingleton sInstance;
@@ -44,7 +47,7 @@ public class NetworkManagerSingleton {
     private static final String LEADERBOARD_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/leaderboard";
     private static final String GET_USER_URL_STRING = "http://";
     private static final String UPLOAD_USER_URL_STRING = "http://";
-    private static final String GET_LEVEL_URL_STRING = "http://";
+    private static final String LEVELS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/levels";
 
     private NetworkManagerSingleton(Context context) {
         mContext = context;
@@ -80,7 +83,7 @@ public class NetworkManagerSingleton {
     public synchronized void loginJSONRequest(User user, final BooleanResponseListener booleanResponseListener) {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
-            jsonParams.put("user_student_number", user.getUser_student_number());
+            jsonParams.put("user_student_number", user.getUser_student_number_id());
             jsonParams.put("user_password", user.getUser_password());
             JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LOGIN_USER_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
@@ -89,7 +92,7 @@ public class NetworkManagerSingleton {
                             try {
                                 if (validResponse(response)) {
                                     User user = new User();
-                                    user.setUser_student_number(response.getString("user_student_number"));
+                                    user.setUser_student_number_id(response.getString("user_student_number"));
                                     user.setUser_nickname(response.getString("user_nickname"));
                                     user.setUser_avatar(response.getInt("user_avatar"));
                                     user.setUser_is_private(response.getInt("user_is_private"));
@@ -133,7 +136,7 @@ public class NetworkManagerSingleton {
     public synchronized void registerJSONRequest(User user, final BooleanResponseListener booleanResponseListener) {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
-            jsonParams.put("user_student_number", user.getUser_student_number());
+            jsonParams.put("user_student_number", user.getUser_student_number_id());
             jsonParams.put("user_nickname", user.getUser_nickname());
             jsonParams.put("user_password", user.getUser_password());
             jsonParams.put("user_avatar", user.getUser_avatar());
@@ -174,8 +177,8 @@ public class NetworkManagerSingleton {
     public synchronized void downloadLeaderboardJSONRequest(final ObjectResponseListener<ArrayList<User>> objectResponseListener) {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
-            jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number());
-            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LEADERBOARD_URL_STRING, new JSONObject(jsonParams),
+            jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, LEADERBOARD_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -186,7 +189,7 @@ public class NetworkManagerSingleton {
                                     for (int x = 0; x < jsonArray.length(); x++) {
                                         JSONObject jsonObject = jsonArray.getJSONObject(x);
                                         User user = new User();
-                                        user.setUser_student_number(jsonObject.getString("user_student_number"));
+                                        user.setUser_student_number_id(jsonObject.getString("user_student_number"));
                                         user.setUser_nickname(jsonObject.getString("user_nickname"));
                                         user.setUser_avatar(jsonObject.getInt("user_avatar"));
                                         user.setUser_overall_score(jsonObject.getInt("user_overall_score"));
@@ -226,6 +229,71 @@ public class NetworkManagerSingleton {
         }
     }
 
+    public synchronized void downloadLevelsJSONRequest(final BooleanResponseListener booleanResponseListener) {
+        if (canSyncData()&&!sDatabaseHandlerSingleton.checkHasLevels()) {
+            Map<String, Object> jsonParams = new HashMap<>();
+            jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LEADERBOARD_URL_STRING, new JSONObject(jsonParams),
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                if (validResponse(response)) {
+                                    Log.e("",response.toString());
+                                    JSONArray jsonArray1 = response.getJSONArray("level_list");
+                                    for (int x = 0; x < jsonArray1.length(); x++) {
+                                        JSONObject jsonObject1 = jsonArray1.getJSONObject(x);
+                                        Level level = new Level();
+                                        level.setLevel_id(jsonObject1.getInt("level_id"));
+                                        level.setLevel_number(jsonObject1.getInt("level_number"));
+                                        level.setLevel_title(jsonObject1.getString("level_title"));
+                                        level.setLevel_description(jsonObject1.getString("level_description"));
+                                        sDatabaseHandlerSingleton.insertOrUpdateLevel(level);
+                                        JSONArray jsonArray2 = jsonObject1.getJSONArray("puzzle_list");
+                                        for (int a = 0; a < jsonArray2.length(); a++) {
+                                            JSONObject jsonObject2 = jsonArray2.getJSONObject(a);
+                                            Puzzle puzzle = new Puzzle();
+                                            puzzle.setPuzzle_id(jsonObject2.getInt("puzzle_id"));
+                                            puzzle.setPuzzle_level_id(jsonObject2.getInt("puzzle_level_id"));
+                                            puzzle.setPuzzle_type(jsonObject2.getString("puzzle_type"));
+                                            puzzle.setPuzzle_instructions(jsonObject2.getString("puzzle_instructions"));
+                                            puzzle.setPuzzle_expected_output(jsonObject2.getString("puzzle_expected_output"));
+                                            puzzle.setPuzzle_data(jsonObject2.getString("puzzle_data"));
+                                            sDatabaseHandlerSingleton.insertOrUpdatePuzzle(puzzle);
+                                        }
+                                    }
+                                    Log.e(mClassName, "downloadLevelsJSONRequest: " + response.getString("response_message"));
+                                    booleanResponseListener.getResult(true, response.getString("response_message"));
+                                } else {
+                                    Log.e(mClassName, "downloadLevelsJSONRequest Error: Invalid response");
+                                    booleanResponseListener.getResult(false, response.getString("response_message"));
+                                }
+                            } catch (JSONException ex) {
+                                Log.e(mClassName, "downloadLevelsJSONRequest Error: " + ex.getMessage());
+                                booleanResponseListener.getResult(false, ex.getMessage());
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError ex) {
+                            if (ex != null) {
+                                String error = getVolleyError(ex);
+                                Log.e(mClassName, "downloadLevelsJSONRequest Error: " + error);
+                                booleanResponseListener.getResult(false, error);
+                            }
+                        }
+                    }
+            );
+            RetryPolicy policy = new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+            objectRequest.setRetryPolicy(policy);
+            getRequestQueue().add(objectRequest);
+        } else {
+            Log.e(mClassName, "downloadLevelsJSONRequest Error: Prevented from syncing");
+            booleanResponseListener.getResult(false, "");
+        }
+    }
+
     public synchronized void downloadUserJSONRequest(String user_student_number, final ObjectResponseListener<User> objectResponseListener) {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
@@ -236,7 +304,7 @@ public class NetworkManagerSingleton {
                         public void onResponse(JSONObject response) {
                             try {
                                 User user = new User();
-                                user.setUser_student_number(response.getString("user_student_number"));
+                                user.setUser_student_number_id(response.getString("user_student_number"));
                                 user.setUser_nickname(response.getString("user_nickname"));
                                 objectResponseListener.getResult(user, true, "");
                             } catch (JSONException ex) {
@@ -268,7 +336,7 @@ public class NetworkManagerSingleton {
     public synchronized void uploadUserJSONRequest(final BooleanResponseListener booleanResponseListener) {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
-            jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number());
+            jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
             jsonParams.put("user_nickname", sDatabaseHandlerSingleton.getLoggedUser().getUser_nickname());
             jsonParams.put("user_nickname", sDatabaseHandlerSingleton.getLoggedUser().getUser_nickname());
             jsonParams.put("user_avatar", sDatabaseHandlerSingleton.getLoggedUser().getUser_avatar());
@@ -311,7 +379,7 @@ public class NetworkManagerSingleton {
     private synchronized void uploadUserLevelsJSONRequest(final BooleanResponseListener booleanResponseListener) {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
-            jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number());
+            jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
             jsonParams.put("user_nickname", sDatabaseHandlerSingleton.getLoggedUser().getUser_nickname());
             jsonParams.put("user_nickname", sDatabaseHandlerSingleton.getLoggedUser().getUser_nickname());
             jsonParams.put("user_avatar", sDatabaseHandlerSingleton.getLoggedUser().getUser_avatar());

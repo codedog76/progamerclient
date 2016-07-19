@@ -1,16 +1,14 @@
 package models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Level implements Serializable {
 
     private int level_id; //PK
-    private String level_student_number; //FK
+    private int level_number;
     private String level_title;
-    private int level_progress;
-    private int level_score;
-    private int level_attempts;
-    private int level_time;
+    private String level_description;
 
     public Level() {
     }
@@ -23,12 +21,12 @@ public class Level implements Serializable {
         this.level_id = level_id;
     }
 
-    public String getLevel_student_number() {
-        return level_student_number;
+    public int getLevel_number() {
+        return level_number;
     }
 
-    public void setLevel_student_number(String level_student_number) {
-        this.level_student_number = level_student_number;
+    public void setLevel_number(int level_number) {
+        this.level_number = level_number;
     }
 
     public String getLevel_title() {
@@ -39,35 +37,11 @@ public class Level implements Serializable {
         this.level_title = level_title;
     }
 
-    public int getLevel_progress() {
-        return level_progress;
+    public String getLevel_description() {
+        return level_description;
     }
 
-    public void setLevel_progress(int level_progress) {
-        this.level_progress = level_progress;
-    }
-
-    public int getLevel_score() {
-        return level_score;
-    }
-
-    public void setLevel_score(int level_score) {
-        this.level_score = level_score;
-    }
-
-    public int getLevel_attempts() {
-        return level_attempts;
-    }
-
-    public void setLevel_attempts(int level_attempts) {
-        this.level_attempts = level_attempts;
-    }
-
-    public int getLevel_time() {
-        return level_time;
-    }
-
-    public void setLevel_time(int level_time) {
-        this.level_time = level_time;
+    public void setLevel_description(String level_description) {
+        this.level_description = level_description;
     }
 }

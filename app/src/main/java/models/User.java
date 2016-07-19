@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class User implements Serializable {
 
-    private String user_student_number;
+    private String user_student_number_id; //pk
     private String user_nickname;
     private int user_avatar;
     private int user_is_private;
@@ -23,12 +23,12 @@ public class User implements Serializable {
     public User() {
     }
 
-    public String getUser_student_number() {
-        return user_student_number;
+    public String getUser_student_number_id() {
+        return user_student_number_id;
     }
 
-    public void setUser_student_number(String user_student_number) {
-        this.user_student_number = user_student_number;
+    public void setUser_student_number_id(String user_student_number_id) {
+        this.user_student_number_id = user_student_number_id;
     }
 
     public String getUser_nickname() {
