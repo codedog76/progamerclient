@@ -93,12 +93,12 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
         @Override
         public void onClick(View v) {
             if (clickListener != null) {
-                clickListener.itemClicked(getAdapterPosition());
+                clickListener.itemClicked(getAdapterPosition(), levelList.get(getAdapterPosition()));
             }
         }
     }
 
     public interface clickListener {
-        void itemClicked(int position);
+        void itemClicked(int position, Level selected_level);
     }
 }

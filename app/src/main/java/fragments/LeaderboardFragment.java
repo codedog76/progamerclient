@@ -169,10 +169,10 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
     }
 
     @Override
-    public void itemClicked(int position, String user_student_number) {
+    public void itemClicked(int position, User selected_user) {
         Intent intent = new Intent(getContext(), UserProfileActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putString("user", user_student_number);
+        bundle.putSerializable("selected_user", selected_user);
         intent.putExtras(bundle);
         startActivity(intent);
     }

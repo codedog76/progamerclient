@@ -105,12 +105,12 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         @Override
         public void onClick(View v) {
             if (clickListener != null) {
-                clickListener.itemClicked(getAdapterPosition(), userList.get(getAdapterPosition()).getUser_student_number_id());
+                clickListener.itemClicked(getAdapterPosition(), userList.get(getAdapterPosition()));
             }
         }
     }
 
     public interface clickListener {
-        void itemClicked(int position, String user_student_number);
+        void itemClicked(int position, User selected_user);
     }
 }

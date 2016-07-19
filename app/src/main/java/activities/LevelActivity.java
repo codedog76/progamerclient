@@ -8,7 +8,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.progamer.R;
@@ -16,58 +19,66 @@ import com.example.progamer.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import fragments.LevelDescriptionFragment;
-import fragments.LevelPerformanceFragment;
-import fragments.LoginFragment;
-import fragments.RegisterFragment;
+import database.DatabaseHandler;
 import models.Level;
-import models.User;
+import singletons.DatabaseHandlerSingleton;
 
 public class LevelActivity extends AppCompatActivity {
 
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
     private Toolbar toolbar;
     private Level selectedLevel;
+    private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
+    private TextView activityLevelTitleTextView;
+    private Button levelContinueButton;
+    private String mClassName = getClass().toString();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_level);
         assignViews();
+        assignSingletons();
+        assignListeners();
         assignActionBar();
         getBundle();
     }
 
+    private void assignListeners() {
+        levelContinueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+    }
+
+    private void assignSingletons() {
+        mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
+    }
+
     private void getBundle() {
         Bundle bundle = getIntent().getExtras();
-        if (bundle != null)
-            selectedLevel = (Level) bundle.getSerializable("level");
-        if (selectedLevel != null) {
-
+        if (bundle != null) {
+            selectedLevel = (Level) bundle.getSerializable("selected_level");
+            if (selectedLevel != null) {
+                getSupportActionBar().setTitle("Level " + selectedLevel.getLevel_number());
+                activityLevelTitleTextView.setText(selectedLevel.getLevel_title());
+            } else {
+                Log.e(mClassName, "Level data missing");
+                finish();
+            }
         }
     }
 
     private void assignViews() {
         toolbar = (Toolbar) findViewById(R.id.app_actionbar);
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
-        setupViewPager(viewPager);
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        if (tabLayout != null)
-            tabLayout.setupWithViewPager(viewPager);
+        activityLevelTitleTextView = (TextView) findViewById(R.id.activityLevelTitleTextView);
+        levelContinueButton = (Button) findViewById(R.id.levelContinueButton);
     }
 
     private void assignActionBar() {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new LevelDescriptionFragment(), "Description");
-        adapter.addFragment(new LevelPerformanceFragment(), "Performance");
-        viewPager.setAdapter(adapter);
     }
 
     @Override

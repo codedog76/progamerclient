@@ -97,9 +97,9 @@ public class UserProfileActivity extends AppCompatActivity {
                 activityUserProfileProgressBar.setVisibility(View.GONE);
                 activityUserProfileTopContainer.setVisibility(View.VISIBLE);
             } else {
-                String user_student_number = bundle.getString("user", null);
-                if (user_student_number != null) {
-                    networkManagerSingleton.downloadUserJSONRequest(user_student_number, new NetworkManagerSingleton.ObjectResponseListener<User>() {
+                User selected_user = (User)bundle.getSerializable("selected_user");
+                if (selected_user != null) {
+                    networkManagerSingleton.downloadUserJSONRequest(selected_user, new NetworkManagerSingleton.ObjectResponseListener<User>() {
                         @Override
                         public void getResult(User object, Boolean response, String message) {
                             if (response) {

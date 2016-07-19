@@ -290,10 +290,10 @@ public class NetworkManagerSingleton {
         }
     }
 
-    public synchronized void downloadUserJSONRequest(String user_student_number, final ObjectResponseListener<User> objectResponseListener) {
+    public synchronized void downloadUserJSONRequest(User selected_user, final ObjectResponseListener<User> objectResponseListener) {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
-            jsonParams.put("user_student_number", user_student_number);
+            jsonParams.put("user_student_number", selected_user.getUser_student_number_id());
             JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, USER_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override

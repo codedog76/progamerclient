@@ -77,10 +77,10 @@ public class LevelsFragment extends Fragment implements LevelAdapter.clickListen
     }
 
     @Override
-    public void itemClicked(int position) {
+    public void itemClicked(int position, Level selected_level) {
         Intent intent = new Intent(getContext(), LevelActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("level", levelList.get(position));
+        bundle.putSerializable("selected_level", selected_level);
         intent.putExtras(bundle);
         startActivity(intent);
     }

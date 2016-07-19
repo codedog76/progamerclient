@@ -247,12 +247,12 @@ public class LeaderboardAttemptsFragment extends Fragment implements Leaderboard
     }
 
     @Override
-    public void itemClicked(int position, String user_student_number) {
-        interfaceListener.itemClicked(position, user_student_number);
+    public void itemClicked(int position, User selected_user) {
+        interfaceListener.itemClicked(position, selected_user);
     }
 
     public interface InterfaceListener {
-        void itemClicked(int position, String user_student_number);
+        void itemClicked(int position, User selected_user);
 
         void startRefreshData();
     }
