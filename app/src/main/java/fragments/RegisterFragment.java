@@ -51,6 +51,7 @@ public class RegisterFragment extends Fragment {
     private AlertDialog avatarDialog;
     private View avatarView;
     private NetworkManagerSingleton networkManagerSingleton;
+    private DatabaseHandlerSingleton databaseHandlerSingleton;
     private GridView gridView;
     private ImageAdapter imageAdapter;
     private int currentAvatar;
@@ -86,6 +87,7 @@ public class RegisterFragment extends Fragment {
 
     public void assignSingletons() {
         networkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
+        databaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getActivity());
     }
 
     private void assignAvatarDialog() {
@@ -317,23 +319,14 @@ public class RegisterFragment extends Fragment {
             @Override
             public void getResult(Boolean response, String message) {
                 if (response) {
-                    loadLevelData();
-                } else {
-                    progressDialog.hide();
-                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    private void loadLevelData() {
-        networkManagerSingleton.downloadLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
-            @Override
-            public void getResult(Boolean response, String message) {
-                if (response) {
-                    Intent intent = new Intent(getContext(), MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
+                    if (databaseHandlerSingleton.loginUser(registerStudentNumberText.getText().toString())) {
+                        Intent intent = new Intent(getContext(), MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    } else {
+                        progressDialog.hide();
+                        Toast.makeText(getContext(), "Failed to log in the user in the local database", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     progressDialog.hide();
                     Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();

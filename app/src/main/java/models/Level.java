@@ -9,6 +9,7 @@ public class Level implements Serializable {
     private int level_number;
     private String level_title;
     private String level_description;
+    private ArrayList<Puzzle> puzzle_list;
 
     public Level() {
     }
@@ -43,5 +44,13 @@ public class Level implements Serializable {
 
     public void setLevel_description(String level_description) {
         this.level_description = level_description;
+    }
+
+    public ArrayList<Puzzle> getPuzzle_list() {
+        return puzzle_list;
+    }
+
+    public void addToPuzzle_list(Puzzle puzzle) {
+        this.puzzle_list.add(puzzle);
     }
 }

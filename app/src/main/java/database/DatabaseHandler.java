@@ -278,8 +278,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Level level = new Level();
                 level.setLevel_id(Integer.parseInt(cursor.getString(0)));
                 level.setLevel_number(Integer.parseInt(cursor.getString(1)));
-                level.setLevel_title(cursor.getString(1));
-                level.setLevel_description(cursor.getString(2));
+                level.setLevel_title(cursor.getString(2));
+                level.setLevel_description(cursor.getString(3));
                 level_list.add(level);
                 cursor.moveToNext();
             }

@@ -18,12 +18,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.progamer.R;
 import com.xwray.passwordview.PasswordView;
-
 import activities.MainActivity;
 import models.User;
+import singletons.DatabaseHandlerSingleton;
 import singletons.NetworkManagerSingleton;
 
 public class LoginFragment extends Fragment {
@@ -33,6 +32,7 @@ public class LoginFragment extends Fragment {
     private ProgressDialog progressDialog;
     private Button loginButton;
     private NetworkManagerSingleton networkManagerSingleton;
+    private DatabaseHandlerSingleton databaseHandlerSingleton;
     private TextInputLayout loginStudentNumberTextInputLayout, loginPasswordTextInputLayout;
     private boolean validStudentNumber, validPassword;
 
@@ -57,6 +57,7 @@ public class LoginFragment extends Fragment {
 
     public void assignSingletons() {
         networkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
+        databaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getActivity());
     }
 
     private void assignProgressDialog() {
@@ -166,7 +167,15 @@ public class LoginFragment extends Fragment {
                 @Override
                 public void getResult(Boolean response, String message) {
                     if (response) {
-                        loadLevelData();
+                        if (databaseHandlerSingleton.loginUser(loginStudentNumberText.getText().toString())) {
+                            Intent intent = new Intent(getContext(), MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                        } else {
+                            progressDialog.hide();
+                            Toast.makeText(getContext(), "Failed to log in the user in the local database", Toast.LENGTH_SHORT).show();
+                        }
+
                     } else {
                         progressDialog.hide();
                         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
@@ -174,22 +183,6 @@ public class LoginFragment extends Fragment {
                 }
             });
         }
-    }
-
-    private void loadLevelData() {
-        networkManagerSingleton.downloadLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
-            @Override
-            public void getResult(Boolean response, String message) {
-                if (response) {
-                    Intent intent = new Intent(getContext(), MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                } else {
-                    progressDialog.hide();
-                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     private boolean validInput() {

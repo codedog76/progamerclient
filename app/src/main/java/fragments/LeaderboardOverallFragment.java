@@ -13,10 +13,13 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.example.progamer.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
 import adapters.LeaderboardAdapter;
 import de.hdodenhof.circleimageview.CircleImageView;
 import singletons.DatabaseHandlerSingleton;
@@ -71,8 +74,8 @@ public class LeaderboardOverallFragment extends Fragment implements LeaderboardA
     }
 
     private void loadData() {
-        addList(((LeaderboardFragment)getParentFragment()).getLeaderboardList());
-        if(leaderboardAdapter.getItemCount()>1) {
+        addList(((LeaderboardFragment) getParentFragment()).getLeaderboardList());
+        if (leaderboardAdapter.getItemCount() > 1) {
             overallTopNameTextView.setText(currentUser.getUser_nickname());
             overallTopScoreTextView.setText(String.valueOf(currentUser.getUser_overall_score()));
             overallBottomNameTextView.setText(currentUser.getUser_nickname());
@@ -189,10 +192,12 @@ public class LeaderboardOverallFragment extends Fragment implements LeaderboardA
             public void stopRefreshing() {
                 swipeRefreshLayout.setRefreshing(false);
             }
+
             @Override
             public void startRefreshing() {
                 swipeRefreshLayout.setRefreshing(true);
             }
+
             @Override
             public void reloadData() {
                 loadData();

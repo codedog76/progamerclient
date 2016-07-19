@@ -33,172 +33,187 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:layout_gravity="top"
                 android:background="?attr/colorPrimary"
                 app:layout_collapseMode="parallax"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="55dp"
-                android:layout_marginTop="?attr/actionBarSize"
-                android:orientation="vertical">
+                android:layout_marginTop="?attr/actionBarSize">
 
                 <LinearLayout
+                    android:id="@+id/activityUserProfileTopContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <RelativeLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center">
-
-                        <de.hdodenhof.circleimageview.CircleImageView
-                            android:id="@+id/leaderboardCircleImageView"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
-                            android:layout_centerInParent="true"
-                            android:src="@drawable/avatar_1"
-                            app:civ_border_color="@color/black"
-                            app:civ_border_width="0dp"
-                            app:civ_fill_color="@color/white" />
-
-                        <ProgressBar
-                            android:id="@+id/progressBar"
-                            style="?android:attr/progressBarStyleHorizontal"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:layout_centerInParent="true"
-                            android:indeterminate="false"
-                            android:max="100"
-                            android:progress="80"
-                            android:progressDrawable="@drawable/circular" />
-                    </RelativeLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:layout_marginTop="5dp"
                         android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/userProfileStudentNameTextView"
-                            android:layout_width="match_parent"
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_horizontal"
-                            android:text="Student Name"
-                            android:textColor="@color/white"
-                            android:textSize="24sp" />
+                            android:layout_gravity="center">
 
-                        <TextView
-                            android:id="@+id/userProfileStudentNumberTextView"
+                            <de.hdodenhof.circleimageview.CircleImageView
+                                android:id="@+id/leaderboardCircleImageView"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:layout_centerInParent="true"
+                                android:src="@drawable/avatar_1"
+                                app:civ_border_color="@color/black"
+                                app:civ_border_width="0dp"
+                                app:civ_fill_color="@color/white" />
+
+                            <ProgressBar
+                                android:id="@+id/progressBar"
+                                style="?android:attr/progressBarStyleHorizontal"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
+                                android:layout_centerInParent="true"
+                                android:indeterminate="false"
+                                android:max="100"
+                                android:progress="80"
+                                android:progressDrawable="@drawable/circular" />
+                        </RelativeLayout>
+
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center_horizontal"
-                            android:text="Student Number"
-                            android:textColor="@color/white"
-                            android:textSize="16sp" />
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginTop="5dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/userProfileStudentNameTextView"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_horizontal"
+                                android:text="Student Name"
+                                android:textColor="@color/white"
+                                android:textSize="24sp" />
+
+                            <TextView
+                                android:id="@+id/userProfileStudentNumberTextView"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_horizontal"
+                                android:text="Student Number"
+                                android:textColor="@color/white"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+
                     </LinearLayout>
-
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:alpha="0.12"
-                        android:background="@color/white" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:baselineAligned="false"
-                        android:orientation="horizontal"
-                        android:paddingBottom="4dp"
-                        android:paddingTop="4dp">
+                        android:orientation="vertical">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:alpha="0.12"
+                            android:background="@color/white" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:baselineAligned="false"
+                            android:orientation="horizontal"
+                            android:paddingBottom="4dp"
+                            android:paddingTop="4dp">
 
-                            <TextView
+                            <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="Overall Score" />
+                                android:layout_weight="1"
+                                android:orientation="vertical">
 
-                            <TextView
-                                android:id="@+id/userProfileOverallRank"
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:text="Overall Score" />
+
+                                <TextView
+                                    android:id="@+id/userProfileOverallRank"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:gravity="center"
+                                    android:text="1"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <LinearLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:text="1"
-                                android:textStyle="bold" />
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:text="Overall Attempts" />
+
+                                <TextView
+                                    android:id="@+id/userProfileAttemptsRank"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:gravity="center"
+                                    android:text="1"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:text="Overall Time" />
+
+                                <TextView
+                                    android:id="@+id/userProfileTimeRank"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:gravity="center"
+                                    android:text="1"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
                         </LinearLayout>
 
-                        <LinearLayout
+                        <View
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="Overall Attempts" />
-
-                            <TextView
-                                android:id="@+id/userProfileAttemptsRank"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:text="1"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="Overall Time" />
-
-                            <TextView
-                                android:id="@+id/userProfileTimeRank"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:text="1"
-                                android:textStyle="bold" />
-                        </LinearLayout>
+                            android:layout_height="1dp"
+                            android:alpha="0.12"
+                            android:background="@color/white" />
 
                     </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:alpha="0.12"
-                        android:background="@color/white" />
 
                 </LinearLayout>
 
+                <ProgressBar
+                    android:id="@+id/activityUserProfileProgressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true" />
 
-            </LinearLayout>
+            </RelativeLayout>
+
 
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>

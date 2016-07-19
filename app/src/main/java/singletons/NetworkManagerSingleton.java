@@ -42,12 +42,12 @@ public class NetworkManagerSingleton {
     private String mClassName = getClass().toString();
 
     private static final int TIME_OUT_INTERVAL = 5000;
-    private static final String LOGIN_USER_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/login";
-    private static final String REGISTER_USER_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/register";
+    private static final String LOGIN_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/login";
+    private static final String REGISTER_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/register";
     private static final String LEADERBOARD_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/leaderboard";
-    private static final String GET_USER_URL_STRING = "http://";
-    private static final String UPLOAD_USER_URL_STRING = "http://";
     private static final String LEVELS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/levels";
+    private static final String USER_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/user";
+    private static final String UPLOAD_USER_URL_STRING = "http://";
 
     private NetworkManagerSingleton(Context context) {
         mContext = context;
@@ -85,7 +85,7 @@ public class NetworkManagerSingleton {
             Map<String, Object> jsonParams = new HashMap<>();
             jsonParams.put("user_student_number", user.getUser_student_number_id());
             jsonParams.put("user_password", user.getUser_password());
-            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LOGIN_USER_URL_STRING, new JSONObject(jsonParams),
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LOGIN_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -97,14 +97,13 @@ public class NetworkManagerSingleton {
                                     user.setUser_avatar(response.getInt("user_avatar"));
                                     user.setUser_is_private(response.getInt("user_is_private"));
                                     if (sDatabaseHandlerSingleton.insertOrUpdateUser(user)) {
-                                        if (sDatabaseHandlerSingleton.loginUser(response.getString("user_student_number"))) {
-                                            booleanResponseListener.getResult(true, response.getString("response_message"));
-                                            return;
-                                        }
+                                        downloadLevelsJSONRequest(booleanResponseListener);
+                                    } else {
+                                        Log.e(mClassName, "Failed to add user to local database");
+                                        booleanResponseListener.getResult(false, "Failed to add user to local database");
                                     }
-                                    booleanResponseListener.getResult(false, "Failed modifying user in SQLite database");
                                 } else {
-                                    Log.e(mClassName, "loginJSONRequest Error: " + "Invalid response");
+                                    Log.e(mClassName, "loginJSONRequest Error: Invalid response");
                                     booleanResponseListener.getResult(false, response.getString("response_message"));
                                 }
                             } catch (JSONException ex) {
@@ -141,7 +140,7 @@ public class NetworkManagerSingleton {
             jsonParams.put("user_password", user.getUser_password());
             jsonParams.put("user_avatar", user.getUser_avatar());
             jsonParams.put("user_is_private", user.getUser_is_private());
-            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, REGISTER_USER_URL_STRING, new JSONObject(jsonParams),
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, REGISTER_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -178,13 +177,13 @@ public class NetworkManagerSingleton {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
             jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
-            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.GET, LEADERBOARD_URL_STRING, new JSONObject(jsonParams),
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LEADERBOARD_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
                                 if (validResponse(response)) {
-                                    ArrayList<User> leaderboardList = new ArrayList<>();
+                                    ArrayList<User> userList = new ArrayList<>();
                                     JSONArray jsonArray = response.getJSONArray("user_list");
                                     for (int x = 0; x < jsonArray.length(); x++) {
                                         JSONObject jsonObject = jsonArray.getJSONObject(x);
@@ -195,10 +194,10 @@ public class NetworkManagerSingleton {
                                         user.setUser_overall_score(jsonObject.getInt("user_overall_score"));
                                         user.setUser_overall_attempts(jsonObject.getInt("user_overall_attempts"));
                                         user.setUser_overall_time(jsonObject.getInt("user_overall_time"));
-                                        leaderboardList.add(user);
+                                        userList.add(user);
                                     }
                                     Log.e(mClassName, "downloadLeaderboardJSONRequest: " + response.getString("response_message"));
-                                    objectResponseListener.getResult(leaderboardList, true, response.getString("response_message"));
+                                    objectResponseListener.getResult(userList, true, response.getString("response_message"));
                                 } else {
                                     Log.e(mClassName, "downloadLeaderboardJSONRequest Error: Invalid response");
                                     objectResponseListener.getResult(null, false, response.getString("response_message"));
@@ -230,16 +229,17 @@ public class NetworkManagerSingleton {
     }
 
     public synchronized void downloadLevelsJSONRequest(final BooleanResponseListener booleanResponseListener) {
-        if (canSyncData()&&!sDatabaseHandlerSingleton.checkHasLevels()) {
+        if (sDatabaseHandlerSingleton.checkHasLevels()) {
+            booleanResponseListener.getResult(true, "User already has levels");
+        } else {
             Map<String, Object> jsonParams = new HashMap<>();
             jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
-            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LEADERBOARD_URL_STRING, new JSONObject(jsonParams),
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LEVELS_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
                                 if (validResponse(response)) {
-                                    Log.e("",response.toString());
                                     JSONArray jsonArray1 = response.getJSONArray("level_list");
                                     for (int x = 0; x < jsonArray1.length(); x++) {
                                         JSONObject jsonObject1 = jsonArray1.getJSONObject(x);
@@ -248,8 +248,8 @@ public class NetworkManagerSingleton {
                                         level.setLevel_number(jsonObject1.getInt("level_number"));
                                         level.setLevel_title(jsonObject1.getString("level_title"));
                                         level.setLevel_description(jsonObject1.getString("level_description"));
-                                        sDatabaseHandlerSingleton.insertOrUpdateLevel(level);
                                         JSONArray jsonArray2 = jsonObject1.getJSONArray("puzzle_list");
+                                        sDatabaseHandlerSingleton.insertOrUpdateLevel(level);
                                         for (int a = 0; a < jsonArray2.length(); a++) {
                                             JSONObject jsonObject2 = jsonArray2.getJSONObject(a);
                                             Puzzle puzzle = new Puzzle();
@@ -262,7 +262,6 @@ public class NetworkManagerSingleton {
                                             sDatabaseHandlerSingleton.insertOrUpdatePuzzle(puzzle);
                                         }
                                     }
-                                    Log.e(mClassName, "downloadLevelsJSONRequest: " + response.getString("response_message"));
                                     booleanResponseListener.getResult(true, response.getString("response_message"));
                                 } else {
                                     Log.e(mClassName, "downloadLevelsJSONRequest Error: Invalid response");
@@ -288,9 +287,6 @@ public class NetworkManagerSingleton {
             RetryPolicy policy = new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
             objectRequest.setRetryPolicy(policy);
             getRequestQueue().add(objectRequest);
-        } else {
-            Log.e(mClassName, "downloadLevelsJSONRequest Error: Prevented from syncing");
-            booleanResponseListener.getResult(false, "");
         }
     }
 
@@ -298,7 +294,7 @@ public class NetworkManagerSingleton {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
             jsonParams.put("user_student_number", user_student_number);
-            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, GET_USER_URL_STRING, new JSONObject(jsonParams),
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, USER_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -306,9 +302,11 @@ public class NetworkManagerSingleton {
                                 User user = new User();
                                 user.setUser_student_number_id(response.getString("user_student_number"));
                                 user.setUser_nickname(response.getString("user_nickname"));
+                                user.setUser_avatar(response.getInt("user_avatar"));
+                                user.setUser_is_private(response.getInt("user_is_private"));
                                 objectResponseListener.getResult(user, true, "");
                             } catch (JSONException ex) {
-                                Log.e(mClassName + ": ", "Error: " + ex.getMessage());
+                                Log.e(mClassName, "Error downloadUserJSONRequest: " + ex.getMessage());
                                 objectResponseListener.getResult(null, false, ex.getMessage());
                             }
                         }
@@ -318,7 +316,7 @@ public class NetworkManagerSingleton {
                         public void onErrorResponse(VolleyError ex) {
                             if (ex != null) {
                                 String error = getVolleyError(ex);
-                                Log.e(mClassName + ": ", error);
+                                Log.e(mClassName,"Error downloadUserJSONRequest: " + error);
                                 objectResponseListener.getResult(null, false, error);
                             }
                         }
@@ -328,7 +326,7 @@ public class NetworkManagerSingleton {
             objectRequest.setRetryPolicy(policy);
             getRequestQueue().add(objectRequest);
         } else {
-            Log.e(mClassName + ": ", "Prevented from syncing");
+            Log.e(mClassName, "Error downloadUserJSONRequest: Prevented from syncing");
             objectResponseListener.getResult(null, false, "");
         }
     }

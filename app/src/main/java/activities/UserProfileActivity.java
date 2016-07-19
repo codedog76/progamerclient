@@ -9,11 +9,19 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.example.progamer.R;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 import fragments.AchievementFragment;
 import fragments.OverviewFragment;
@@ -28,9 +36,13 @@ public class UserProfileActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private Toolbar toolbar;
     private TextView userProfileStudentNameTextView, userProfileStudentNumberTextView, userProfileOverallRank, userProfileAttemptsRank, userProfileTimeRank;
+    private LinearLayout activityUserProfileTopContainer;
+    private ProgressBar activityUserProfileProgressBar;
     private CircleImageView leaderboardCircleImageView;
     private DatabaseHandlerSingleton databaseHandlerSingleton;
     private NetworkManagerSingleton networkManagerSingleton;
+    private String mClassName = getClass().toString();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +71,8 @@ public class UserProfileActivity extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        activityUserProfileProgressBar = (ProgressBar) findViewById(R.id.activityUserProfileProgressBar);
+        activityUserProfileTopContainer = (LinearLayout) findViewById(R.id.activityUserProfileTopContainer);
         userProfileStudentNameTextView = (TextView) findViewById(R.id.userProfileStudentNameTextView);
         userProfileStudentNumberTextView = (TextView) findViewById(R.id.userProfileStudentNumberTextView);
         userProfileOverallRank = (TextView) findViewById(R.id.userProfileOverallRank);
@@ -70,6 +84,8 @@ public class UserProfileActivity extends AppCompatActivity {
     private void getBundle() {
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
+            activityUserProfileTopContainer.setVisibility(View.INVISIBLE);
+            activityUserProfileProgressBar.setVisibility(View.VISIBLE);
             if (bundle.getBoolean("is_logged_user", false)) {
                 userProfileStudentNameTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_nickname());
                 userProfileStudentNumberTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
@@ -78,13 +94,15 @@ public class UserProfileActivity extends AppCompatActivity {
                 userProfileTimeRank.setText(String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_overall_time_rank()));
                 int id = getResources().getIdentifier("avatar_" + String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_avatar()), "drawable", getPackageName());
                 leaderboardCircleImageView.setImageDrawable(ContextCompat.getDrawable(this, id));
+                activityUserProfileProgressBar.setVisibility(View.GONE);
+                activityUserProfileTopContainer.setVisibility(View.VISIBLE);
             } else {
                 String user_student_number = bundle.getString("user", null);
-                if(user_student_number!=null){
+                if (user_student_number != null) {
                     networkManagerSingleton.downloadUserJSONRequest(user_student_number, new NetworkManagerSingleton.ObjectResponseListener<User>() {
                         @Override
                         public void getResult(User object, Boolean response, String message) {
-                            if(response) {
+                            if (response) {
                                 userProfileStudentNameTextView.setText(object.getUser_nickname());
                                 userProfileStudentNumberTextView.setText(object.getUser_student_number_id());
                                 userProfileOverallRank.setText(String.valueOf(object.getUser_overall_score_rank()));
@@ -92,7 +110,10 @@ public class UserProfileActivity extends AppCompatActivity {
                                 userProfileTimeRank.setText(String.valueOf(object.getUser_overall_time_rank()));
                                 int id = getResources().getIdentifier("avatar_" + String.valueOf(object.getUser_avatar()), "drawable", getPackageName());
                                 leaderboardCircleImageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), id));
+                                activityUserProfileProgressBar.setVisibility(View.GONE);
+                                activityUserProfileTopContainer.setVisibility(View.VISIBLE);
                             } else {
+                                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
                                 finish();
                             }
                         }
