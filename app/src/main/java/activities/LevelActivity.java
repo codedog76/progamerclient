@@ -52,7 +52,7 @@ public class LevelActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), PuzzleActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("current_level", selectedLevel);
+                bundle.putInt("current_level_id", selectedLevel.getLevel_id());
                 intent.putExtras(bundle);
                 startActivity(intent);
             }

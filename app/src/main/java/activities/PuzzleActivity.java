@@ -5,10 +5,18 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.example.progamer.R;
+
+import models.Level;
+import models.Puzzle;
+import singletons.DatabaseHandlerSingleton;
 
 
 public class PuzzleActivity extends AppCompatActivity {
@@ -16,8 +24,15 @@ public class PuzzleActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TextView puzzleInstructionsTitleText, puzzleInstructionsText, puzzleExpectedOutputTitleText, puzzleExpectedOutputText, puzzleTimerText, puzzleAttemptsText;
     private Button puzzleCheckButton;
-    long startTime = 0;
-    Handler timerHandler = new Handler();
+    private long startTime = 0;
+    private Handler timerHandler = new Handler();
+    private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
+    private Puzzle selectedPuzzle;
+    private String mClassName = getClass().toString();
+    private int mTimerSeconds;
+    private int mTimerResumeTime;
+    private int mAttemptsCount;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,20 +41,78 @@ public class PuzzleActivity extends AppCompatActivity {
         assignViews();
         assignFonts();
         assignActionBar();
+        assignSingletons();
+        getBundle();
+        assingListeners();
+    }
+
+    private void assingListeners() {
+        puzzleCheckButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAttemptsCount++;
+                puzzleAttemptsText.setText("Attempts: " + String.valueOf(mAttemptsCount));
+            }
+        });
+    }
+
+    private void assignSingletons() {
+        mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
+    }
+
+    private void getBundle() {
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            int current_level_id = bundle.getInt("current_level_id", -1);
+            if (current_level_id != -1) {
+                Level tempLevel = new Level();
+                tempLevel.setLevel_id(current_level_id);
+                selectedPuzzle = mDatabaseHandlerSingleton.getNextPuzzle(tempLevel);
+                mTimerResumeTime = selectedPuzzle.getPuzzle_time();
+                mAttemptsCount = selectedPuzzle.getPuzzle_attempts();
+            } else {
+                Log.e(mClassName, "Level data missing");
+                finish();
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Toast.makeText(getApplicationContext(), "onResume", Toast.LENGTH_SHORT).show();
+        if (mAttemptsCount == 0)
+            mAttemptsCount = 1;
+        puzzleAttemptsText.setText("Attempts: " + String.valueOf(mAttemptsCount));
         startTime = System.currentTimeMillis();
         timerHandler.postDelayed(timerRunnable, 0);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Toast.makeText(getApplicationContext(), "onPause", Toast.LENGTH_SHORT).show();
+        mTimerResumeTime = mTimerSeconds;
+        timerHandler.removeCallbacks(timerRunnable);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Toast.makeText(getApplicationContext(), "onDestroy", Toast.LENGTH_SHORT).show();
+        selectedPuzzle.setPuzzle_time(mTimerSeconds);
+        selectedPuzzle.setPuzzle_attempts(mAttemptsCount);
+        mDatabaseHandlerSingleton.setPuzzleData(selectedPuzzle);
     }
 
     Runnable timerRunnable = new Runnable() {
         @Override
         public void run() {
-            long millis = System.currentTimeMillis() - startTime;
-            int seconds = (int) (millis / 1000);
-            int minutes = seconds / 60;
-            seconds = seconds % 60;
-
-            puzzleTimerText.setText("Timer: " + String.format("%d:%02d", minutes, seconds));
-
+            long millis = (System.currentTimeMillis() - startTime);
+            mTimerSeconds = mTimerResumeTime + (int) (millis / 1000);
+            int displayMinutes = mTimerSeconds / 60;
+            int displaySeconds = mTimerSeconds % 60;
+            puzzleTimerText.setText("Timer: " + String.format("%d:%02d", displayMinutes, displaySeconds));
             timerHandler.postDelayed(this, 500);
         }
     };

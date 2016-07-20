@@ -307,10 +307,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return null;
     }
 
-    public boolean setPuzzleCompleted(Puzzle puzzle) {
+    public boolean setPuzzleData(Puzzle puzzle) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(PUZZLE_COMPLETED, 1);
+        values.put(PUZZLE_COMPLETED, puzzle.getPuzzle_completed());
+        values.put(PUZZLE_ATTEMPTS, puzzle.getPuzzle_attempts());
+        values.put(PUZZLE_TIME, puzzle.getPuzzle_time());
         int rowsAffected = db.update(PUZZLE_TABLE, values, PUZZLE_ID + " = ?",
                 new String[]{String.valueOf(puzzle.getPuzzle_id())});
         return rowsAffected == 1;

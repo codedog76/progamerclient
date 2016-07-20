@@ -99,7 +99,7 @@ public class DatabaseHandlerSingleton {
         return getDatabaseHandler().getNextPuzzle(getLoggedUser(), level);
     }
 
-    public boolean setPuzzleCompleted(Puzzle puzzle) {
-        return getDatabaseHandler().setPuzzleCompleted(puzzle);
+    public boolean setPuzzleData(Puzzle puzzle) {
+        return getDatabaseHandler().setPuzzleData(puzzle);
     }
 }
