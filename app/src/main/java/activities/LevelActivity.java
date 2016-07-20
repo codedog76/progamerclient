@@ -1,5 +1,6 @@
 package activities;
 
+import android.content.Intent;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.progamer.R;
 
@@ -21,6 +23,7 @@ import java.util.List;
 
 import database.DatabaseHandler;
 import models.Level;
+import models.Puzzle;
 import singletons.DatabaseHandlerSingleton;
 
 public class LevelActivity extends AppCompatActivity {
@@ -47,7 +50,11 @@ public class LevelActivity extends AppCompatActivity {
         levelContinueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(getApplicationContext(), PuzzleActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("current_level", selectedLevel);
+                intent.putExtras(bundle);
+                startActivity(intent);
             }
         });
     }

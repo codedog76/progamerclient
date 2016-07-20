@@ -5,14 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 
 import models.Level;
 import models.Puzzle;
 import models.User;
-import models.UserLevel;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
@@ -43,45 +41,36 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     //table level
     private static final String LEVEL_TABLE = "level";
     private static final String LEVEL_ID = "level_id"; //pk
+    private static final String LEVEL_USER_STUDENT_NUMBER_ID = "level_user_student_number_ID"; //fk
+    private static final String LEVEL_DATABASE_ID = "level_database_id";
     private static final String LEVEL_NUMBER = "level_number";
     private static final String LEVEL_TITLE = "level_title";
     private static final String LEVEL_DESCRIPTION = "level_description";
+    private static final String LEVEL_COMPLETED = "level_completed";
+    private static final String LEVEL_SCORE = "level_score";
+    private static final String LEVEL_ATTEMPTS = "level_attempts";
+    private static final String LEVEL_TIME = "level_time";
     private static final String CREATE_TABLE_LEVEL = "create table "
             + LEVEL_TABLE
             + "("
             + LEVEL_ID + " integer not null primary key AUTOINCREMENT, "
+            + LEVEL_USER_STUDENT_NUMBER_ID + " text not null, "
+            + LEVEL_DATABASE_ID + " integer not null, "
             + LEVEL_NUMBER + " integer not null, "
             + LEVEL_TITLE + " text not null, "
-            + LEVEL_DESCRIPTION + " text not null"
-            + ");";
-
-    //table userlevel
-    private static final String USERLEVEL_TABLE = "userlevel";
-    private static final String USERLEVEL_ID = "userlevel_id"; //pk
-    private static final String USERLEVEL_USER_STUDENT_NUMBER_ID = "userlevel_user_student_number_ID"; //fk
-    private static final String USERLEVEL_LEVEL_ID = "userlevel_level_id"; //fk
-    private static final String USERLEVEL_COMPLETED = "userlevel_completed";
-    private static final String USERLEVEL_SCORE = "userlevel_score";
-    private static final String USERLEVEL_ATTEMPTS = "userlevel_attempts";
-    private static final String USERLEVEL_TIME = "userlevel_time";
-    private static final String CREATE_TABLE_USERLEVEL = "create table "
-            + USERLEVEL_TABLE
-            + "("
-            + USERLEVEL_ID + " integer not null primary key, "
-            + USERLEVEL_USER_STUDENT_NUMBER_ID + " text not null, "
-            + USERLEVEL_LEVEL_ID + " integer not null, "
-            + USERLEVEL_COMPLETED + " integer not null, "
-            + USERLEVEL_SCORE + " integer not null, "
-            + USERLEVEL_ATTEMPTS + " integer not null, "
-            + USERLEVEL_TIME + " integer not null, "
-            + "foreign key (" + USERLEVEL_USER_STUDENT_NUMBER_ID + ") references " + USER_TABLE + "(" + USER_STUDENT_NUMBER_ID + "), "
-            + "foreign key (" + USERLEVEL_LEVEL_ID + ") references " + LEVEL_TABLE + "(" + LEVEL_ID + ")"
+            + LEVEL_DESCRIPTION + " text not null, "
+            + LEVEL_COMPLETED + " integer not null, "
+            + LEVEL_SCORE + " integer not null, "
+            + LEVEL_ATTEMPTS + " integer not null, "
+            + LEVEL_TIME + " integer not null, "
+            + "foreign key (" + LEVEL_USER_STUDENT_NUMBER_ID + ") references " + USER_TABLE + "(" + USER_STUDENT_NUMBER_ID + ")"
             + ");";
 
     //table puzzle
     private static final String PUZZLE_TABLE = "puzzle";
     private static final String PUZZLE_ID = "puzzle_id"; //pk
     private static final String PUZZLE_LEVEL_ID = "puzzle_level_id"; //fk
+    private static final String PUZZLE_DATABASE_ID = "puzzle_database_id";
     private static final String PUZZLE_TYPE = "puzzle_type";
     private static final String PUZZLE_INSTRUCTIONS = "puzzle_instructions";
     private static final String PUZZLE_EXPECTED_OUTPUT = "puzzle_expected_output";
@@ -92,8 +81,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_PUZZLE = "create table "
             + PUZZLE_TABLE
             + "("
-            + PUZZLE_ID + " integer not null primary key, "
+            + PUZZLE_ID + " integer not null primary key AUTOINCREMENT, "
             + PUZZLE_LEVEL_ID + " integer not null, "
+            + PUZZLE_DATABASE_ID + " integer not null, "
             + PUZZLE_TYPE + " text not null, "
             + PUZZLE_INSTRUCTIONS + " text not null, "
             + PUZZLE_EXPECTED_OUTPUT + " text not null, "
@@ -112,7 +102,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase database) {
         database.execSQL(CREATE_TABLE_USER);
         database.execSQL(CREATE_TABLE_LEVEL);
-        database.execSQL(CREATE_TABLE_USERLEVEL);
         database.execSQL(CREATE_TABLE_PUZZLE);
     }
 
@@ -120,7 +109,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + USER_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + LEVEL_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + USERLEVEL_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + PUZZLE_TABLE);
         onCreate(db);
     }
@@ -141,33 +129,24 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void insertOrUpdateLevel(Level level) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(LEVEL_ID, level.getLevel_id());
+        values.put(LEVEL_USER_STUDENT_NUMBER_ID, level.getLevel_user_student_number_ID());
+        values.put(LEVEL_DATABASE_ID, level.getLevel_database_id());
         values.put(LEVEL_NUMBER, level.getLevel_number());
         values.put(LEVEL_TITLE, level.getLevel_title());
         values.put(LEVEL_DESCRIPTION, level.getLevel_description());
+        values.put(LEVEL_COMPLETED, level.getLevel_completed());
+        values.put(LEVEL_SCORE, level.getLevel_score());
+        values.put(LEVEL_ATTEMPTS, level.getLevel_attempts());
+        values.put(LEVEL_TIME, level.getLevel_time());
         db.insertWithOnConflict(LEVEL_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-        db.close();
-    }
-
-    public void insertOrUpdateUserLevel(UserLevel userLevel) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(USERLEVEL_ID, userLevel.getUserlevel_id());
-        values.put(USERLEVEL_USER_STUDENT_NUMBER_ID, userLevel.getUserlevel_student_number_id());
-        values.put(USERLEVEL_LEVEL_ID, userLevel.getUserlevel_level_id());
-        values.put(USERLEVEL_COMPLETED, userLevel.getUserlevel_completed());
-        values.put(USERLEVEL_SCORE, userLevel.getUserlevel_score());
-        values.put(USERLEVEL_ATTEMPTS, userLevel.getUserlevel_attempts());
-        values.put(USERLEVEL_TIME, userLevel.getUserlevel_time());
-        db.insertWithOnConflict(PUZZLE_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
 
     public void insertOrUpdatePuzzle(Puzzle puzzle) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(PUZZLE_ID, puzzle.getPuzzle_id());
         values.put(PUZZLE_LEVEL_ID, puzzle.getPuzzle_level_id());
+        values.put(PUZZLE_DATABASE_ID, puzzle.getPuzzle_level_id());
         values.put(PUZZLE_TYPE, puzzle.getPuzzle_type());
         values.put(PUZZLE_INSTRUCTIONS, puzzle.getPuzzle_instructions());
         values.put(PUZZLE_EXPECTED_OUTPUT, puzzle.getPuzzle_expected_output());
@@ -248,7 +227,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return rowsAffected == 1;
     }
 
-
     public boolean logoutUser(User current_user) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -267,24 +245,74 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         } else {
             return false;
         }
-    }
+    }//todo:improve
 
-    public ArrayList<Level> getLevels() {
+    public ArrayList<Level> getLevels(User current_user) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT level_id, level_number, level_title, level_description FROM "+ LEVEL_TABLE, null);
+        Cursor cursor = db.rawQuery("SELECT level_id, level_database_id, level_number, level_title, level_description, level_completed, level_score, level_attempts, level_time FROM " + LEVEL_TABLE +
+                " WHERE level_user_student_number_ID= ? ", new String[]{current_user.getUser_student_number_id()});
         ArrayList<Level> level_list = new ArrayList<>();
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
                 Level level = new Level();
                 level.setLevel_id(Integer.parseInt(cursor.getString(0)));
-                level.setLevel_number(Integer.parseInt(cursor.getString(1)));
-                level.setLevel_title(cursor.getString(2));
-                level.setLevel_description(cursor.getString(3));
-                level_list.add(level);
+                level.setLevel_database_id(Integer.parseInt(cursor.getString(1)));
+                level.setLevel_number(Integer.parseInt(cursor.getString(2)));
+                level.setLevel_title(cursor.getString(3));
+                level.setLevel_description(cursor.getString(4));
+                level.setLevel_completed(Integer.parseInt(cursor.getString(5)));
+                level.setLevel_score(Integer.parseInt(cursor.getString(6)));
+                level.setLevel_attempts(Integer.parseInt(cursor.getString(7)));
+                level.setLevel_time(Integer.parseInt(cursor.getString(8)));
+                level_list.add(getPuzzlesProgress(level));
                 cursor.moveToNext();
             }
         }
         cursor.close();
         return level_list;
+    }
+
+    private Level getPuzzlesProgress(Level level) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT SUM(puzzle_completed) AS level_puzzles_progress, COUNT(*) AS level_puzzles_count FROM " + PUZZLE_TABLE +
+                " WHERE puzzle_level_id= ? ", new String[]{String.valueOf(level.getLevel_id())});
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            level.setLevel_puzzles_progress(cursor.getInt(cursor.getColumnIndex("level_puzzles_progress")));
+            level.setLevel_puzzles_count(cursor.getInt(cursor.getColumnIndex("level_puzzles_count")));
+            cursor.close();
+        }
+        return level;
+    }
+
+    public Puzzle getNextPuzzle(User user, Level level) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT puzzle_id, puzzle_level_id, puzzle_type, puzzle_instructions, puzzle_expected_output, puzzle_data, puzzle_completed, puzzle_attempts, puzzle_time FROM " + PUZZLE_TABLE + " INNER JOIN " + LEVEL_TABLE +
+                " WHERE puzzle_level_id=level_id AND puzzle_completed=0 AND level_user_student_number_ID= ? AND level_id= ? LIMIT 1", new String[]{user.getUser_student_number_id(), String.valueOf(level.getLevel_id())});
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            Puzzle puzzle = new Puzzle();
+            puzzle.setPuzzle_id(cursor.getInt(cursor.getColumnIndex("puzzle_id")));
+            puzzle.setPuzzle_level_id(cursor.getInt(cursor.getColumnIndex("puzzle_level_id")));
+            puzzle.setPuzzle_type(cursor.getString(cursor.getColumnIndex("puzzle_type")));
+            puzzle.setPuzzle_instructions(cursor.getString(cursor.getColumnIndex("puzzle_instructions")));
+            puzzle.setPuzzle_expected_output(cursor.getString(cursor.getColumnIndex("puzzle_expected_output")));
+            puzzle.setPuzzle_data(cursor.getString(cursor.getColumnIndex("puzzle_data")));
+            puzzle.setPuzzle_completed(cursor.getInt(cursor.getColumnIndex("puzzle_completed")));
+            puzzle.setPuzzle_attempts(cursor.getInt(cursor.getColumnIndex("puzzle_attempts")));
+            puzzle.setPuzzle_time(cursor.getInt(cursor.getColumnIndex("puzzle_time")));
+            cursor.close();
+            return puzzle;
+        }
+        return null;
+    }
+
+    public boolean setPuzzleCompleted(Puzzle puzzle) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(PUZZLE_COMPLETED, 1);
+        int rowsAffected = db.update(PUZZLE_TABLE, values, PUZZLE_ID + " = ?",
+                new String[]{String.valueOf(puzzle.getPuzzle_id())});
+        return rowsAffected == 1;
     }
 }

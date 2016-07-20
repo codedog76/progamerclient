@@ -56,8 +56,13 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
 
         holder.levelRowLevelNumber.setText("Level " + level.getLevel_id());
         holder.levelRowLevelName.setText(level.getLevel_title());
-        holder.levelRowNumericProgressTextView.setText("1/1");
-        holder.levelRowProgressBar.setProgress((int)(Math.random() * 99));
+        holder.levelRowNumericProgressTextView.setText(level.getLevel_puzzles_progress()+"/"+level.getLevel_puzzles_count());
+        if(level.getLevel_puzzles_count()!=0) {
+            double percentage = 100.0 * level.getLevel_puzzles_progress() / level.getLevel_puzzles_count();
+            holder.levelRowProgressBar.setProgress((int)percentage);
+        } else {
+            holder.levelRowProgressBar.setProgress(0);
+        }
         //String levelTrophy = level.getLevelTrophy();
         //int id = context.getResources().getIdentifier(levelTrophy, "drawable", context.getPackageName());
         //Drawable drawable = ContextCompat.getDrawable(context, id);

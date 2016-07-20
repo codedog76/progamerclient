@@ -1,7 +1,6 @@
 package singletons;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -9,7 +8,6 @@ import database.DatabaseHandler;
 import models.Level;
 import models.Puzzle;
 import models.User;
-import models.UserLevel;
 
 public class DatabaseHandlerSingleton {
 
@@ -48,11 +46,7 @@ public class DatabaseHandlerSingleton {
         }
     }
 
-    public void insertOrUpdateUserLevel(UserLevel userLevel) {
-        if (userLevel != null) {
-            getDatabaseHandler().insertOrUpdateUserLevel(userLevel);
-        }
-    }
+
 
     public void insertOrUpdatePuzzle(Puzzle puzzle) {
         if (puzzle != null)
@@ -98,6 +92,14 @@ public class DatabaseHandlerSingleton {
     }
 
     public ArrayList<Level> getLevels() {
-        return getDatabaseHandler().getLevels();
+        return getDatabaseHandler().getLevels(getLoggedUser());
+    }
+
+    public Puzzle getNextPuzzle(Level level){
+        return getDatabaseHandler().getNextPuzzle(getLoggedUser(), level);
+    }
+
+    public boolean setPuzzleCompleted(Puzzle puzzle) {
+        return getDatabaseHandler().setPuzzleCompleted(puzzle);
     }
 }

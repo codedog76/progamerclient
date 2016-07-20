@@ -3,6 +3,7 @@ package models;
 public class Puzzle {
     private int puzzle_id; //pk
     private int puzzle_level_id; //fk
+    private int puzzle_database_id;
     private String puzzle_type;
     private String puzzle_instructions;
     private String puzzle_expected_output;
@@ -13,14 +14,6 @@ public class Puzzle {
 
     public Puzzle() {
 
-    }
-
-    public String getPuzzle_data() {
-        return puzzle_data;
-    }
-
-    public void setPuzzle_data(String puzzle_data) {
-        this.puzzle_data = puzzle_data;
     }
 
     public int getPuzzle_id() {
@@ -37,6 +30,14 @@ public class Puzzle {
 
     public void setPuzzle_level_id(int puzzle_level_id) {
         this.puzzle_level_id = puzzle_level_id;
+    }
+
+    public int getPuzzle_database_id() {
+        return puzzle_database_id;
+    }
+
+    public void setPuzzle_database_id(int puzzle_database_id) {
+        this.puzzle_database_id = puzzle_database_id;
     }
 
     public String getPuzzle_type() {
@@ -61,6 +62,14 @@ public class Puzzle {
 
     public void setPuzzle_expected_output(String puzzle_expected_output) {
         this.puzzle_expected_output = puzzle_expected_output;
+    }
+
+    public String getPuzzle_data() {
+        return puzzle_data;
+    }
+
+    public void setPuzzle_data(String puzzle_data) {
+        this.puzzle_data = puzzle_data;
     }
 
     public int getPuzzle_completed() {

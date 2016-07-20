@@ -31,7 +31,6 @@ import java.util.Map;
 import models.Level;
 import models.Puzzle;
 import models.User;
-import models.UserLevel;
 
 public class NetworkManagerSingleton {
     private static NetworkManagerSingleton sInstance;
@@ -244,10 +243,15 @@ public class NetworkManagerSingleton {
                                     for (int x = 0; x < jsonArray1.length(); x++) {
                                         JSONObject jsonObject1 = jsonArray1.getJSONObject(x);
                                         Level level = new Level();
+                                        level.setLevel_user_student_number_ID(jsonObject1.getString("level_user_student_number_id"));
                                         level.setLevel_id(jsonObject1.getInt("level_id"));
                                         level.setLevel_number(jsonObject1.getInt("level_number"));
                                         level.setLevel_title(jsonObject1.getString("level_title"));
                                         level.setLevel_description(jsonObject1.getString("level_description"));
+                                        level.setLevel_completed(jsonObject1.getInt("level_completed"));
+                                        level.setLevel_score(jsonObject1.getInt("level_score"));
+                                        level.setLevel_attempts(jsonObject1.getInt("level_attempts"));
+                                        level.setLevel_time(jsonObject1.getInt("level_time"));
                                         JSONArray jsonArray2 = jsonObject1.getJSONArray("puzzle_list");
                                         sDatabaseHandlerSingleton.insertOrUpdateLevel(level);
                                         for (int a = 0; a < jsonArray2.length(); a++) {
@@ -259,6 +263,8 @@ public class NetworkManagerSingleton {
                                             puzzle.setPuzzle_instructions(jsonObject2.getString("puzzle_instructions"));
                                             puzzle.setPuzzle_expected_output(jsonObject2.getString("puzzle_expected_output"));
                                             puzzle.setPuzzle_data(jsonObject2.getString("puzzle_data"));
+                                            if(puzzle.getPuzzle_id()==1)
+                                                puzzle.setPuzzle_completed(1);
                                             sDatabaseHandlerSingleton.insertOrUpdatePuzzle(puzzle);
                                         }
                                     }
