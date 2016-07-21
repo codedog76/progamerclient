@@ -2,6 +2,9 @@ package activities;
 
 import android.graphics.Typeface;
 import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -14,6 +17,8 @@ import android.widget.Toast;
 
 import com.example.progamer.R;
 
+import fragments.LevelsFragment;
+import fragments.puzzles.DragListViewFragment;
 import models.Level;
 import models.Puzzle;
 import singletons.DatabaseHandlerSingleton;
@@ -32,6 +37,7 @@ public class PuzzleActivity extends AppCompatActivity {
     private int mTimerSeconds;
     private int mTimerResumeTime;
     private int mAttemptsCount;
+    private DragListViewFragment mDragListViewFragment;
 
 
     @Override
@@ -44,6 +50,7 @@ public class PuzzleActivity extends AppCompatActivity {
         assignSingletons();
         getBundle();
         assingListeners();
+        loadDragListViewFragment();
     }
 
     private void assingListeners() {
@@ -68,12 +75,34 @@ public class PuzzleActivity extends AppCompatActivity {
                 Level tempLevel = new Level();
                 tempLevel.setLevel_id(current_level_id);
                 selectedPuzzle = mDatabaseHandlerSingleton.getNextPuzzle(tempLevel);
+                getSupportActionBar().setTitle(String.valueOf(selectedPuzzle.getPuzzle_id()) +" " + selectedPuzzle.getPuzzle_database_id());
                 mTimerResumeTime = selectedPuzzle.getPuzzle_time();
                 mAttemptsCount = selectedPuzzle.getPuzzle_attempts();
             } else {
                 Log.e(mClassName, "Level data missing");
                 finish();
             }
+        }
+    }
+
+    private void loadDragListViewFragment() {
+        if (mDragListViewFragment == null)
+            mDragListViewFragment = new DragListViewFragment();
+        replaceFragment(mDragListViewFragment);
+    }
+
+    private void replaceFragment(Fragment fragment) {
+        String tag = fragment.getClass().toString();
+        try {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, fragment, tag);
+            fragmentTransaction.addToBackStack(tag);
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.commit();
+            getSupportFragmentManager().executePendingTransactions();
+        } catch (Exception ex) {
+            Log.e("FragmentException", ex.getMessage());
         }
     }
 

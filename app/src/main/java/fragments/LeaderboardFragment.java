@@ -57,6 +57,11 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_leaderboard, container, false);
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         assignSingletons();
         assignViews(view);
@@ -86,7 +91,6 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
             }
         });
     }
-
 
     private void refreshData() {
         overallFragmentInterface.startRefreshing();
@@ -146,11 +150,6 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
     private void assignViewPager() {
         setupViewPager(leaderboardViewPager);
         leaderboardTabLayout.setupWithViewPager(leaderboardViewPager);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_leaderboard, container, false);
     }
 
     private void setupViewPager(ViewPager viewPager) {

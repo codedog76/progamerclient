@@ -54,7 +54,7 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
         Level level = levelList.get(position);
 
-        holder.levelRowLevelNumber.setText("Level " + level.getLevel_id());
+        holder.levelRowLevelNumber.setText("Level " + level.getLevel_number());
         holder.levelRowLevelName.setText(level.getLevel_title());
         holder.levelRowNumericProgressTextView.setText(level.getLevel_puzzles_progress()+"/"+level.getLevel_puzzles_count());
         if(level.getLevel_puzzles_count()!=0) {

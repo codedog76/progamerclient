@@ -96,7 +96,7 @@ public class NetworkManagerSingleton {
                                     user.setUser_avatar(response.getInt("user_avatar"));
                                     user.setUser_is_private(response.getInt("user_is_private"));
                                     if (sDatabaseHandlerSingleton.insertOrUpdateUser(user)) {
-                                        downloadLevelsJSONRequest(booleanResponseListener);
+                                        downloadLevelsJSONRequest(user, booleanResponseListener);
                                     } else {
                                         Log.e(mClassName, "Failed to add user to local database");
                                         booleanResponseListener.getResult(false, "Failed to add user to local database");
@@ -227,12 +227,12 @@ public class NetworkManagerSingleton {
         }
     }
 
-    public synchronized void downloadLevelsJSONRequest(final BooleanResponseListener booleanResponseListener) {
+    public synchronized void downloadLevelsJSONRequest(User user, final BooleanResponseListener booleanResponseListener) {
         if (sDatabaseHandlerSingleton.checkHasLevels()) {
             booleanResponseListener.getResult(true, "User already has levels");
         } else {
             Map<String, Object> jsonParams = new HashMap<>();
-            jsonParams.put("user_student_number", sDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
+            jsonParams.put("user_student_number", user.getUser_student_number_id());
             JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LEVELS_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
@@ -243,8 +243,9 @@ public class NetworkManagerSingleton {
                                     for (int x = 0; x < jsonArray1.length(); x++) {
                                         JSONObject jsonObject1 = jsonArray1.getJSONObject(x);
                                         Level level = new Level();
-                                        level.setLevel_user_student_number_ID(jsonObject1.getString("level_user_student_number_id"));
-                                        level.setLevel_id(jsonObject1.getInt("level_id"));
+                                        //pk auto increment
+                                        level.setLevel_user_student_number_ID(jsonObject1.getString("level_user_student_number_id")); //fk
+                                        level.setLevel_database_id(jsonObject1.getInt("level_id")); //database pk
                                         level.setLevel_number(jsonObject1.getInt("level_number"));
                                         level.setLevel_title(jsonObject1.getString("level_title"));
                                         level.setLevel_description(jsonObject1.getString("level_description"));
@@ -253,19 +254,18 @@ public class NetworkManagerSingleton {
                                         level.setLevel_attempts(jsonObject1.getInt("level_attempts"));
                                         level.setLevel_time(jsonObject1.getInt("level_time"));
                                         JSONArray jsonArray2 = jsonObject1.getJSONArray("puzzle_list");
-                                        sDatabaseHandlerSingleton.insertOrUpdateLevel(level);
+                                        long level_id = sDatabaseHandlerSingleton.insertOrUpdateLevel(level);
                                         for (int a = 0; a < jsonArray2.length(); a++) {
                                             JSONObject jsonObject2 = jsonArray2.getJSONObject(a);
                                             Puzzle puzzle = new Puzzle();
-                                            puzzle.setPuzzle_id(jsonObject2.getInt("puzzle_id"));
-                                            puzzle.setPuzzle_level_id(jsonObject2.getInt("puzzle_level_id"));
+                                            puzzle.setPuzzle_database_id(jsonObject2.getInt("puzzle_id")); //refers to database pk
+                                            // pk auto increment
+                                            puzzle.setPuzzle_level_id((int)level_id); //fk
                                             puzzle.setPuzzle_type(jsonObject2.getString("puzzle_type"));
                                             puzzle.setPuzzle_instructions(jsonObject2.getString("puzzle_instructions"));
                                             puzzle.setPuzzle_expected_output(jsonObject2.getString("puzzle_expected_output"));
                                             puzzle.setPuzzle_data(jsonObject2.getString("puzzle_data"));
-                                            if(puzzle.getPuzzle_id()==1)
-                                                puzzle.setPuzzle_completed(1);
-                                            sDatabaseHandlerSingleton.insertOrUpdatePuzzle(puzzle);
+                                            long puzzle_id = sDatabaseHandlerSingleton.insertOrUpdatePuzzle(puzzle);
                                         }
                                     }
                                     booleanResponseListener.getResult(true, response.getString("response_message"));

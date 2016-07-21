@@ -1,6 +1,7 @@
 package singletons;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -40,17 +41,24 @@ public class DatabaseHandlerSingleton {
         return false;
     }
 
-    public void insertOrUpdateLevel(Level level) {
+    public long insertOrUpdateLevel(Level level) {
         if (level != null) {
-            getDatabaseHandler().insertOrUpdateLevel(level);
+            long level_id = getDatabaseHandler().insertOrUpdateLevel(level);
+            Log.e(mClassName, String.valueOf(level_id));
+            return level_id;
+        } else {
+            return -1;
         }
     }
 
-
-
-    public void insertOrUpdatePuzzle(Puzzle puzzle) {
-        if (puzzle != null)
-            getDatabaseHandler().insertOrUpdatePuzzle(puzzle);
+    public long insertOrUpdatePuzzle(Puzzle puzzle) {
+        if (puzzle != null) {
+            long puzzle_id = getDatabaseHandler().insertOrUpdatePuzzle(puzzle);
+            Log.e(mClassName, String.valueOf(puzzle_id));
+            return puzzle_id;
+        } else {
+            return -1;
+        }
     }
 
     public int getUserOverallScore() {
@@ -79,7 +87,7 @@ public class DatabaseHandlerSingleton {
     }
 
     public boolean checkHasLevels() {
-        return mDatabaseHandler.checkHasLevels();
+        return mDatabaseHandler.checkHasLevels(getLoggedUser());
     }
 
     public User getLoggedUser() {
