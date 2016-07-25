@@ -1,34 +1,25 @@
 package activities;
 
-import android.content.Intent;
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.progamer.R;
 
-import java.util.ArrayList;
-
-import fragments.LevelsFragment;
 import fragments.puzzles.DragListViewFragment;
 import fragments.puzzles.MultipleChoiceListFragment;
 import models.Level;
@@ -39,7 +30,7 @@ import singletons.DatabaseHandlerSingleton;
 public class PuzzleActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
-    private TextView puzzleInstructionsTitleText, puzzleInstructionsText, puzzleExpectedOutputTitleText, puzzleExpectedOutputText, puzzleTimerText, puzzleAttemptsText,
+    private TextView puzzleInstructionsText, puzzleExpectedOutputText, puzzleTimerText, puzzleAttemptsText,
             resultPopupTextView;
     private LinearLayout resultPopup, bottomBar;
     private Button puzzleButton;
@@ -52,6 +43,17 @@ public class PuzzleActivity extends AppCompatActivity {
     private String mClassName = getClass().toString();
     private int mTimerSeconds;
     private int mTimerResumeTime;
+    Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long millis = (System.currentTimeMillis() - startTime);
+            mTimerSeconds = mTimerResumeTime + (int) (millis / 1000);
+            int displayMinutes = mTimerSeconds / 60;
+            int displaySeconds = mTimerSeconds % 60;
+            puzzleTimerText.setText("Timer: " + String.format("%d:%02d", displayMinutes, displaySeconds));
+            timerHandler.postDelayed(this, 500);
+        }
+    };
     private int mAttemptsCount;
     private DragListViewFragment mDragListViewFragment;
     private MultipleChoiceListFragment mMultipleChoiceListFragment;
@@ -141,7 +143,7 @@ public class PuzzleActivity extends AppCompatActivity {
         }
         if (mMultipleChoiceListFragment != null && mCurrentFragment.equals(mMultipleChoiceListFragment.getClass().toString())) {
             mMultipleChoiceListFragment = (MultipleChoiceListFragment) getSupportFragmentManager().findFragmentByTag(mCurrentFragment);
-            mMultipleChoiceListFragment.disableSelection();
+            mMultipleChoiceListFragment.toggleTouch();
         }
     }
 
@@ -258,23 +260,9 @@ public class PuzzleActivity extends AppCompatActivity {
         savePuzzleData();
     }
 
-    Runnable timerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            long millis = (System.currentTimeMillis() - startTime);
-            mTimerSeconds = mTimerResumeTime + (int) (millis / 1000);
-            int displayMinutes = mTimerSeconds / 60;
-            int displaySeconds = mTimerSeconds % 60;
-            puzzleTimerText.setText("Timer: " + String.format("%d:%02d", displayMinutes, displaySeconds));
-            timerHandler.postDelayed(this, 500);
-        }
-    };
-
     private void assignViews() {
         toolbar = (Toolbar) findViewById(R.id.app_actionbar);
-        puzzleInstructionsTitleText = (TextView) findViewById(R.id.puzzleInstructionsTitleText);
         puzzleInstructionsText = (TextView) findViewById(R.id.puzzleInstructionsText);
-        puzzleExpectedOutputTitleText = (TextView) findViewById(R.id.puzzleExpectedOutputTitleText);
         puzzleExpectedOutputText = (TextView) findViewById(R.id.puzzleExpectedOutputText);
         puzzleTimerText = (TextView) findViewById(R.id.puzzleTimerText);
         puzzleAttemptsText = (TextView) findViewById(R.id.puzzleAttemptsText);
@@ -289,9 +277,7 @@ public class PuzzleActivity extends AppCompatActivity {
     private void assignFonts() {
         Typeface Roboto_Medium = Typeface.createFromAsset(getAssets(), "Roboto-Medium.ttf");
         Typeface Roboto_Regular = Typeface.createFromAsset(getAssets(), "Roboto-Regular.ttf");
-        puzzleInstructionsTitleText.setTypeface(Roboto_Regular);
-        puzzleInstructionsText.setTypeface(Roboto_Regular);
-        puzzleExpectedOutputTitleText.setTypeface(Roboto_Regular);
+        puzzleInstructionsText.setTypeface(Roboto_Medium);
         puzzleExpectedOutputText.setTypeface(Roboto_Regular);
         puzzleTimerText.setTypeface(Roboto_Regular);
         puzzleAttemptsText.setTypeface(Roboto_Regular);

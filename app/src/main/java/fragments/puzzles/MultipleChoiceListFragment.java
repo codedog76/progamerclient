@@ -1,12 +1,9 @@
 package fragments.puzzles;
 
 
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.Pair;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,18 +16,16 @@ import com.example.progamer.R;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import activities.PuzzleActivity;
 import models.Puzzle;
 
 public class MultipleChoiceListFragment extends Fragment {
 
+    String[] mPuzzleAnswers;
     private ListView multipleSelectionListView;
     private ArrayAdapter<String> arrayAdapter;
-    String[] mPuzzleAnswers;
 
     public MultipleChoiceListFragment() {
         // Required empty public constructor
@@ -70,6 +65,8 @@ public class MultipleChoiceListFragment extends Fragment {
         Collections.sort(answerItems);
         List<String> checkedItems = getCheckList();
         Collections.sort(checkedItems);
+        if (checkedItems.size() == 0 || answerItems.size() == 0)
+            return false;
         for(int x = 0; x < answerItems.size(); x++){
             if(!answerItems.get(x).trim().equals(checkedItems.get(x).trim()))
                 return false;
@@ -89,8 +86,19 @@ public class MultipleChoiceListFragment extends Fragment {
         return outgoing_list;
     }
 
-    public void disableSelection() {
-        multipleSelectionListView.setClickable(false);
+    public void toggleTouch() {
+        if (multipleSelectionListView.isEnabled()) {
+            multipleSelectionListView.setEnabled(false);
+            multipleSelectionListView.setClickable(false);
+            multipleSelectionListView.setFocusable(false);
+            multipleSelectionListView.setFocusableInTouchMode(false);
+        } else {
+            multipleSelectionListView.setEnabled(true);
+            multipleSelectionListView.setClickable(true);
+            multipleSelectionListView.setFocusable(true);
+            multipleSelectionListView.setFocusableInTouchMode(true);
+        }
+
     }
 
     private void assignViews(View view) {

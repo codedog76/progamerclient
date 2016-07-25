@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activityPuzzleMainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="activities.PuzzleActivity">
@@ -23,31 +24,14 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/puzzleInstructionsTitleText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:text="Instructions"
-                android:textSize="18sp" />
-
-            <TextView
                 android:id="@+id/puzzleInstructionsText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="10dp"
                 android:ellipsize="none"
                 android:maxLines="100"
-                android:paddingLeft="4dp"
                 android:scrollHorizontally="false"
                 android:text="PLACEHOLDER" />
-
-            <TextView
-                android:id="@+id/puzzleExpectedOutputTitleText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:text="Expected Output"
-                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/puzzleExpectedOutputText"
@@ -55,8 +39,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
                 android:ellipsize="none"
+                android:gravity="center"
                 android:maxLines="100"
-                android:paddingLeft="4dp"
                 android:scrollHorizontally="false"
                 android:text="PLACEHOLDER" />
 

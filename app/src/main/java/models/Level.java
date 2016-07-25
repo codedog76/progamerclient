@@ -1,7 +1,6 @@
 package models;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 public class Level implements Serializable {
 
@@ -78,19 +77,19 @@ public class Level implements Serializable {
         return level_completed;
     }
 
+    public void setLevel_completed(boolean level_completed) {
+        if (level_completed)
+            this.level_completed = 1;
+        else
+            this.level_completed = 0;
+    }
+
     public void setLevel_completed(int level_completed) {
         this.level_completed = level_completed;
     }
 
     public boolean getPuzzles_completed() {
         return level_puzzles_completed == level_puzzles_count && level_puzzles_count != 0;
-    }
-
-    public void setLevel_completed(boolean level_completed) {
-        if (level_completed)
-            this.level_completed = 1;
-        else
-            this.level_completed = 0;
     }
 
     public int getLevel_score() {
@@ -107,9 +106,9 @@ public class Level implements Serializable {
             return level_score;
         }
         int calc_score = 150 - (level_time + (level_attempts * 5));
-        if (level_score < 0)
-            level_score = 1;
-        else
+        if (calc_score < 0)
+            calc_score = 1;
+        if (calc_score > level_score)
             level_score = calc_score;
         return level_score;
     }
@@ -167,13 +166,13 @@ public class Level implements Serializable {
     }
 
     public String getLevel_trophy() {
-        if (level_score >= 1 && level_score < 100) {
+        if (level_score >= 1 && level_score < 50) {
             return "trophy_bronze";
         }
-        if (level_score >= 100 && level_score < 200) {
+        if (level_score >= 50 && level_score < 100) {
             return "trophy_silver";
         }
-        if (level_score >= 100 && level_score <= 300) {
+        if (level_score >= 100 && level_score <= 150) {
             return "trophy_gold";
         }
         return "trophy_grey";

@@ -7,21 +7,16 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.progamer.R;
 import com.woxthebox.draglistview.DragItem;
 import com.woxthebox.draglistview.DragListView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -81,10 +76,20 @@ public class DragListViewFragment extends Fragment {
     }
 
     public void toggleTouch() {
-        if(mDragListView.isDragEnabled())
+        if (mDragListView.isDragEnabled()) {
+            mDragListView.setEnabled(false);
             mDragListView.setDragEnabled(false);
-        else
+            mDragListView.setClickable(false);
+            mDragListView.setFocusable(false);
+            mDragListView.setFocusableInTouchMode(false);
+        } else {
+            mDragListView.setEnabled(true);
             mDragListView.setDragEnabled(true);
+            mDragListView.setClickable(true);
+            mDragListView.setFocusable(true);
+            mDragListView.setFocusableInTouchMode(true);
+        }
+
     }
 
     public boolean checkIfCorrect() {
