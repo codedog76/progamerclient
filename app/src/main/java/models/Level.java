@@ -15,7 +15,9 @@ public class Level implements Serializable {
     private int level_score;
     private int level_attempts;
     private int level_time;
-    private int level_puzzles_progress;
+    private int level_updated;
+
+    private int level_puzzles_completed;
     private int level_puzzles_count;
 
     public Level() {
@@ -70,11 +72,25 @@ public class Level implements Serializable {
     }
 
     public int getLevel_completed() {
+        if (level_puzzles_completed == level_puzzles_count && level_puzzles_count != 0) {
+            level_completed = 1;
+        }
         return level_completed;
     }
 
     public void setLevel_completed(int level_completed) {
         this.level_completed = level_completed;
+    }
+
+    public boolean getPuzzles_completed() {
+        return level_puzzles_completed == level_puzzles_count && level_puzzles_count != 0;
+    }
+
+    public void setLevel_completed(boolean level_completed) {
+        if (level_completed)
+            this.level_completed = 1;
+        else
+            this.level_completed = 0;
     }
 
     public int getLevel_score() {
@@ -85,12 +101,39 @@ public class Level implements Serializable {
         this.level_score = level_score;
     }
 
+    public int updateLevel_score() {
+        if (level_completed != 1) {
+            level_score = 0;
+            return level_score;
+        }
+        int calc_score = 150 - (level_time + (level_attempts * 5));
+        if (level_score < 0)
+            level_score = 1;
+        else
+            level_score = calc_score;
+        return level_score;
+    }
+
+    public int getLevel_updated() {
+        return level_updated;
+    }
+
+    public void setLevel_updated(int level_updated) {
+        this.level_updated = level_updated;
+    }
+
     public int getLevel_attempts() {
         return level_attempts;
     }
 
     public void setLevel_attempts(int level_attempts) {
         this.level_attempts = level_attempts;
+    }
+
+    public int updateLevel_attempts(int new_level_attempts) {
+        if (new_level_attempts < level_attempts || level_attempts == 0)
+            level_attempts = new_level_attempts;
+        return level_attempts;
     }
 
     public int getLevel_time() {
@@ -101,12 +144,18 @@ public class Level implements Serializable {
         this.level_time = level_time;
     }
 
-    public int getLevel_puzzles_progress() {
-        return level_puzzles_progress;
+    public int updateLevel_time(int new_level_time) {
+        if (new_level_time < level_time || level_time == 0)
+            level_time = new_level_time;
+        return level_time;
     }
 
-    public void setLevel_puzzles_progress(int level_puzzles_progress) {
-        this.level_puzzles_progress = level_puzzles_progress;
+    public int getLevel_puzzles_completed() {
+        return level_puzzles_completed;
+    }
+
+    public void setLevel_puzzles_completed(int level_puzzles_completed) {
+        this.level_puzzles_completed = level_puzzles_completed;
     }
 
     public int getLevel_puzzles_count() {
@@ -115,5 +164,18 @@ public class Level implements Serializable {
 
     public void setLevel_puzzles_count(int level_puzzles_count) {
         this.level_puzzles_count = level_puzzles_count;
+    }
+
+    public String getLevel_trophy() {
+        if (level_score >= 1 && level_score < 100) {
+            return "trophy_bronze";
+        }
+        if (level_score >= 100 && level_score < 200) {
+            return "trophy_silver";
+        }
+        if (level_score >= 100 && level_score <= 300) {
+            return "trophy_gold";
+        }
+        return "trophy_grey";
     }
 }

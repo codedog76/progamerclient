@@ -14,8 +14,8 @@ public class DatabaseHandlerSingleton {
 
     private static DatabaseHandlerSingleton sInstance;
     private DatabaseHandler mDatabaseHandler;
-    private User current_user;
     private String mClassName = getClass().toString();
+    private String user_student_number;
 
     public static DatabaseHandlerSingleton getInstance(Context mContext) {
         if (sInstance == null)
@@ -31,34 +31,26 @@ public class DatabaseHandlerSingleton {
         return mDatabaseHandler;
     }
 
-    public boolean insertOrUpdateUser(User user) {
-        if (user != null) {
-            if (getDatabaseHandler().insertOrUpdateUser(user)) {
-                current_user = user;
-                return true;
-            }
+    public long insertUser(User current_user) {
+        if (current_user != null) {
+            return getDatabaseHandler().insertUser(current_user);
         }
-        return false;
+        return -1;
     }
 
-    public long insertOrUpdateLevel(Level level) {
-        if (level != null) {
-            long level_id = getDatabaseHandler().insertOrUpdateLevel(level);
-            Log.e(mClassName, String.valueOf(level_id));
-            return level_id;
-        } else {
-            return -1;
+    public long insertLevel(Level current_level) {
+        if (current_level != null) {
+            return getDatabaseHandler().insertLevel(current_level);
         }
+        return -1;
     }
 
-    public long insertOrUpdatePuzzle(Puzzle puzzle) {
-        if (puzzle != null) {
-            long puzzle_id = getDatabaseHandler().insertOrUpdatePuzzle(puzzle);
-            Log.e(mClassName, String.valueOf(puzzle_id));
-            return puzzle_id;
-        } else {
-            return -1;
+    public long insertPuzzle(Puzzle current_puzzle) {
+        Log.e("asd",current_puzzle.getPuzzle_level_id() +" "+ current_puzzle.getPuzzle_answer());
+        if (current_puzzle != null) {
+            return getDatabaseHandler().insertOrUpdatePuzzle(current_puzzle);
         }
+        return -1;
     }
 
     public int getUserOverallScore() {
@@ -77,6 +69,13 @@ public class DatabaseHandlerSingleton {
         return getDatabaseHandler().loginUser(user_student_number);
     }
 
+    public String getLoggedUserStudentNumber() {
+        if(user_student_number == null) {
+            user_student_number = getLoggedUser().getUser_student_number_id();
+        }
+        return user_student_number;
+    }
+
     public boolean logoutUser() {
         if (getDatabaseHandler().logoutUser(getLoggedUser())) {
             sInstance = null;
@@ -86,28 +85,52 @@ public class DatabaseHandlerSingleton {
         }
     }
 
-    public boolean checkHasLevels() {
-        return mDatabaseHandler.checkHasLevels(getLoggedUser());
+    public boolean checkUserHasLevels(User current_user) {
+        return mDatabaseHandler.checkHasLevels(current_user);
     }
 
     public User getLoggedUser() {
-        if (current_user == null) {
-            current_user = getDatabaseHandler().getLoggedInUser();
-            return current_user;
-        } else {
-            return current_user;
+        return getDatabaseHandler().getLoggedInUser();
+    }
+
+    public int deleteLevelPuzzles(Level current_level) {
+        if (current_level != null) {
+            return getDatabaseHandler().deleteLevelPuzzles(current_level);
         }
+        return -1;
     }
 
     public ArrayList<Level> getLevels() {
         return getDatabaseHandler().getLevels(getLoggedUser());
     }
 
-    public Puzzle getNextPuzzle(Level level){
-        return getDatabaseHandler().getNextPuzzle(getLoggedUser(), level);
+    public Puzzle getNextPuzzle(Level current_level) {
+        return getDatabaseHandler().getNextPuzzle(current_level);
     }
 
-    public boolean setPuzzleData(Puzzle puzzle) {
-        return getDatabaseHandler().setPuzzleData(puzzle);
+    public int updatePuzzleData(Puzzle current_puzzle) {
+        if(current_puzzle!=null) {
+            return getDatabaseHandler().updatePuzzleData(current_puzzle);
+        }
+        return -1;
+    }
+
+    public Level getLevel(int level_id) {
+        return getDatabaseHandler().getLevel(level_id);
+    }
+
+    public int updateLevelData(Level current_level) {
+        if(current_level!=null) {
+            return getDatabaseHandler().updateLevelData(current_level);
+        }
+        return -1;
+    }
+
+    public int resetLevelsUpdated() {
+        return getDatabaseHandler().resetLevelsUpdated(getLoggedUser());
+    }
+
+    public int resetUserUpdated() {
+        return getDatabaseHandler().resetUserUpdated(getLoggedUser());
     }
 }

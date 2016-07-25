@@ -45,7 +45,7 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
     private RelativeLayout leaderboardRelativeLayout;
     private LinearLayout leaderboardProgressBarLinearLayout, leaderboardTryAgainLinearLayout;
     private ViewPagerAdapter adapter;
-    private NetworkManagerSingleton networkManagerSingleton;
+    private NetworkManagerSingleton mNetworkManagerSingleton;
     private OverallFragmentInterface overallFragmentInterface;
     private AttemptsFragmentInterface attemptsFragmentInterface;
     private TimeFragmentInterface timeFragmentInterface;
@@ -74,29 +74,40 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
         leaderboardRelativeLayout.setVisibility(View.VISIBLE);
         leaderboardProgressBarLinearLayout.setVisibility(View.VISIBLE);
         leaderboardTryAgainLinearLayout.setVisibility(View.GONE);
-        networkManagerSingleton.downloadLeaderboardJSONRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+        mNetworkManagerSingleton.uploadUserLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
             @Override
-            public void getResult(ArrayList<User> object, Boolean response, String message) {
+            public void getResult(Boolean response, String message) {
                 if (response) {
-                    leaderboardList.clear();
-                    leaderboardList = object;
-                    assignViewPager();
-                    leaderboardRelativeLayout.setVisibility(View.GONE);
-                    leaderboardProgressBarLinearLayout.setVisibility(View.GONE);
-                    leaderboardTryAgainLinearLayout.setVisibility(View.GONE);
+                    mNetworkManagerSingleton.downloadLeaderboardJSONRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+                        @Override
+                        public void getResult(ArrayList<User> object, Boolean response, String message) {
+                            if (response) {
+                                leaderboardList.clear();
+                                leaderboardList = object;
+                                assignViewPager();
+                                leaderboardRelativeLayout.setVisibility(View.GONE);
+                                leaderboardProgressBarLinearLayout.setVisibility(View.GONE);
+                                leaderboardTryAgainLinearLayout.setVisibility(View.GONE);
+                            } else {
+                                leaderboardProgressBarLinearLayout.setVisibility(View.GONE);
+                                leaderboardTryAgainLinearLayout.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    });
                 } else {
                     leaderboardProgressBarLinearLayout.setVisibility(View.GONE);
                     leaderboardTryAgainLinearLayout.setVisibility(View.VISIBLE);
                 }
             }
         });
+
     }
 
     private void refreshData() {
         overallFragmentInterface.startRefreshing();
         attemptsFragmentInterface.startRefreshing();
         timeFragmentInterface.startRefreshing();
-        networkManagerSingleton.downloadLeaderboardJSONRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+        mNetworkManagerSingleton.downloadLeaderboardJSONRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
             @Override
             public void getResult(ArrayList<User> object, Boolean response, String message) {
                 if (response) {
@@ -118,7 +129,7 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
     }
 
     private void assignSingletons() {
-        networkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
+        mNetworkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
     }
 
     private void assignViews(View view) {
@@ -157,7 +168,7 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
         adapter = new ViewPagerAdapter(getChildFragmentManager());
         leaderboardOverallFragment = new LeaderboardOverallFragment();
         leaderboardOverallFragment.setListener(this);
-        adapter.addFragment(leaderboardOverallFragment, "Overall");
+        adapter.addFragment(leaderboardOverallFragment, "Score");
         leaderboardAttemptsFragment = new LeaderboardAttemptsFragment();
         leaderboardAttemptsFragment.setListener(this);
         adapter.addFragment(leaderboardAttemptsFragment, "Attempts");

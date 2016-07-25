@@ -1,5 +1,7 @@
 package adapters;
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +16,13 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, String>, ItemAdapter
 
     private int mLayoutId;
     private int mGrabHandleId;
+    private Context mContext;
 
-    public ItemAdapter(ArrayList<Pair<Long, String>> list, int layoutId, int grabHandleId, boolean dragOnLongPress) {
+    public ItemAdapter(ArrayList<Pair<Long, String>> list, int layoutId, int grabHandleId, boolean dragOnLongPress, Context context) {
         super(dragOnLongPress);
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
+        mContext = context;
         setHasStableIds(true);
         setItemList(list);
     }
@@ -43,21 +47,21 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, String>, ItemAdapter
     }
 
     public class ViewHolder extends DragItemAdapter<Pair<Long, String>, ItemAdapter.ViewHolder>.ViewHolder {
-        public TextView mText;
+        private TextView mText;
 
         public ViewHolder(final View itemView) {
             super(itemView, mGrabHandleId);
             mText = (TextView) itemView.findViewById(R.id.text);
+            Typeface Roboto_Regular = Typeface.createFromAsset(mContext.getAssets(), "Roboto-Regular.ttf");
+            mText.setTypeface(Roboto_Regular);
         }
 
         @Override
         public void onItemClicked(View view) {
-            Toast.makeText(view.getContext(), "Item clicked", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public boolean onItemLongClicked(View view) {
-            Toast.makeText(view.getContext(), "Item long clicked", Toast.LENGTH_SHORT).show();
             return true;
         }
     }

@@ -2,11 +2,15 @@ package adapters;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -17,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import models.Level;
+import singletons.DatabaseHandlerSingleton;
 
 public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> {
 
@@ -24,6 +29,7 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
     private clickListener clickListener;
     private LayoutInflater layoutInflater;
     private List<Level> levelList = Collections.emptyList();
+    private String mClassName = getClass().toString();
 
     public LevelAdapter(Context context) {
         this.context = context;
@@ -52,21 +58,47 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Level level = levelList.get(position);
+        Level current_level = levelList.get(position);
+        holder.levelRowLevelNumber.setText("Level " + current_level.getLevel_number());
+        holder.levelRowLevelName.setText(current_level.getLevel_title());
+        holder.levelRowNumericProgressTextView.setText(current_level.getLevel_puzzles_completed() + "/" + current_level.getLevel_puzzles_count());
 
-        holder.levelRowLevelNumber.setText("Level " + level.getLevel_number());
-        holder.levelRowLevelName.setText(level.getLevel_title());
-        holder.levelRowNumericProgressTextView.setText(level.getLevel_puzzles_progress()+"/"+level.getLevel_puzzles_count());
-        if(level.getLevel_puzzles_count()!=0) {
-            double percentage = 100.0 * level.getLevel_puzzles_progress() / level.getLevel_puzzles_count();
-            holder.levelRowProgressBar.setProgress((int)percentage);
+        String levelTrophy = current_level.getLevel_trophy();
+        int id = context.getResources().getIdentifier(levelTrophy, "drawable", context.getPackageName());
+        Drawable drawable = ContextCompat.getDrawable(context, id);
+        holder.levelRowBadgeImageView.setImageDrawable(drawable);
+        if (current_level.getLevel_puzzles_count() != 0) {
+            double percentage = 100.0 * current_level.getLevel_puzzles_completed() / current_level.getLevel_puzzles_count();
+            holder.levelRowProgressBar.setProgress((int) percentage);
         } else {
             holder.levelRowProgressBar.setProgress(0);
         }
-        //String levelTrophy = level.getLevelTrophy();
-        //int id = context.getResources().getIdentifier(levelTrophy, "drawable", context.getPackageName());
-        //Drawable drawable = ContextCompat.getDrawable(context, id);
-        //holder.levelRowBadgeImageView.setImageDrawable(drawable);
+        Typeface Roboto_Regular = Typeface.createFromAsset(context.getAssets(), "Roboto-Regular.ttf");
+        Typeface Roboto_Medium = Typeface.createFromAsset(context.getAssets(), "Roboto-Medium.ttf");
+        holder.levelRowLevelNumber.setTypeface(Roboto_Regular);
+        holder.levelRowLevelName.setTypeface(Roboto_Regular);
+        if (position == 0 || (levelList.get(position - 1).getLevel_completed()==1)) {
+            holder.selectableLayout.setFocusable(true);
+            holder.selectableLayout.setClickable(true);
+            holder.levelRowLevelNumber.setAlpha(0.85f);
+            holder.levelRowLevelName.setAlpha(0.7f);
+            holder.levelRowNumericProgressTextView.setAlpha(0.7f);
+            holder.levelRowProgressBar.setAlpha(0.85f);
+            holder.levelRowDivider.setAlpha(0.12f);
+            holder.levelRowBadgeImageView.setAlpha(1.0f);
+            holder.levelRowLevelNumber.setTypeface(Roboto_Medium);
+        } else {
+            holder.selectableLayout.setFocusable(false);
+            holder.selectableLayout.setClickable(false);
+            holder.levelRowBadgeImageView.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.lock_104));
+            holder.levelRowLevelNumber.setAlpha(0.4f);
+            holder.levelRowLevelName.setAlpha(0.4f);
+            holder.levelRowNumericProgressTextView.setAlpha(0.4f);
+            holder.levelRowProgressBar.setAlpha(0.4f);
+            holder.levelRowDivider.setAlpha(0.08f);
+            holder.levelRowBadgeImageView.setAlpha(0.2f);
+            holder.levelRowLevelNumber.setTypeface(Roboto_Regular);
+        }
     }
 
     @Override
@@ -79,20 +111,19 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
         private TextView levelRowLevelNumber, levelRowLevelName, levelRowNumericProgressTextView;
         private ImageView levelRowBadgeImageView;
         private ProgressBar levelRowProgressBar;
+        private LinearLayout selectableLayout;
+        private View levelRowDivider;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            selectableLayout = (LinearLayout) itemView.findViewById(R.id.levelRowLayout);
             levelRowLevelNumber = (TextView) itemView.findViewById(R.id.levelRowLevelNumber);
             levelRowLevelName = (TextView) itemView.findViewById(R.id.levelRowLevelName);
             levelRowNumericProgressTextView = (TextView) itemView.findViewById(R.id.levelRowNumericProgressTextView);
             levelRowBadgeImageView = (ImageView) itemView.findViewById(R.id.levelRowBadgeImageView);
             levelRowProgressBar = (ProgressBar) itemView.findViewById(R.id.levelRowProgressBar);
-
-            Typeface Roboto_Regular = Typeface.createFromAsset(context.getAssets(), "Roboto-Regular.ttf");
-            levelRowLevelNumber.setTypeface(Roboto_Regular);
-            levelRowLevelName.setTypeface(Roboto_Regular);
-
-            itemView.setOnClickListener(this);
+            levelRowDivider = itemView.findViewById(R.id.levelRowDivider);
+            selectableLayout.setOnClickListener(this);
         }
 
         @Override

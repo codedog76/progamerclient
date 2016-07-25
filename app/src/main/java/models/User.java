@@ -6,13 +6,13 @@ public class User implements Serializable {
 
     private String user_student_number_id; //pk
     private String user_nickname;
-    private int user_avatar;
     private int user_is_private;
+    private int user_avatar;
+    private int user_logged_in;
+    private int user_updated;
+
     private String user_password;
     private int user_current_level;
-
-    private int user_logged_in;
-
     private int user_overall_score;
     private int user_overall_attempts;
     private int user_overall_time;
@@ -133,5 +133,13 @@ public class User implements Serializable {
 
     public void setUser_overall_attempts_rank(int user_overall_attempts_rank) {
         this.user_overall_attempts_rank = user_overall_attempts_rank;
+    }
+
+    public int getUser_updated() {
+        return user_updated;
+    }
+
+    public void setUser_updated(int user_updated) {
+        this.user_updated = user_updated;
     }
 }

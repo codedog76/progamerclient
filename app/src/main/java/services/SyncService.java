@@ -27,7 +27,7 @@ public class SyncService extends Service {
     private static NetworkManagerSingleton sNetworkManagerSingleton;
     private Handler mUserSyncHandler = new Handler();
     private String mClassName = getClass().toString();
-    private int REFRESH_INTERVAL = 20 * 1000;
+    private int REFRESH_INTERVAL = 30 * 1000;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -61,13 +61,13 @@ public class SyncService extends Service {
     private Runnable mSyncUserRunnable = new Runnable() {
         @Override
         public void run() {
-            sNetworkManagerSingleton.uploadUserJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
+            sNetworkManagerSingleton.syncUserData(new NetworkManagerSingleton.BooleanResponseListener() {
                 @Override
                 public void getResult(Boolean response, String message) {
                     if(response) {
-                        Log.d(mClassName, "User uploaded succesfully");
+                        Log.e(mClassName, "All data synced");
                     } else {
-                        Log.d(mClassName, "User uploaded failed");
+                        Log.e(mClassName, "Failed to sync data");
                     }
                 }
             });

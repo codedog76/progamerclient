@@ -288,8 +288,13 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 
+    <color name="gold">#CFB53B</color>
+    <color name="silver">#E6E8FA</color>
+    <color name="bronze">#8C7853</color>
+
     <!-- Colors for the app -->
     <color name="primary_background">@color/grey_200</color>
+    <color name="secondary_background">@color/pink_100</color>
     <color name="primary">@color/light_blue_A200</color>
     <color name="primary_dark">@color/light_blue_A700</color>
     <color name="accent">@color/pink_A200</color>

@@ -5,6 +5,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/levelRowLayout"
         android:layout_width="match_parent"
         android:layout_height="88dp"
         android:background="?attr/selectableItemBackground"
@@ -66,8 +67,8 @@
 
         <ImageView
             android:id="@+id/levelRowBadgeImageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_gravity="center"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
@@ -76,6 +77,7 @@
     </LinearLayout>
 
     <View
+        android:id="@+id/levelRowDivider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginLeft="16dp"

@@ -47,6 +47,11 @@ public class LevelsFragment extends Fragment implements LevelAdapter.clickListen
         assignSingletons();
         assignViews(view);
         assignAdapter();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         addList(mDatabaseHandlerSingleton.getLevels());
     }
 
@@ -80,7 +85,7 @@ public class LevelsFragment extends Fragment implements LevelAdapter.clickListen
     public void itemClicked(int position, Level selected_level) {
         Intent intent = new Intent(getContext(), LevelActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("selected_level", selected_level);
+        bundle.putInt("level_id", selected_level.getLevel_id());
         intent.putExtras(bundle);
         startActivity(intent);
     }

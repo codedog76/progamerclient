@@ -2,6 +2,7 @@ package fragments;
 
 
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -74,30 +75,32 @@ public class LeaderboardAttemptsFragment extends Fragment implements Leaderboard
             overallTopScoreTextView.setText(String.valueOf(currentUser.getUser_overall_attempts()));
             overallBottomNameTextView.setText(currentUser.getUser_nickname());
             overallBottomScoreTextView.setText(String.valueOf(currentUser.getUser_overall_attempts()));
+            overallTopRankTextView.setText("#"+String.valueOf(currentUserPos + 1));
+            overallBottomRankTextView.setText("#"+String.valueOf(currentUserPos + 1));
+            int id = getContext().getResources().getIdentifier("avatar_"+String.valueOf(currentUser.getUser_avatar()), "drawable", getContext().getPackageName());
+            Drawable drawable = ContextCompat.getDrawable(getContext(), id);
+            overallTopRankCircleImageView.setImageDrawable(drawable);
+            overallBottomRankCircleImageView.setImageDrawable(drawable);
             if (currentUserPos <= 2) {
-                overallTopRankTextView.setVisibility(View.GONE);
-                overallBottomRankTextView.setVisibility(View.GONE);
-                overallTopRankCircleImageView.setVisibility(View.VISIBLE);
-                overallBottomRankCircleImageView.setVisibility(View.VISIBLE);
+                overallTopRankCircleImageView.setBorderWidth(5);
+                overallBottomRankCircleImageView.setBorderWidth(5);
                 if (currentUserPos == 0) {
-                    overallTopRankCircleImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.trophy_gold));
-                    overallBottomRankCircleImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.trophy_gold));
+                    overallTopRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.gold));
+                    overallBottomRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.gold));
                 }
                 if (currentUserPos == 1) {
-                    overallTopRankCircleImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.trophy_silver));
-                    overallBottomRankCircleImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.trophy_silver));
+                    overallTopRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.silver));
+                    overallBottomRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.silver));
                 }
                 if (currentUserPos == 2) {
-                    overallTopRankCircleImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.trophy_bronze));
-                    overallBottomRankCircleImageView.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.trophy_bronze));
+                    overallTopRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.bronze));
+                    overallBottomRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.bronze));
                 }
             } else {
-                overallTopRankTextView.setText(String.valueOf(currentUserPos + 1));
-                overallBottomRankTextView.setText(String.valueOf(currentUserPos + 1));
-                overallTopRankTextView.setVisibility(View.VISIBLE);
-                overallBottomRankTextView.setVisibility(View.VISIBLE);
-                overallTopRankCircleImageView.setVisibility(View.GONE);
-                overallBottomRankCircleImageView.setVisibility(View.GONE);
+                overallTopRankCircleImageView.setBorderWidth(0);
+                overallBottomRankCircleImageView.setBorderWidth(0);
+                overallTopRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.grey_50));
+                overallBottomRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.grey_50));
             }
         } else {
             overallTopLinearLayout.setVisibility(View.GONE);

@@ -8,6 +8,7 @@ public class Puzzle {
     private String puzzle_instructions;
     private String puzzle_expected_output;
     private String puzzle_data;
+    private String puzzle_answer;
     private int puzzle_completed;
     private int puzzle_attempts;
     private int puzzle_time;
@@ -80,6 +81,13 @@ public class Puzzle {
         this.puzzle_completed = puzzle_completed;
     }
 
+    public void setPuzzle_completed(boolean puzzle_completed) {
+        if(puzzle_completed)
+            this.puzzle_completed = 1;
+        else
+            this.puzzle_completed = 0;
+    }
+
     public int getPuzzle_attempts() {
         return puzzle_attempts;
     }
@@ -94,5 +102,13 @@ public class Puzzle {
 
     public void setPuzzle_time(int puzzle_time) {
         this.puzzle_time = puzzle_time;
+    }
+
+    public String getPuzzle_answer() {
+        return puzzle_answer;
+    }
+
+    public void setPuzzle_answer(String puzzle_answer) {
+        this.puzzle_answer = puzzle_answer;
     }
 }

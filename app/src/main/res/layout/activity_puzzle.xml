@@ -19,58 +19,72 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/puzzleInstructionsTitleText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Instructions" />
+                android:layout_marginBottom="5dp"
+                android:text="Instructions"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/puzzleInstructionsText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas at velit eu libero tincidunt porta. Praesent gravida velit sed turpis rutrum vulputate." />
+                android:layout_marginBottom="5dp"
+                android:ellipsize="none"
+                android:maxLines="100"
+                android:paddingLeft="4dp"
+                android:scrollHorizontally="false"
+                android:text="PLACEHOLDER" />
 
             <TextView
                 android:id="@+id/puzzleExpectedOutputTitleText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Expected Output" />
+                android:layout_marginBottom="5dp"
+                android:text="Expected Output"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/puzzleExpectedOutputText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas at velit eu libero tincidunt porta. Praesent gravida velit sed turpis rutrum vulputate." />
+                android:layout_marginBottom="5dp"
+                android:ellipsize="none"
+                android:maxLines="100"
+                android:paddingLeft="4dp"
+                android:scrollHorizontally="false"
+                android:text="PLACEHOLDER" />
 
         </LinearLayout>
 
     </android.support.v7.widget.CardView>
 
-
-
     <android.support.v7.widget.CardView
         android:id="@+id/puzzleView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/topView"
         android:layout_margin="6dp">
 
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content" />
 
     </android.support.v7.widget.CardView>
 
     <LinearLayout
-        android:id="@+id/bottomView"
+        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/green_100"
+        android:elevation="2dp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -97,7 +111,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/puzzleCheckButton"
+            android:id="@+id/puzzleButton"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:layout_margin="6dp"
@@ -106,6 +120,27 @@
             android:textColor="@color/white"
             android:textSize="14sp" />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/resultPopup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:animateLayoutChanges="true"
+        android:background="@color/green_500"
+        android:elevation="2dp"
+        android:minHeight="50dp"
+        android:minWidth="100dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/resultPopupTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="CORRECT"
+            android:textColor="@color/white" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -3,10 +3,10 @@
     android:id="@+id/mainView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context="fragments.puzzles.DragListViewFragment">
+    tools:context="fragments.puzzles.MultipleChoiceListFragment">
 
-    <com.woxthebox.draglistview.DragListView
-        android:id="@+id/dragListView"
+    <ListView
+        android:id="@+id/multipleSelectionListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
