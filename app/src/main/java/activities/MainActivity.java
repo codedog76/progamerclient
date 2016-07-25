@@ -22,12 +22,14 @@ import android.widget.Toast;
 
 import com.example.progamer.R;
 
+import bsh.EvalError;
 import fragments.LeaderboardFragment;
 import fragments.LevelsFragment;
 import fragments.NavigationDrawerFragment;
 import services.SyncService;
 import singletons.DatabaseHandlerSingleton;
 import singletons.NetworkManagerSingleton;
+import bsh.Interpreter;
 
 public class MainActivity extends AppCompatActivity implements NavigationDrawerFragment.drawerListener {
 
@@ -118,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         drawerFragment.setListener(this);
         navNicknameTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_nickname());
         navStudentNumberTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
-        int id = getResources().getIdentifier("avatar_"+String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_avatar()), "drawable", getPackageName());
+        int id = getResources().getIdentifier("avatar_" + String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_avatar()), "drawable", getPackageName());
         navProfileImageView.setImageDrawable(ContextCompat.getDrawable(this, id));
     }
 

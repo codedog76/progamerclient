@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +18,13 @@ import com.woxthebox.draglistview.DragItem;
 import com.woxthebox.draglistview.DragListView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import activities.PuzzleActivity;
 import adapters.ItemAdapter;
+import interpreter.JavaInterpreter;
 import models.Puzzle;
 
 public class DragListViewFragment extends Fragment {
@@ -29,6 +32,8 @@ public class DragListViewFragment extends Fragment {
     private DragListView mDragListView;
     private ArrayList<Pair<Long, String>> mItemArray;
     private ItemAdapter mItemAdapter;
+    private Puzzle mCurrentPuzzle;
+    private String mClassName = getClass().toString();
 
     public DragListViewFragment() {
         // Required empty public constructor
@@ -50,11 +55,11 @@ public class DragListViewFragment extends Fragment {
 
     private void loadData() {
         PuzzleActivity puzzleActivity = (PuzzleActivity) getActivity();
-        Puzzle selectedPuzzle = puzzleActivity.getSelectedPuzzle();
-        String[] mPuzzleData = selectedPuzzle.getPuzzle_data().split("//");
+        mCurrentPuzzle = puzzleActivity.getSelectedPuzzle();
         mItemArray = new ArrayList<>();
-        for (int i = 1; i < mPuzzleData.length; i++) {
-            mItemArray.add(new Pair<>((long) i, mPuzzleData[i]));
+        List<String> puzzleData = mCurrentPuzzle.getPuzzleData();
+        for (int i = 0; i < puzzleData.size(); i++) {
+            mItemArray.add(new Pair<>((long) i, puzzleData.get(i)));
         }
         setupDragView();
     }
@@ -89,13 +94,25 @@ public class DragListViewFragment extends Fragment {
             mDragListView.setFocusable(true);
             mDragListView.setFocusableInTouchMode(true);
         }
-
     }
 
     public boolean checkIfCorrect() {
         List<Pair<Long, String>> adapterList = mItemAdapter.getItemList();
-        for (int x = 0; x < mItemArray.size(); x++) {
-            if (!adapterList.get(x).second.equals(mItemArray.get(x).second)) {
+        List<String> cSharpCode = new ArrayList<>();
+        for (Pair<Long, String> cSharpLine : adapterList) {
+            cSharpCode.add(cSharpLine.second);
+        }
+        JavaInterpreter javaInterpreter = new JavaInterpreter();
+        List compiledAnswer = javaInterpreter.compileCSharpCode(cSharpCode);
+        if (compiledAnswer == null) {
+            return false;
+        }
+        List<String> puzzleAnswer = mCurrentPuzzle.getPuzzleAnswers();
+        if (puzzleAnswer == null) {
+            return false;
+        }
+        for (int x = 0; x < compiledAnswer.size(); x++) {
+            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(puzzleAnswer.get(x)))) {
                 return false;
             }
         }

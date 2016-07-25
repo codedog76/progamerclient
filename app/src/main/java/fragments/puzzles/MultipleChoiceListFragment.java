@@ -4,6 +4,8 @@ package fragments.puzzles;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.Pair;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +21,14 @@ import java.util.Collections;
 import java.util.List;
 
 import activities.PuzzleActivity;
+import interpreter.JavaInterpreter;
 import models.Puzzle;
 
 public class MultipleChoiceListFragment extends Fragment {
 
-    String[] mPuzzleAnswers;
     private ListView multipleSelectionListView;
-    private ArrayAdapter<String> arrayAdapter;
+    private ArrayAdapter<String> mArrayAdapter;
+    private Puzzle mCurrentPuzzle;
 
     public MultipleChoiceListFragment() {
         // Required empty public constructor
@@ -48,28 +51,36 @@ public class MultipleChoiceListFragment extends Fragment {
 
     private void loadData() {
         PuzzleActivity puzzleActivity = (PuzzleActivity) getActivity();
-        Puzzle selectedPuzzle = puzzleActivity.getSelectedPuzzle();
-        String[] mPuzzleData = selectedPuzzle.getPuzzle_data().split("//");
-        mPuzzleAnswers = selectedPuzzle.getPuzzle_answer().split("//");
-        ArrayList<String> puzzleItems = new ArrayList<>(Arrays.asList(mPuzzleData));
-        puzzleItems.remove(0);
-        Collections.shuffle(puzzleItems);
-        arrayAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_multiple_choice, puzzleItems);
+        mCurrentPuzzle = puzzleActivity.getSelectedPuzzle();
+        List<String> puzzleData = mCurrentPuzzle.getPuzzleData();
+        mArrayAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_multiple_choice, puzzleData);
         multipleSelectionListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        multipleSelectionListView.setAdapter(arrayAdapter);
+        multipleSelectionListView.setAdapter(mArrayAdapter);
     }
 
     public boolean checkIfCorrect() {
-        List<String> answerItems = new ArrayList<>(Arrays.asList(mPuzzleAnswers));
-        answerItems.remove(0);
-        Collections.sort(answerItems);
-        List<String> checkedItems = getCheckList();
-        Collections.sort(checkedItems);
-        if (checkedItems.size() == 0 || answerItems.size() == 0)
+        List<String> cSharpCode = new ArrayList<>();
+        SparseBooleanArray checked = multipleSelectionListView.getCheckedItemPositions();
+        for (int i = 0; i < checked.size(); i++) {
+            if (checked.valueAt(i)) {
+                String tag = multipleSelectionListView.getItemAtPosition(checked.keyAt(i)).toString();
+                cSharpCode.add(tag);
+            }
+        }
+        JavaInterpreter javaInterpreter = new JavaInterpreter();
+        List compiledAnswer = javaInterpreter.compileCSharpCode(cSharpCode);
+        Log.e("ASD", compiledAnswer.toString());
+        if (compiledAnswer == null) {
             return false;
-        for(int x = 0; x < answerItems.size(); x++){
-            if(!answerItems.get(x).trim().equals(checkedItems.get(x).trim()))
+        }
+        List<String> puzzleAnswer = mCurrentPuzzle.getPuzzleAnswers();
+        if (puzzleAnswer == null) {
+            return false;
+        }
+        for (int x = 0; x < compiledAnswer.size(); x++) {
+            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(puzzleAnswer.get(x)))) {
                 return false;
+            }
         }
         return true;
     }

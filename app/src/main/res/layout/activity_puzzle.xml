@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activityPuzzleMainLayout"
     android:layout_width="match_parent"
+    android:orientation="vertical"
     android:layout_height="match_parent"
     tools:context="activities.PuzzleActivity">
 
@@ -10,57 +11,73 @@
         android:id="@+id/app_actionbar"
         layout="@layout/app_actionbar" />
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/topView"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/app_actionbar"
-        android:layout_margin="6dp">
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/puzzleInstructionsText"
+            <android.support.v7.widget.CardView
+                android:id="@+id/topView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:ellipsize="none"
-                android:maxLines="100"
-                android:scrollHorizontally="false"
-                android:text="PLACEHOLDER" />
+                android:layout_margin="6dp">
 
-            <TextView
-                android:id="@+id/puzzleExpectedOutputText"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/puzzleInstructionsText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:ellipsize="none"
+                        android:maxLines="100"
+                        android:scrollHorizontally="false"
+                        android:text="PLACEHOLDER" />
+
+                    <TextView
+                        android:id="@+id/puzzleExpectedOutputText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:ellipsize="none"
+                        android:gravity="center"
+                        android:maxLines="100"
+                        android:scrollHorizontally="false"
+                        android:text="PLACEHOLDER" />
+
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/puzzleView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:ellipsize="none"
-                android:gravity="center"
-                android:maxLines="100"
-                android:scrollHorizontally="false"
-                android:text="PLACEHOLDER" />
+                android:layout_below="@id/topView"
+                android:layout_marginLeft="6dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginRight="6dp">
 
+                <FrameLayout
+                    android:id="@+id/fragment_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </android.support.v7.widget.CardView>
         </LinearLayout>
 
-    </android.support.v7.widget.CardView>
+    </ScrollView>
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/puzzleView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/topView"
-        android:layout_margin="6dp">
-
-        <FrameLayout
-            android:id="@+id/fragment_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </android.support.v7.widget.CardView>
 
     <LinearLayout
         android:id="@+id/bottomBar"
@@ -127,4 +144,4 @@
             android:textColor="@color/white" />
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

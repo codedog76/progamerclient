@@ -2,13 +2,11 @@ package singletons;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
-
-import misc.ObscuredSharedPreferences;
 
 public class SettingsSingleton {
     private static SettingsSingleton sInstance;
     private SharedPreferences mSharedPreferences;
+    private final static String PREFERENCES = "progamer_preferences";
 
     public static SettingsSingleton getInstance(Context mContext) {
         if(sInstance==null)
@@ -17,7 +15,7 @@ public class SettingsSingleton {
     }
 
     private SettingsSingleton(Context mContext) {
-        mSharedPreferences = new ObscuredSharedPreferences(mContext, mContext.getSharedPreferences("SECURE", Context.MODE_PRIVATE));
+        mSharedPreferences = mContext.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
     }
 
     public boolean getLaunchScreenActive() {

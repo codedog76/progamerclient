@@ -1,5 +1,12 @@
 package models;
 
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class Puzzle {
     private int puzzle_id; //pk
     private int puzzle_level_id; //fk
@@ -15,6 +22,14 @@ public class Puzzle {
 
     public Puzzle() {
 
+    }
+
+    public List<String> getPuzzleAnswers() {
+        return new ArrayList<>(Arrays.asList(puzzle_answer.split("//")));
+    }
+
+    public List<String> getPuzzleData() {
+        return new ArrayList<>(Arrays.asList(puzzle_data.split("//")));
     }
 
     public int getPuzzle_id() {
@@ -82,7 +97,7 @@ public class Puzzle {
     }
 
     public void setPuzzle_completed(boolean puzzle_completed) {
-        if(puzzle_completed)
+        if (puzzle_completed)
             this.puzzle_completed = 1;
         else
             this.puzzle_completed = 0;
