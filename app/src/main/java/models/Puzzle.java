@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Puzzle {
     private int puzzle_id; //pk
@@ -22,14 +24,6 @@ public class Puzzle {
 
     public Puzzle() {
 
-    }
-
-    public List<String> getPuzzleAnswers() {
-        return new ArrayList<>(Arrays.asList(puzzle_answer.split("//")));
-    }
-
-    public List<String> getPuzzleData() {
-        return new ArrayList<>(Arrays.asList(puzzle_data.split("//")));
     }
 
     public int getPuzzle_id() {

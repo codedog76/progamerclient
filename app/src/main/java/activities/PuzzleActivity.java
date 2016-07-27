@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import com.example.progamer.R;
 
+import java.util.List;
+
 import fragments.puzzles.DragListViewFragment;
 import fragments.puzzles.MultipleChoiceListFragment;
 import models.Level;
@@ -43,17 +45,6 @@ public class PuzzleActivity extends AppCompatActivity {
     private String mClassName = getClass().toString();
     private int mTimerSeconds;
     private int mTimerResumeTime;
-    Runnable timerRunnable = new Runnable() {
-        @Override
-        public void run() {
-            long millis = (System.currentTimeMillis() - startTime);
-            mTimerSeconds = mTimerResumeTime + (int) (millis / 1000);
-            int displayMinutes = mTimerSeconds / 60;
-            int displaySeconds = mTimerSeconds % 60;
-            puzzleTimerText.setText("Timer: " + String.format("%d:%02d", displayMinutes, displaySeconds));
-            timerHandler.postDelayed(this, 500);
-        }
-    };
     private int mAttemptsCount;
     private DragListViewFragment mDragListViewFragment;
     private MultipleChoiceListFragment mMultipleChoiceListFragment;
@@ -75,12 +66,23 @@ public class PuzzleActivity extends AppCompatActivity {
         assignListeners();
     }
 
+    private Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            long millis = (System.currentTimeMillis() - startTime);
+            mTimerSeconds = mTimerResumeTime + (int) (millis / 1000);
+            int displayMinutes = mTimerSeconds / 60;
+            int displaySeconds = mTimerSeconds % 60;
+            puzzleTimerText.setText("Timer: " + String.format("%d:%02d", displayMinutes, displaySeconds));
+            timerHandler.postDelayed(this, 500);
+        }
+    };
+
     private void reloadData() {
         if (mCurrentLevel != null) {
             mCurrentPuzzle = mDatabaseHandlerSingleton.getNextPuzzle(mCurrentLevel);
             getSupportActionBar().setTitle("Puzzle " + (mCurrentLevel.getLevel_puzzles_completed() + 1) + "/" + mCurrentLevel.getLevel_puzzles_count());
             puzzleInstructionsText.setText(mCurrentPuzzle.getPuzzle_instructions());
-            puzzleExpectedOutputText.setText(mCurrentPuzzle.getPuzzle_expected_output());
             mTimerResumeTime = mCurrentPuzzle.getPuzzle_time();
             mAttemptsCount = mCurrentPuzzle.getPuzzle_attempts();
             if (mAttemptsCount == 0)
@@ -98,6 +100,14 @@ public class PuzzleActivity extends AppCompatActivity {
             Log.e(mClassName, "Level data missing");
             finish();
         }
+    }
+
+    public void setExpectedOutput(List<String> expectedOutput) {
+        String expected_output = "";
+        for(String output:expectedOutput) {
+            expected_output = expected_output + output;
+        }
+        puzzleExpectedOutputText.setText(expected_output);
     }
 
     private void assignListeners() {
@@ -182,8 +192,12 @@ public class PuzzleActivity extends AppCompatActivity {
         mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
     }
 
-    public Puzzle getSelectedPuzzle() {
+    public Puzzle getCurrentPuzzle() {
         return mCurrentPuzzle;
+    }
+
+    public Level getCurrentLevel() {
+        return mCurrentLevel;
     }
 
     private void getBundle() {

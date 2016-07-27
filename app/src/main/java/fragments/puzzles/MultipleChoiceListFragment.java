@@ -1,11 +1,10 @@
 package fragments.puzzles;
 
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.Pair;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,19 +15,24 @@ import android.widget.ListView;
 import com.example.progamer.R;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import activities.PuzzleActivity;
-import interpreter.JavaInterpreter;
+import models.Level;
+import other.JavaInterpreter;
 import models.Puzzle;
+import other.PuzzleGenerator;
 
 public class MultipleChoiceListFragment extends Fragment {
 
+    private String mClassName = getClass().toString();
     private ListView multipleSelectionListView;
     private ArrayAdapter<String> mArrayAdapter;
-    private Puzzle mCurrentPuzzle;
+    private PuzzleGenerator mPuzzleGenerator;
+    private List<String> mExpectedAnswer;
+    private PuzzleActivity mParentPuzzleActivity;
+    private Level mCurrentLevel;
+    private List<String> mPuzzleData;
 
     public MultipleChoiceListFragment() {
         // Required empty public constructor
@@ -46,14 +50,26 @@ public class MultipleChoiceListFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         assignViews(view);
-        loadData();
+        mParentPuzzleActivity = (PuzzleActivity) getActivity();
+        mCurrentLevel = mParentPuzzleActivity.getCurrentLevel();
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                loadData();
+                setupMultiChoiceListView();
+            }
+        });
     }
 
     private void loadData() {
-        PuzzleActivity puzzleActivity = (PuzzleActivity) getActivity();
-        mCurrentPuzzle = puzzleActivity.getSelectedPuzzle();
-        List<String> puzzleData = mCurrentPuzzle.getPuzzleData();
-        mArrayAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_multiple_choice, puzzleData);
+        mPuzzleGenerator.generatePuzzle(mCurrentLevel.getLevel_title());
+        mExpectedAnswer = mPuzzleGenerator.getExpectedAnswer();
+        mParentPuzzleActivity.setExpectedOutput(mExpectedAnswer);
+        mPuzzleData = mPuzzleGenerator.getFinalCodeList();
+    }
+
+    private void setupMultiChoiceListView() {
+        mArrayAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_multiple_choice, mPuzzleData);
         multipleSelectionListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         multipleSelectionListView.setAdapter(mArrayAdapter);
     }
@@ -69,16 +85,11 @@ public class MultipleChoiceListFragment extends Fragment {
         }
         JavaInterpreter javaInterpreter = new JavaInterpreter();
         List compiledAnswer = javaInterpreter.compileCSharpCode(cSharpCode);
-        Log.e("ASD", compiledAnswer.toString());
         if (compiledAnswer == null) {
             return false;
         }
-        List<String> puzzleAnswer = mCurrentPuzzle.getPuzzleAnswers();
-        if (puzzleAnswer == null) {
-            return false;
-        }
         for (int x = 0; x < compiledAnswer.size(); x++) {
-            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(puzzleAnswer.get(x)))) {
+            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(mExpectedAnswer.get(x)))) {
                 return false;
             }
         }

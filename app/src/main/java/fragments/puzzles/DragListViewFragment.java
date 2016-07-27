@@ -2,6 +2,7 @@ package fragments.puzzles;
 
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -18,22 +19,26 @@ import com.woxthebox.draglistview.DragItem;
 import com.woxthebox.draglistview.DragListView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import activities.PuzzleActivity;
 import adapters.ItemAdapter;
-import interpreter.JavaInterpreter;
+import models.Level;
+import other.JavaInterpreter;
 import models.Puzzle;
+import other.PuzzleGenerator;
 
 public class DragListViewFragment extends Fragment {
 
-    private DragListView mDragListView;
-    private ArrayList<Pair<Long, String>> mItemArray;
-    private ItemAdapter mItemAdapter;
-    private Puzzle mCurrentPuzzle;
     private String mClassName = getClass().toString();
+    private DragListView mDragListView;
+    private ItemAdapter mItemAdapter;
+    private PuzzleGenerator mPuzzleGenerator;
+    private List<String> mExpectedAnswer;
+    private PuzzleActivity mParentPuzzleActivity;
+    private Level mCurrentLevel;
+    private List<String> mPuzzleData;
 
     public DragListViewFragment() {
         // Required empty public constructor
@@ -50,25 +55,30 @@ public class DragListViewFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         assignViews(view);
-        loadData();
+        mParentPuzzleActivity = (PuzzleActivity) getActivity();
+        mCurrentLevel = mParentPuzzleActivity.getCurrentLevel();
+        mPuzzleGenerator = new PuzzleGenerator();
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                loadData();
+                setupDragListView();
+            }
+        });
     }
 
     private void loadData() {
-        PuzzleActivity puzzleActivity = (PuzzleActivity) getActivity();
-        mCurrentPuzzle = puzzleActivity.getSelectedPuzzle();
-        mItemArray = new ArrayList<>();
-        List<String> puzzleData = mCurrentPuzzle.getPuzzleData();
-        for (int i = 0; i < puzzleData.size(); i++) {
-            mItemArray.add(new Pair<>((long) i, puzzleData.get(i)));
+        mPuzzleGenerator.generatePuzzle(mCurrentLevel.getLevel_title());
+        mExpectedAnswer = mPuzzleGenerator.getExpectedAnswer();
+        mParentPuzzleActivity.setExpectedOutput(mExpectedAnswer);
+        mPuzzleData = mPuzzleGenerator.getFinalCodeList();
+    }
+
+    private void setupDragListView() {
+        ArrayList<Pair<Long, String>> mItemArray = new ArrayList<>();
+        for (int i = 0; i < mPuzzleData.size(); i++) {
+            mItemArray.add(new Pair<>((long) i, mPuzzleData.get(i)));
         }
-        setupDragView();
-    }
-
-    private void assignViews(View view) {
-        mDragListView = (DragListView) view.findViewById(R.id.dragListView);
-    }
-
-    private void setupDragView() {
         mDragListView.getRecyclerView().setVerticalScrollBarEnabled(true);
         mDragListView.setLayoutManager(new LinearLayoutManager(getContext()));
         ArrayList<Pair<Long, String>> listToSend = new ArrayList<>();
@@ -78,6 +88,29 @@ public class DragListViewFragment extends Fragment {
         mDragListView.setAdapter(mItemAdapter, true);
         mDragListView.setCanDragHorizontally(false);
         mDragListView.setCustomDragItem(new MyDragItem(getContext(), R.layout.drag_row));
+    }
+
+    public boolean checkIfCorrect() {
+        List<Pair<Long, String>> adapterList = mItemAdapter.getItemList();
+        List<String> cSharpCode = new ArrayList<>();
+        for (Pair<Long, String> cSharpLine : adapterList) {
+            cSharpCode.add(cSharpLine.second);
+        }
+        JavaInterpreter javaInterpreter = new JavaInterpreter();
+        List compiledAnswer = javaInterpreter.compileCSharpCode(cSharpCode);
+        if (compiledAnswer == null) {
+            return false;
+        }
+        for (int x = 0; x < compiledAnswer.size(); x++) {
+            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(mExpectedAnswer.get(x)))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void assignViews(View view) {
+        mDragListView = (DragListView) view.findViewById(R.id.dragListView);
     }
 
     public void toggleTouch() {
@@ -94,29 +127,6 @@ public class DragListViewFragment extends Fragment {
             mDragListView.setFocusable(true);
             mDragListView.setFocusableInTouchMode(true);
         }
-    }
-
-    public boolean checkIfCorrect() {
-        List<Pair<Long, String>> adapterList = mItemAdapter.getItemList();
-        List<String> cSharpCode = new ArrayList<>();
-        for (Pair<Long, String> cSharpLine : adapterList) {
-            cSharpCode.add(cSharpLine.second);
-        }
-        JavaInterpreter javaInterpreter = new JavaInterpreter();
-        List compiledAnswer = javaInterpreter.compileCSharpCode(cSharpCode);
-        if (compiledAnswer == null) {
-            return false;
-        }
-        List<String> puzzleAnswer = mCurrentPuzzle.getPuzzleAnswers();
-        if (puzzleAnswer == null) {
-            return false;
-        }
-        for (int x = 0; x < compiledAnswer.size(); x++) {
-            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(puzzleAnswer.get(x)))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private static class MyDragItem extends DragItem {

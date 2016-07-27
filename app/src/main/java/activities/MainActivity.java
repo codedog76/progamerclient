@@ -26,6 +26,7 @@ import bsh.EvalError;
 import fragments.LeaderboardFragment;
 import fragments.LevelsFragment;
 import fragments.NavigationDrawerFragment;
+import other.PuzzleGenerator;
 import services.SyncService;
 import singletons.DatabaseHandlerSingleton;
 import singletons.NetworkManagerSingleton;
