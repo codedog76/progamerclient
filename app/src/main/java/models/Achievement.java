@@ -1,46 +1,54 @@
 package models;
 
 public class Achievement {
-    private String achievementTitle, achievementDescription;
-    int achievementTotal;
-    int achievementProgress;
 
-    public Achievement(String achievementTitle, String achievementDescription, int achievementTotal, int achievementProgress) {
-        this.achievementTitle = achievementTitle;
-        this.achievementDescription = achievementDescription;
-        this.achievementTotal = achievementTotal;
-        this.achievementProgress = achievementProgress;
+    private int achievement_id; //PK
+    private int achievement_database_id;
+    private String achievement_title;
+    private String achievement_description;
+    private int achievement_total;
+
+    public Achievement() {
+
     }
 
-    public int getAchievementProgress() {
-        return achievementProgress;
+    public int getAchievement_id() {
+        return achievement_id;
     }
 
-    public void setAchievementProgress(int achievementProgress) {
-        this.achievementProgress = achievementProgress;
+    public void setAchievement_id(int achievement_id) {
+        this.achievement_id = achievement_id;
     }
 
-    public String getAchievementTitle() {
-        return achievementTitle;
+    public int getAchievement_database_id() {
+        return achievement_database_id;
     }
 
-    public void setAchievementTitle(String achievementTitle) {
-        this.achievementTitle = achievementTitle;
+    public void setAchievement_database_id(int achievement_database_id) {
+        this.achievement_database_id = achievement_database_id;
     }
 
-    public String getAchievementDescription() {
-        return achievementDescription;
+    public String getAchievement_title() {
+        return achievement_title;
     }
 
-    public void setAchievementDescription(String achievementDescription) {
-        this.achievementDescription = achievementDescription;
+    public void setAchievement_title(String achievement_title) {
+        this.achievement_title = achievement_title;
     }
 
-    public int getAchievementTotal() {
-        return achievementTotal;
+    public String getAchievement_description() {
+        return achievement_description;
     }
 
-    public void setAchievementTotal(int achievementTotal) {
-        this.achievementTotal = achievementTotal;
+    public void setAchievement_description(String achievement_description) {
+        this.achievement_description = achievement_description;
+    }
+
+    public int getAchievement_total() {
+        return achievement_total;
+    }
+
+    public void setAchievement_total(int achievement_total) {
+        this.achievement_total = achievement_total;
     }
 }

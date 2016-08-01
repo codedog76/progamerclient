@@ -62,7 +62,11 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
         holder.levelRowLevelNumber.setText("Level " + current_level.getLevel_number());
         holder.levelRowLevelName.setText(current_level.getLevel_title());
         holder.levelRowNumericProgressTextView.setText(current_level.getLevel_puzzles_completed() + "/" + current_level.getLevel_puzzles_count());
-
+        if (current_level.getLevel_score() != 0) {
+            holder.levelRowScore.setText(String.valueOf(current_level.getLevel_score()));
+            holder.levelRowScore.setVisibility(View.VISIBLE);
+        } else
+            holder.levelRowScore.setVisibility(View.GONE);
         String levelTrophy = current_level.getLevel_trophy();
         int id = context.getResources().getIdentifier(levelTrophy, "drawable", context.getPackageName());
         Drawable drawable = ContextCompat.getDrawable(context, id);
@@ -77,7 +81,7 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
         Typeface Roboto_Medium = Typeface.createFromAsset(context.getAssets(), "Roboto-Medium.ttf");
         holder.levelRowLevelNumber.setTypeface(Roboto_Regular);
         holder.levelRowLevelName.setTypeface(Roboto_Regular);
-        if (position == 0 || (levelList.get(position - 1).getLevel_completed()==1)) {
+        if (position == 0 || (levelList.get(position - 1).getLevel_completed() == 1)) {
             holder.selectableLayout.setFocusable(true);
             holder.selectableLayout.setClickable(true);
             holder.levelRowLevelNumber.setAlpha(0.85f);
@@ -108,7 +112,7 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private TextView levelRowLevelNumber, levelRowLevelName, levelRowNumericProgressTextView;
+        private TextView levelRowLevelNumber, levelRowLevelName, levelRowNumericProgressTextView, levelRowScore;
         private ImageView levelRowBadgeImageView;
         private ProgressBar levelRowProgressBar;
         private LinearLayout selectableLayout;
@@ -120,6 +124,7 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
             levelRowLevelNumber = (TextView) itemView.findViewById(R.id.levelRowLevelNumber);
             levelRowLevelName = (TextView) itemView.findViewById(R.id.levelRowLevelName);
             levelRowNumericProgressTextView = (TextView) itemView.findViewById(R.id.levelRowNumericProgressTextView);
+            levelRowScore = (TextView) itemView.findViewById(R.id.levelRowScore);
             levelRowBadgeImageView = (ImageView) itemView.findViewById(R.id.levelRowBadgeImageView);
             levelRowProgressBar = (ProgressBar) itemView.findViewById(R.id.levelRowProgressBar);
             levelRowDivider = itemView.findViewById(R.id.levelRowDivider);

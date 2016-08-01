@@ -6,9 +6,11 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import database.DatabaseHandler;
+import models.Achievement;
 import models.Level;
 import models.Puzzle;
 import models.User;
+import models.UserAchievement;
 
 public class DatabaseHandlerSingleton {
 
@@ -46,23 +48,32 @@ public class DatabaseHandlerSingleton {
     }
 
     public long insertPuzzle(Puzzle current_puzzle) {
-        Log.e("asd",current_puzzle.getPuzzle_level_id() +" "+ current_puzzle.getPuzzle_answer());
         if (current_puzzle != null) {
-            return getDatabaseHandler().insertOrUpdatePuzzle(current_puzzle);
+            return getDatabaseHandler().insertPuzzle(current_puzzle);
         }
         return -1;
     }
 
-    public int getUserOverallScore() {
-        return getDatabaseHandler().getLoggedInUserOverallScore(getLoggedUser());
+    public long insertAchievement(Achievement current_achievement) {
+        if (current_achievement != null) {
+            return getDatabaseHandler().insertAchievement(current_achievement);
+        }
+        return -1;
     }
 
-    public int getUserOverallAttempts() {
-        return getDatabaseHandler().getLoggedInUserOverallAttempts(getLoggedUser());
+    public long insertUserAchievement(UserAchievement current_userachievement) {
+        if (current_userachievement != null) {
+            return getDatabaseHandler().insertUserAchievement(current_userachievement);
+        }
+        return -1;
     }
 
-    public int getUserOverallTime() {
-        return getDatabaseHandler().getLoggedInUserOverallTime(getLoggedUser());
+    public boolean checkHasAchievements() {
+        return mDatabaseHandler.checkHasAchievements();
+    }
+
+    public boolean checkHasLoggedUserAchievements() {
+        return mDatabaseHandler.checkHasLoggedUserAchievements();
     }
 
     public boolean loginUser(String user_student_number) {
@@ -70,7 +81,7 @@ public class DatabaseHandlerSingleton {
     }
 
     public String getLoggedUserStudentNumber() {
-        if(user_student_number == null) {
+        if (user_student_number == null) {
             user_student_number = getLoggedUser().getUser_student_number_id();
         }
         return user_student_number;
@@ -104,12 +115,16 @@ public class DatabaseHandlerSingleton {
         return getDatabaseHandler().getLevels(getLoggedUser());
     }
 
+    public ArrayList<UserAchievement> getLoggedUserAchievements() {
+        return getDatabaseHandler().getLoggedUserAchievements(getLoggedUser());
+    }
+
     public Puzzle getNextPuzzle(Level current_level) {
         return getDatabaseHandler().getNextPuzzle(current_level);
     }
 
     public int updatePuzzleData(Puzzle current_puzzle) {
-        if(current_puzzle!=null) {
+        if (current_puzzle != null) {
             return getDatabaseHandler().updatePuzzleData(current_puzzle);
         }
         return -1;
@@ -120,7 +135,7 @@ public class DatabaseHandlerSingleton {
     }
 
     public int updateLevelData(Level current_level) {
-        if(current_level!=null) {
+        if (current_level != null) {
             return getDatabaseHandler().updateLevelData(current_level);
         }
         return -1;

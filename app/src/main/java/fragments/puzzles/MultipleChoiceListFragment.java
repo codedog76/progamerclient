@@ -1,10 +1,11 @@
 package fragments.puzzles;
 
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.Pair;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,20 +20,17 @@ import java.util.List;
 
 import activities.PuzzleActivity;
 import models.Level;
-import other.JavaInterpreter;
-import models.Puzzle;
-import other.PuzzleGenerator;
+import puzzle.JavaInterpreter;
+import puzzle.PuzzleCodeBuilder;
 
 public class MultipleChoiceListFragment extends Fragment {
 
     private String mClassName = getClass().toString();
-    private ListView multipleSelectionListView;
+    private ListView mMultipleSelectionListView;
     private ArrayAdapter<String> mArrayAdapter;
-    private PuzzleGenerator mPuzzleGenerator;
-    private List<String> mExpectedAnswer;
     private PuzzleActivity mParentPuzzleActivity;
-    private Level mCurrentLevel;
-    private List<String> mPuzzleData;
+    private PuzzleCodeBuilder mCurrentPuzzleCodeBuilder;
+    private List<Pair<String, String>> mCodePairList;
 
     public MultipleChoiceListFragment() {
         // Required empty public constructor
@@ -51,80 +49,78 @@ public class MultipleChoiceListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         assignViews(view);
         mParentPuzzleActivity = (PuzzleActivity) getActivity();
-        mCurrentLevel = mParentPuzzleActivity.getCurrentLevel();
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                loadData();
-                setupMultiChoiceListView();
-            }
-        });
+        mCurrentPuzzleCodeBuilder = mParentPuzzleActivity.getCurrentPuzzleCodeBuilder();
+        loadData();
     }
 
     private void loadData() {
-        mPuzzleGenerator.generatePuzzle(mCurrentLevel.getLevel_title());
-        mExpectedAnswer = mPuzzleGenerator.getExpectedAnswer();
-        mParentPuzzleActivity.setExpectedOutput(mExpectedAnswer);
-        mPuzzleData = mPuzzleGenerator.getFinalCodeList();
+        mCodePairList = mCurrentPuzzleCodeBuilder.getCSharpCodeToDisplayPuzzle();
+        if (mCodePairList != null && mCodePairList.size() > 0) {
+            List<String> toDisplayList = new ArrayList<>();
+            for (Pair<String, String> pair : mCodePairList) {
+                if (pair.first != null && !pair.first.equals(""))
+                    toDisplayList.add(pair.first);
+            }
+            mArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.multiple_choice_row, toDisplayList);
+            mMultipleSelectionListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+            mMultipleSelectionListView.setAdapter(mArrayAdapter);
+        } else {
+            mParentPuzzleActivity.finish();
+        }
     }
 
-    private void setupMultiChoiceListView() {
-        mArrayAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_multiple_choice, mPuzzleData);
-        multipleSelectionListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        multipleSelectionListView.setAdapter(mArrayAdapter);
-    }
-
-    public boolean checkIfCorrect() {
-        List<String> cSharpCode = new ArrayList<>();
-        SparseBooleanArray checked = multipleSelectionListView.getCheckedItemPositions();
+    public Boolean checkIfCorrect() {
+        List<String> codeToRun = new ArrayList<>();
+        List<String> checkedItems = new ArrayList<>();
+        SparseBooleanArray checked = mMultipleSelectionListView.getCheckedItemPositions();
         for (int i = 0; i < checked.size(); i++) {
             if (checked.valueAt(i)) {
-                String tag = multipleSelectionListView.getItemAtPosition(checked.keyAt(i)).toString();
-                cSharpCode.add(tag);
+                checkedItems.add(mMultipleSelectionListView.getItemAtPosition(checked.keyAt(i)).toString());
+            }
+        }
+        if (mCurrentPuzzleCodeBuilder.getProcessCodeSelected()) {
+            for (Pair<String, String> pair : mCodePairList) {
+                if (pair.first.equals(""))
+                    codeToRun.add(pair.second);
+                else {
+                    if (checkIfChecked(pair.first, checkedItems)) {
+                        codeToRun.add(pair.second);
+                    }
+                }
+            }
+        } else {
+            for (Pair<String, String> pair : mCodePairList) {
+                if (pair.first.equals(""))
+                    codeToRun.add(pair.second);
+                else if (!checkIfChecked(pair.first, checkedItems)) {
+                    codeToRun.add(pair.second);
+                }
             }
         }
         JavaInterpreter javaInterpreter = new JavaInterpreter();
-        List compiledAnswer = javaInterpreter.compileCSharpCode(cSharpCode);
-        if (compiledAnswer == null) {
+        List<Object> compiledAnswer = javaInterpreter.compileCSharpCode(codeToRun);
+        if (compiledAnswer == null || compiledAnswer.size() == 0) {
             return false;
         }
+        List<Object> expectedAnswer = mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer();
         for (int x = 0; x < compiledAnswer.size(); x++) {
-            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(mExpectedAnswer.get(x)))) {
+            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(expectedAnswer.get(x)))) {
                 return false;
             }
         }
         return true;
     }
 
-    private ArrayList<String> getCheckList() {
-        ArrayList<String> outgoing_list = new ArrayList<>();
-        SparseBooleanArray checked = multipleSelectionListView.getCheckedItemPositions();
-        for (int i = 0; i < checked.size(); i++) {
-            if (checked.valueAt(i)) {
-                String tag = multipleSelectionListView.getItemAtPosition(checked.keyAt(i)).toString();
-                outgoing_list.add(tag);
+    private boolean checkIfChecked(String first, List<String> checkedItems) {
+        for (String checkedItem : checkedItems) {
+            if (first.equals(checkedItem)) {
+                return true;
             }
         }
-        return outgoing_list;
-    }
-
-    public void toggleTouch() {
-        if (multipleSelectionListView.isEnabled()) {
-            multipleSelectionListView.setEnabled(false);
-            multipleSelectionListView.setClickable(false);
-            multipleSelectionListView.setFocusable(false);
-            multipleSelectionListView.setFocusableInTouchMode(false);
-        } else {
-            multipleSelectionListView.setEnabled(true);
-            multipleSelectionListView.setClickable(true);
-            multipleSelectionListView.setFocusable(true);
-            multipleSelectionListView.setFocusableInTouchMode(true);
-        }
-
+        return false;
     }
 
     private void assignViews(View view) {
-        multipleSelectionListView = (ListView) view.findViewById(R.id.multipleSelectionListView);
+        mMultipleSelectionListView = (ListView) view.findViewById(R.id.multipleSelectionListView);
     }
-
 }

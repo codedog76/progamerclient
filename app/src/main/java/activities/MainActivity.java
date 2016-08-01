@@ -18,19 +18,17 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.progamer.R;
 
-import bsh.EvalError;
+import java.util.List;
+
 import fragments.LeaderboardFragment;
 import fragments.LevelsFragment;
 import fragments.NavigationDrawerFragment;
-import other.PuzzleGenerator;
-import services.SyncService;
+import puzzle.PuzzleCodeBuilder;
 import singletons.DatabaseHandlerSingleton;
 import singletons.NetworkManagerSingleton;
-import bsh.Interpreter;
 
 public class MainActivity extends AppCompatActivity implements NavigationDrawerFragment.drawerListener {
 
@@ -57,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         assignNavigationDrawer();
         assignListeners();
         loadLevelsFragment();
-        startService(new Intent(this, SyncService.class));
+        //startService(new Intent(this, SyncService.class));
         assignProgressDialog();
     }
 

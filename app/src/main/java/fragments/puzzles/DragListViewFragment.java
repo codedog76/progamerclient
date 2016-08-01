@@ -2,7 +2,6 @@ package fragments.puzzles;
 
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,6 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.progamer.R;
@@ -25,20 +26,17 @@ import java.util.List;
 import activities.PuzzleActivity;
 import adapters.ItemAdapter;
 import models.Level;
-import other.JavaInterpreter;
-import models.Puzzle;
-import other.PuzzleGenerator;
+import puzzle.JavaInterpreter;
+import puzzle.PuzzleCodeBuilder;
 
 public class DragListViewFragment extends Fragment {
 
     private String mClassName = getClass().toString();
     private DragListView mDragListView;
     private ItemAdapter mItemAdapter;
-    private PuzzleGenerator mPuzzleGenerator;
-    private List<String> mExpectedAnswer;
     private PuzzleActivity mParentPuzzleActivity;
-    private Level mCurrentLevel;
-    private List<String> mPuzzleData;
+    private PuzzleCodeBuilder mCurrentPuzzleCodeBuilder;
+    private List<Pair<String, String>> mCodePairList;
 
     public DragListViewFragment() {
         // Required empty public constructor
@@ -56,53 +54,50 @@ public class DragListViewFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         assignViews(view);
         mParentPuzzleActivity = (PuzzleActivity) getActivity();
-        mCurrentLevel = mParentPuzzleActivity.getCurrentLevel();
-        mPuzzleGenerator = new PuzzleGenerator();
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                loadData();
-                setupDragListView();
-            }
-        });
+        mCurrentPuzzleCodeBuilder = mParentPuzzleActivity.getCurrentPuzzleCodeBuilder();
+        loadData();
     }
 
     private void loadData() {
-        mPuzzleGenerator.generatePuzzle(mCurrentLevel.getLevel_title());
-        mExpectedAnswer = mPuzzleGenerator.getExpectedAnswer();
-        mParentPuzzleActivity.setExpectedOutput(mExpectedAnswer);
-        mPuzzleData = mPuzzleGenerator.getFinalCodeList();
-    }
-
-    private void setupDragListView() {
-        ArrayList<Pair<Long, String>> mItemArray = new ArrayList<>();
-        for (int i = 0; i < mPuzzleData.size(); i++) {
-            mItemArray.add(new Pair<>((long) i, mPuzzleData.get(i)));
+        mCodePairList = mCurrentPuzzleCodeBuilder.getCSharpCodeToDisplayPuzzle();
+        if (mCodePairList != null && mCodePairList.size() > 0) {
+            List<String> toDisplayList = new ArrayList<>();
+            for (Pair<String, String> pair : mCodePairList) {
+                if (pair.first != null && !pair.first.equals(""))
+                    toDisplayList.add(pair.first);
+            }
+            ArrayList<Pair<Long, String>> mItemArray = new ArrayList<>();
+            for (int i = 0; i < toDisplayList.size(); i++) {
+                mItemArray.add(new Pair<>((long) i, toDisplayList.get(i)));
+            }
+            mDragListView.getRecyclerView().setVerticalScrollBarEnabled(true);
+            mDragListView.setLayoutManager(new LinearLayoutManager(getContext()));
+            ArrayList<Pair<Long, String>> listToSend = new ArrayList<>();
+            listToSend.addAll(mItemArray);
+            Collections.shuffle(listToSend);
+            mItemAdapter = new ItemAdapter(listToSend, R.layout.drag_row, R.id.text, false, getContext());
+            mDragListView.setAdapter(mItemAdapter, true);
+            mDragListView.setCanDragHorizontally(false);
+            mDragListView.setCustomDragItem(new MyDragItem(getContext(), R.layout.drag_row));
+        } else {
+            mParentPuzzleActivity.finish();
         }
-        mDragListView.getRecyclerView().setVerticalScrollBarEnabled(true);
-        mDragListView.setLayoutManager(new LinearLayoutManager(getContext()));
-        ArrayList<Pair<Long, String>> listToSend = new ArrayList<>();
-        listToSend.addAll(mItemArray);
-        Collections.shuffle(listToSend);
-        mItemAdapter = new ItemAdapter(listToSend, R.layout.drag_row, R.id.text, false, getContext());
-        mDragListView.setAdapter(mItemAdapter, true);
-        mDragListView.setCanDragHorizontally(false);
-        mDragListView.setCustomDragItem(new MyDragItem(getContext(), R.layout.drag_row));
     }
 
-    public boolean checkIfCorrect() {
+    public Boolean checkIfCorrect() {
         List<Pair<Long, String>> adapterList = mItemAdapter.getItemList();
-        List<String> cSharpCode = new ArrayList<>();
+        List<String> codeToRun = new ArrayList<>();
         for (Pair<Long, String> cSharpLine : adapterList) {
-            cSharpCode.add(cSharpLine.second);
+            codeToRun.add(cSharpLine.second); //todo: find all in correct list
         }
         JavaInterpreter javaInterpreter = new JavaInterpreter();
-        List compiledAnswer = javaInterpreter.compileCSharpCode(cSharpCode);
-        if (compiledAnswer == null) {
+        List<Object> compiledAnswer = javaInterpreter.compileCSharpCode(codeToRun);
+        if (compiledAnswer == null || compiledAnswer.size() == 0) {
             return false;
         }
+        List<Object> expectedAnswer = mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer();
         for (int x = 0; x < compiledAnswer.size(); x++) {
-            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(mExpectedAnswer.get(x)))) {
+            if (!String.valueOf(compiledAnswer.get(x)).equals(String.valueOf(expectedAnswer.get(x)))) {
                 return false;
             }
         }
@@ -111,22 +106,6 @@ public class DragListViewFragment extends Fragment {
 
     private void assignViews(View view) {
         mDragListView = (DragListView) view.findViewById(R.id.dragListView);
-    }
-
-    public void toggleTouch() {
-        if (mDragListView.isDragEnabled()) {
-            mDragListView.setEnabled(false);
-            mDragListView.setDragEnabled(false);
-            mDragListView.setClickable(false);
-            mDragListView.setFocusable(false);
-            mDragListView.setFocusableInTouchMode(false);
-        } else {
-            mDragListView.setEnabled(true);
-            mDragListView.setDragEnabled(true);
-            mDragListView.setClickable(true);
-            mDragListView.setFocusable(true);
-            mDragListView.setFocusableInTouchMode(true);
-        }
     }
 
     private static class MyDragItem extends DragItem {

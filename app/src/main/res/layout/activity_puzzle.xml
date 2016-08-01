@@ -46,11 +46,10 @@
 
                     <TextView
                         android:id="@+id/puzzleExpectedOutputText"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
                         android:ellipsize="none"
-                        android:gravity="center"
+                        android:layout_gravity="center"
                         android:maxLines="100"
                         android:scrollHorizontally="false"
                         android:text="PLACEHOLDER" />

@@ -1,5 +1,6 @@
 package activities;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -41,11 +42,13 @@ public class LevelActivity extends AppCompatActivity {
     private Button levelContinueButton;
     private String mClassName = getClass().toString();
     private int level_id;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_level);
+        assignProgressDialog();
         assignViews();
         assignFonts();
         assignSingletons();
@@ -53,6 +56,13 @@ public class LevelActivity extends AppCompatActivity {
         assignActionBar();
         getBundle();
         loadData();
+    }
+
+    private void assignProgressDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading..");
+        progressDialog.setCancelable(false);
+        progressDialog.setCanceledOnTouchOutside(false);
     }
 
     private void assignFonts() {
@@ -67,6 +77,12 @@ public class LevelActivity extends AppCompatActivity {
         levelContinueButton.setTypeface(Roboto_Medium);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        progressDialog.dismiss();
+    }
+
     private void loadData() {
         getSupportActionBar().setTitle("Level " + mCurrentLevel.getLevel_number());
         activityLevelTitleTextView.setText(mCurrentLevel.getLevel_title());
@@ -74,14 +90,35 @@ public class LevelActivity extends AppCompatActivity {
         currentUserScore.setText(String.valueOf(mCurrentLevel.getLevel_score()));
         currentUserAttempts.setText(String.valueOf(mCurrentLevel.getLevel_attempts()));
         currentUserTime.setText(String.valueOf(mCurrentLevel.getLevel_time()));
+        if (mCurrentLevel.getLevel_puzzles_completed() == 0) {
+            if (mCurrentLevel.getPuzzles_completed()) {
+                levelContinueButton.setText("Try Again");
+            } else {
+                levelContinueButton.setText("Start");
+            }
+        } else {
+            levelContinueButton.setText("Continue");
+        }
     }
 
     private void assignListeners() {
-        levelContinueButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCurrentLevel.getPuzzles_completed()) {
-                    showLogoutDialog();
+                levelContinueButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                if(mCurrentLevel.getPuzzles_completed()) {
+                    progressDialog.show();
+                    mNetworkManagerSingleton.downloadPuzzlesJSONRequest(mCurrentLevel, new NetworkManagerSingleton.BooleanResponseListener() {
+                        @Override
+                        public void getResult(Boolean response, String message) {
+                            progressDialog.dismiss();
+                            Intent intent = new Intent(getApplicationContext(), PuzzleActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("level_id", mCurrentLevel.getLevel_id());
+                            intent.putExtras(bundle);
+                            startActivity(intent);
+                        }
+                    });
                 } else {
                     Intent intent = new Intent(getApplicationContext(), PuzzleActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -92,32 +129,6 @@ public class LevelActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private void showLogoutDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Puzzles completed")
-                .setMessage("New puzzles will be downloaded. Do you wish to continue?")
-                //.setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        mNetworkManagerSingleton.downloadPuzzlesJSONRequest(mCurrentLevel, new NetworkManagerSingleton.BooleanResponseListener() {
-                            @Override
-                            public void getResult(Boolean response, String message) {
-                                if (response) {
-                                    Intent intent = new Intent(getApplicationContext(), PuzzleActivity.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                    Bundle bundle = new Bundle();
-                                    bundle.putInt("level_id", mCurrentLevel.getLevel_id());
-                                    intent.putExtras(bundle);
-                                    startActivity(intent);
-                                }
-                            }
-                        });
-                    }
-                })
-                .setNegativeButton("No", null).show();
     }
 
     private void assignSingletons() {

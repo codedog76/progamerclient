@@ -1,5 +1,6 @@
 package activities;
 
+import android.app.ProgressDialog;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,11 +22,15 @@ import android.widget.TextView;
 import com.example.progamer.R;
 
 import java.util.List;
+import java.util.Random;
 
 import fragments.puzzles.DragListViewFragment;
 import fragments.puzzles.MultipleChoiceListFragment;
+import fragments.puzzles.SingleChoiceListFragment;
+import fragments.puzzles.TrueFalseFragment;
 import models.Level;
 import models.Puzzle;
+import puzzle.PuzzleCodeBuilder;
 import singletons.DatabaseHandlerSingleton;
 
 
@@ -41,17 +46,16 @@ public class PuzzleActivity extends AppCompatActivity {
     private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
     private Puzzle mCurrentPuzzle;
     private Level mCurrentLevel;
-    private int level_id;
     private String mClassName = getClass().toString();
-    private int mTimerSeconds;
-    private int mTimerResumeTime;
-    private int mAttemptsCount;
-    private DragListViewFragment mDragListViewFragment;
-    private MultipleChoiceListFragment mMultipleChoiceListFragment;
-    private Animation bottomUp;
-    private Animation bottomDown;
+    private int mTimerSeconds, mTimerResumeTime, mAttemptsCount, level_id;
+    private Animation bottomUp, bottomDown;
     private boolean mCorrectAnswer;
     private String mCurrentFragment;
+    private PuzzleCodeBuilder mCurrentPuzzleCodeBuilder;
+    private DragListViewFragment mDragListViewFragment;
+    private MultipleChoiceListFragment mMultipleChoiceListFragment;
+    private SingleChoiceListFragment mSingleChoiceListFragment;
+    private TrueFalseFragment mTrueFalseFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,19 +85,22 @@ public class PuzzleActivity extends AppCompatActivity {
     private void reloadData() {
         if (mCurrentLevel != null) {
             mCurrentPuzzle = mDatabaseHandlerSingleton.getNextPuzzle(mCurrentLevel);
-            getSupportActionBar().setTitle("Puzzle " + (mCurrentLevel.getLevel_puzzles_completed() + 1) + "/" + mCurrentLevel.getLevel_puzzles_count());
             puzzleInstructionsText.setText(mCurrentPuzzle.getPuzzle_instructions());
+            getSupportActionBar().setTitle("Puzzle " + (mCurrentLevel.getLevel_puzzles_completed() + 1) + "/" + mCurrentLevel.getLevel_puzzles_count());
             mTimerResumeTime = mCurrentPuzzle.getPuzzle_time();
             mAttemptsCount = mCurrentPuzzle.getPuzzle_attempts();
-            if (mAttemptsCount == 0)
-                mAttemptsCount++;
+            mAttemptsCount++;
             puzzleAttemptsText.setText("Attempts: " + String.valueOf(mAttemptsCount));
-            if (mCurrentPuzzle.getPuzzle_type().equals("drag_list")) {
-                loadDragListViewFragment();
+            mCurrentPuzzleCodeBuilder = new PuzzleCodeBuilder();
+            mCurrentPuzzleCodeBuilder.processCSharpCode(mCurrentPuzzle.getPuzzle_data());
+            String expectedOutput = mCurrentPuzzleCodeBuilder.getCSharpCodeToDisplayExpectedOutput();
+            if (!expectedOutput.equals("")) {
+                puzzleExpectedOutputText.setText(expectedOutput);
+                puzzleExpectedOutputText.setVisibility(View.VISIBLE);
+            } else {
+                puzzleExpectedOutputText.setVisibility(View.GONE);
             }
-            if (mCurrentPuzzle.getPuzzle_type().equals("multiple_list")) {
-                loadMultipleChoiceListFragment();
-            }
+            loadPuzzle();
             startTime = System.currentTimeMillis();
             timerHandler.postDelayed(timerRunnable, 0);
         } else {
@@ -102,21 +109,38 @@ public class PuzzleActivity extends AppCompatActivity {
         }
     }
 
-    public void setExpectedOutput(List<String> expectedOutput) {
-        String expected_output = "";
-        for(String output:expectedOutput) {
-            expected_output = expected_output + output;
+    private void loadPuzzle() {
+        String fragmentToLoad = mCurrentPuzzleCodeBuilder.getPuzzleFragmentType();
+        switch (fragmentToLoad) {
+            case "<single>":
+                loadSingleChoiceListFragment();
+                break;
+            case "<multiple>":
+                loadMultipleChoiceListFragment();
+                break;
+            case "<rearrange>":
+                loadDragListViewFragment();
+                break;
+            case "<truefalse>":
+                loadTrueFalseFragment();
+                break;
+            default:
+                finish();
+                break;
         }
-        puzzleExpectedOutputText.setText(expected_output);
+    }
+
+    public PuzzleCodeBuilder getCurrentPuzzleCodeBuilder() {
+        return mCurrentPuzzleCodeBuilder;
     }
 
     private void assignListeners() {
         puzzleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toggleFragmentTouch();
                 if (puzzleButton.getText().toString().equals("Check")) {
                     if (checkFragmentAnswers()) {
+                        mCorrectAnswer = true;
                         mCorrectAnswer = true;
                         savePuzzleData();
                         showCorrectPopup();
@@ -134,7 +158,7 @@ public class PuzzleActivity extends AppCompatActivity {
         });
     }
 
-    private boolean checkFragmentAnswers() {
+    private Boolean checkFragmentAnswers() {
         if (mDragListViewFragment != null && mCurrentFragment.equals(mDragListViewFragment.getClass().toString())) {
             mDragListViewFragment = (DragListViewFragment) getSupportFragmentManager().findFragmentByTag(mCurrentFragment);
             return mDragListViewFragment.checkIfCorrect();
@@ -143,18 +167,15 @@ public class PuzzleActivity extends AppCompatActivity {
             mMultipleChoiceListFragment = (MultipleChoiceListFragment) getSupportFragmentManager().findFragmentByTag(mCurrentFragment);
             return mMultipleChoiceListFragment.checkIfCorrect();
         }
+        if (mSingleChoiceListFragment != null && mCurrentFragment.equals(mSingleChoiceListFragment.getClass().toString())) {
+            mSingleChoiceListFragment = (SingleChoiceListFragment) getSupportFragmentManager().findFragmentByTag(mCurrentFragment);
+            return mSingleChoiceListFragment.checkIfCorrect();
+        }
+        if (mTrueFalseFragment != null && mCurrentFragment.equals(mTrueFalseFragment.getClass().toString())) {
+            mTrueFalseFragment = (TrueFalseFragment) getSupportFragmentManager().findFragmentByTag(mCurrentFragment);
+            return mTrueFalseFragment.checkIfCorrect();
+        }
         return false;
-    }
-
-    private void toggleFragmentTouch() {
-        if (mDragListViewFragment != null && mCurrentFragment.equals(mDragListViewFragment.getClass().toString())) {
-            mDragListViewFragment = (DragListViewFragment) getSupportFragmentManager().findFragmentByTag(mCurrentFragment);
-            mDragListViewFragment.toggleTouch();
-        }
-        if (mMultipleChoiceListFragment != null && mCurrentFragment.equals(mMultipleChoiceListFragment.getClass().toString())) {
-            mMultipleChoiceListFragment = (MultipleChoiceListFragment) getSupportFragmentManager().findFragmentByTag(mCurrentFragment);
-            mMultipleChoiceListFragment.toggleTouch();
-        }
     }
 
     private void hidePopup() {
@@ -192,14 +213,6 @@ public class PuzzleActivity extends AppCompatActivity {
         mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
     }
 
-    public Puzzle getCurrentPuzzle() {
-        return mCurrentPuzzle;
-    }
-
-    public Level getCurrentLevel() {
-        return mCurrentLevel;
-    }
-
     private void getBundle() {
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -235,6 +248,18 @@ public class PuzzleActivity extends AppCompatActivity {
         mMultipleChoiceListFragment = new MultipleChoiceListFragment();
         replaceFragment(mMultipleChoiceListFragment);
         mCurrentFragment = mMultipleChoiceListFragment.getClass().toString();
+    }
+
+    private void loadSingleChoiceListFragment() {
+        mSingleChoiceListFragment = new SingleChoiceListFragment();
+        replaceFragment(mSingleChoiceListFragment);
+        mCurrentFragment = mSingleChoiceListFragment.getClass().toString();
+    }
+
+    private void loadTrueFalseFragment() {
+        mTrueFalseFragment = new TrueFalseFragment();
+        replaceFragment(mTrueFalseFragment);
+        mCurrentFragment = mTrueFalseFragment.getClass().toString();
     }
 
     private void replaceFragment(Fragment fragment) {

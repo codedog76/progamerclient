@@ -18,19 +18,20 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import models.Achievement;
+import models.UserAchievement;
 
 public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.ViewHolder> {
 
     private Context context;
     private LayoutInflater layoutInflater;
-    private List<Achievement> achievementList = Collections.emptyList();
+    private List<UserAchievement> achievementList = Collections.emptyList();
 
     public AchievementAdapter(Context context) {
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
     }
 
-    public void setAchievementList(ArrayList<Achievement> achievementList) {
+    public void setAchievementList(ArrayList<UserAchievement> achievementList) {
         this.achievementList = achievementList;
         notifyDataSetChanged();
     }
@@ -48,7 +49,9 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Achievement achievement = achievementList.get(position);
+        UserAchievement achievement = achievementList.get(position);
+        holder.achievementRowTitleTextView.setText(achievement.getAchievement_title());
+        holder.achievementRowDescriptionTextView.setText(achievement.getAchievement_description());
     }
 
     @Override

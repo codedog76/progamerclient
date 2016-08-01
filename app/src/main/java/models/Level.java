@@ -89,7 +89,7 @@ public class Level implements Serializable {
     }
 
     public boolean getPuzzles_completed() {
-        return level_puzzles_completed == level_puzzles_count && level_puzzles_count != 0;
+        return level_puzzles_completed == level_puzzles_count;
     }
 
     public int getLevel_score() {

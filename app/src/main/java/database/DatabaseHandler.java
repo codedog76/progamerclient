@@ -9,9 +9,11 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import models.Achievement;
 import models.Level;
 import models.Puzzle;
 import models.User;
+import models.UserAchievement;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
@@ -76,11 +78,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String PUZZLE_ID = "puzzle_id"; //pk
     private static final String PUZZLE_LEVEL_ID = "puzzle_level_id"; //fk
     private static final String PUZZLE_DATABASE_ID = "puzzle_database_id";
-    private static final String PUZZLE_TYPE = "puzzle_type";
     private static final String PUZZLE_INSTRUCTIONS = "puzzle_instructions";
-    private static final String PUZZLE_EXPECTED_OUTPUT = "puzzle_expected_output";
     private static final String PUZZLE_DATA = "puzzle_data";
-    private static final String PUZZLE_ANSWER = "puzzle_answer";
     private static final String PUZZLE_COMPLETED = "puzzle_completed";
     private static final String PUZZLE_ATTEMPTS = "puzzle_attempts";
     private static final String PUZZLE_TIME = "puzzle_time";
@@ -90,15 +89,50 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + PUZZLE_ID + " integer not null primary key AUTOINCREMENT, "
             + PUZZLE_LEVEL_ID + " integer not null, "
             + PUZZLE_DATABASE_ID + " integer not null, "
-            + PUZZLE_TYPE + " text not null, "
             + PUZZLE_INSTRUCTIONS + " text not null, "
-            + PUZZLE_EXPECTED_OUTPUT + " text not null, "
             + PUZZLE_DATA + " text not null, "
-            + PUZZLE_ANSWER + " text not null, "
             + PUZZLE_COMPLETED + " integer not null, "
             + PUZZLE_ATTEMPTS + " integer not null, "
             + PUZZLE_TIME + " integer not null, "
             + "foreign key (" + PUZZLE_LEVEL_ID + ") references " + LEVEL_TABLE + "(" + LEVEL_ID + ")"
+            + ");";
+
+    //table achievement
+    private static final String ACHIEVEMENT_TABLE = "achievement";
+    private static final String ACHIEVEMENT_ID = "achievement_id"; //pk
+    private static final String ACHIEVEMENT_DATABASE_ID = "achievement_database_id";
+    private static final String ACHIEVEMENT_TITLE = "achievement_title";
+    private static final String ACHIEVEMENT_DESCRIPTION = "achievement_description";
+    private static final String ACHIEVEMENT_TOTAL = "achievement_total";
+    private static final String CREATE_TABLE_ACHIEVEMENT = "create table "
+            + ACHIEVEMENT_TABLE
+            + "("
+            + ACHIEVEMENT_ID + " integer not null primary key AUTOINCREMENT, "
+            + ACHIEVEMENT_DATABASE_ID + " integer not null, "
+            + ACHIEVEMENT_TITLE + " text not null, "
+            + ACHIEVEMENT_DESCRIPTION + " text not null, "
+            + ACHIEVEMENT_TOTAL + " integer not null"
+            + ");";
+
+    //table userachievement
+    private static final String USERACHIEVEMENT_TABLE = "userachievement";
+    private static final String USERACHIEVEMENT_ID = "userachievement_id"; //pk
+    private static final String USERACHIEVEMENT_DATABASE_ID = "userachievement_database_id";
+    private static final String USERACHIEVEMENT_USER_STUDENT_NUMBER_ID = "userachievement_user_student_number_id"; //fk
+    private static final String USERACHIEVEMENT_ACHIEVEMENT_ID = "userachievement_achievement_id"; //fk
+    private static final String USERACHIEVEMENT_PROGRESS = "userachievement_progress";
+    private static final String USERACHIEVEMENT_UPDATED = "level_updated";
+    private static final String CREATE_TABLE_USERACHIEVEMENT = "create table "
+            + USERACHIEVEMENT_TABLE
+            + "("
+            + USERACHIEVEMENT_ID + " integer not null primary key AUTOINCREMENT, "
+            + USERACHIEVEMENT_DATABASE_ID + " integer not null, "
+            + USERACHIEVEMENT_USER_STUDENT_NUMBER_ID + " text not null, "
+            + USERACHIEVEMENT_ACHIEVEMENT_ID + " integer not null, "
+            + USERACHIEVEMENT_PROGRESS + " integer not null, "
+            + USERACHIEVEMENT_UPDATED + " integer not null, "
+            + "foreign key (" + USERACHIEVEMENT_USER_STUDENT_NUMBER_ID + ") references " + USER_TABLE + "(" + USER_STUDENT_NUMBER_ID + "), "
+            + "foreign key (" + USERACHIEVEMENT_ACHIEVEMENT_ID + ") references " + ACHIEVEMENT_TABLE + "(" + ACHIEVEMENT_ID + ")"
             + ");";
 
     public DatabaseHandler(Context context) {
@@ -110,6 +144,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         database.execSQL(CREATE_TABLE_USER);
         database.execSQL(CREATE_TABLE_LEVEL);
         database.execSQL(CREATE_TABLE_PUZZLE);
+        database.execSQL(CREATE_TABLE_ACHIEVEMENT);
+        database.execSQL(CREATE_TABLE_USERACHIEVEMENT);
     }
 
     @Override
@@ -152,10 +188,58 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return level_id;
     }
 
+    public long insertPuzzle(Puzzle puzzle) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(PUZZLE_LEVEL_ID, puzzle.getPuzzle_level_id());
+        values.put(PUZZLE_DATABASE_ID, puzzle.getPuzzle_level_id());
+        values.put(PUZZLE_INSTRUCTIONS, puzzle.getPuzzle_instructions());
+        values.put(PUZZLE_DATA, puzzle.getPuzzle_data());
+        values.put(PUZZLE_COMPLETED, puzzle.getPuzzle_completed());
+        values.put(PUZZLE_ATTEMPTS, puzzle.getPuzzle_attempts());
+        values.put(PUZZLE_TIME, puzzle.getPuzzle_time());
+        long puzzle_id = db.insertWithOnConflict(PUZZLE_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
+        return puzzle_id;
+    }
+
+    public long insertAchievement(Achievement achievement) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(ACHIEVEMENT_DATABASE_ID, achievement.getAchievement_database_id());
+        values.put(ACHIEVEMENT_TITLE, achievement.getAchievement_title());
+        values.put(ACHIEVEMENT_DESCRIPTION, achievement.getAchievement_description());
+        values.put(ACHIEVEMENT_TOTAL, achievement.getAchievement_total());
+        ;
+        long achievement_id = db.insertWithOnConflict(ACHIEVEMENT_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
+        return achievement_id;
+    }
+
+    public long insertUserAchievement(UserAchievement userAchievement) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(USERACHIEVEMENT_DATABASE_ID, userAchievement.getUserachievement_database_id());
+        values.put(USERACHIEVEMENT_USER_STUDENT_NUMBER_ID, userAchievement.getUser_student_number());
+        values.put(USERACHIEVEMENT_ACHIEVEMENT_ID, userAchievement.getAchievement_id());
+        values.put(USERACHIEVEMENT_PROGRESS, userAchievement.getUserachievement_progress());
+        values.put(USERACHIEVEMENT_UPDATED, userAchievement.getUserachievement_updated());
+        long achievement_id = db.insertWithOnConflict(USERACHIEVEMENT_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
+        return achievement_id;
+    }
+
+    public int deleteLevelPuzzles(Level current_level) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int id = db.delete(PUZZLE_TABLE, "puzzle_level_id= ? ", new String[]{String.valueOf(current_level.getLevel_id())});
+        db.close();
+        return id;
+    }
+
     public ArrayList<Level> getLevels(User current_user) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT level_id, level_user_student_number_id, level_database_id, level_number, level_title, level_description, level_completed, level_score, level_attempts, level_time, level_updated" +
-                " FROM " + LEVEL_TABLE + " WHERE level_user_student_number_id= ? ", new String[]{current_user.getUser_student_number_id()});
+                " FROM " + LEVEL_TABLE + " WHERE level_user_student_number_id= ? ORDER BY level_number ASC", new String[]{current_user.getUser_student_number_id()});
         ArrayList<Level> level_list = new ArrayList<>();
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
@@ -179,29 +263,26 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return level_list;
     }
 
-    public long insertOrUpdatePuzzle(Puzzle puzzle) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(PUZZLE_LEVEL_ID, puzzle.getPuzzle_level_id());
-        values.put(PUZZLE_DATABASE_ID, puzzle.getPuzzle_level_id());
-        values.put(PUZZLE_TYPE, puzzle.getPuzzle_type());
-        values.put(PUZZLE_INSTRUCTIONS, puzzle.getPuzzle_instructions());
-        values.put(PUZZLE_EXPECTED_OUTPUT, puzzle.getPuzzle_expected_output());
-        values.put(PUZZLE_DATA, puzzle.getPuzzle_data());
-        values.put(PUZZLE_ANSWER, puzzle.getPuzzle_answer());
-        values.put(PUZZLE_COMPLETED, puzzle.getPuzzle_completed());
-        values.put(PUZZLE_ATTEMPTS, puzzle.getPuzzle_attempts());
-        values.put(PUZZLE_TIME, puzzle.getPuzzle_time());
-        long puzzle_id = db.insertWithOnConflict(PUZZLE_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-        db.close();
-        return puzzle_id;
-    }
-
-    public int deleteLevelPuzzles(Level current_level) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int id = db.delete(PUZZLE_TABLE, "puzzle_level_id= ? ", new String[]{String.valueOf(current_level.getLevel_id())});
-        db.close();
-        return id;
+    public ArrayList<UserAchievement> getLoggedUserAchievements(User current_user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT userachievement_achievement_id, achievement_title, achievement_description, achievement_total, userachievement_progress, level_updated" +
+                " FROM " + USERACHIEVEMENT_TABLE + " INNER JOIN " + ACHIEVEMENT_TABLE +" ON userachievement_achievement_id=achievement_database_id AND userachievement_user_student_number_id= ?", new String[]{current_user.getUser_student_number_id()});
+        ArrayList<UserAchievement> userachievement_list = new ArrayList<>();
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                UserAchievement current_userachievement = new UserAchievement();
+                current_userachievement.setUserachievement_database_id(cursor.getInt(0));
+                current_userachievement.setAchievement_title(cursor.getString(1));
+                current_userachievement.setAchievement_description(cursor.getString(2));
+                current_userachievement.setAchievement_total(cursor.getInt(3));
+                current_userachievement.setUserachievement_progress(cursor.getInt(4));
+                current_userachievement.setUserachievement_updated(cursor.getInt(5));
+                userachievement_list.add(current_userachievement);
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        return userachievement_list;
     }
 
     public User getLoggedInUser() {
@@ -220,48 +301,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return user;
         } else {
             return null;
-        }
-    }
-
-    public int getLoggedInUserOverallScore(User current_user) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT SUM(puzzle_score) AS overall_score FROM " + PUZZLE_TABLE + ", " + LEVEL_TABLE +
-                " WHERE level_student_number= ? AND puzzle_level_id=level_id", new String[]{current_user.getUser_student_number_id()});
-        if (cursor != null && cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            int overall_score = cursor.getInt(cursor.getColumnIndex("overall_score"));
-            cursor.close();
-            return overall_score;
-        } else {
-            return -1;
-        }
-    }
-
-    public int getLoggedInUserOverallAttempts(User current_user) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT SUM(puzzle_attempts) AS overall_attempts FROM " + PUZZLE_TABLE + ", " + LEVEL_TABLE +
-                " WHERE level_student_number= ? AND puzzle_level_id=level_id", new String[]{current_user.getUser_student_number_id()});
-        if (cursor != null && cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            int overall_attempts = cursor.getInt(cursor.getColumnIndex("overall_attempts"));
-            cursor.close();
-            return overall_attempts;
-        } else {
-            return -1;
-        }
-    }
-
-    public int getLoggedInUserOverallTime(User current_user) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT SUM(puzzle_time) AS overall_time FROM " + PUZZLE_TABLE + ", " + LEVEL_TABLE +
-                " WHERE level_student_number= ? AND puzzle_level_id=level_id", new String[]{current_user.getUser_student_number_id()});
-        if (cursor != null && cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            int overall_time = cursor.getInt(cursor.getColumnIndex("overall_time"));
-            cursor.close();
-            return overall_time;
-        } else {
-            return -1;
         }
     }
 
@@ -292,7 +331,29 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         } else {
             return false;
         }
-    }//todo:improve
+    }
+
+    public boolean checkHasAchievements() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + ACHIEVEMENT_TABLE + " LIMIT 1", null);
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.close();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean checkHasLoggedUserAchievements() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + USERACHIEVEMENT_TABLE + " LIMIT 1", null);
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.close();
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public Puzzle getNextPuzzle(Level current_level) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -304,11 +365,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             current_puzzle.setPuzzle_id(cursor.getInt(cursor.getColumnIndex("puzzle_id")));
             current_puzzle.setPuzzle_database_id(cursor.getInt(cursor.getColumnIndex("puzzle_database_id")));
             current_puzzle.setPuzzle_level_id(cursor.getInt(cursor.getColumnIndex("puzzle_level_id")));
-            current_puzzle.setPuzzle_type(cursor.getString(cursor.getColumnIndex("puzzle_type")));
             current_puzzle.setPuzzle_instructions(cursor.getString(cursor.getColumnIndex("puzzle_instructions")));
-            current_puzzle.setPuzzle_expected_output(cursor.getString(cursor.getColumnIndex("puzzle_expected_output")));
             current_puzzle.setPuzzle_data(cursor.getString(cursor.getColumnIndex("puzzle_data")));
-            current_puzzle.setPuzzle_answer(cursor.getString(cursor.getColumnIndex("puzzle_answer")));
             current_puzzle.setPuzzle_completed(cursor.getInt(cursor.getColumnIndex("puzzle_completed")));
             current_puzzle.setPuzzle_attempts(cursor.getInt(cursor.getColumnIndex("puzzle_attempts")));
             current_puzzle.setPuzzle_time(cursor.getInt(cursor.getColumnIndex("puzzle_time")));
@@ -408,12 +466,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return rowsAffected;
     }
 
-    public int resetUserUpdated(User user) {
+    public int resetUserUpdated(User current_user) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(USER_UPDATED, 0);
         int rowsAffected = db.update(USER_TABLE, values, USER_STUDENT_NUMBER_ID + " = ?",
-                new String[]{String.valueOf(user.getUser_student_number_id())});
+                new String[]{String.valueOf(current_user.getUser_student_number_id())});
         db.close();
         return rowsAffected;
     }

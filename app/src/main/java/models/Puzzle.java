@@ -13,11 +13,8 @@ public class Puzzle {
     private int puzzle_id; //pk
     private int puzzle_level_id; //fk
     private int puzzle_database_id;
-    private String puzzle_type;
     private String puzzle_instructions;
-    private String puzzle_expected_output;
     private String puzzle_data;
-    private String puzzle_answer;
     private int puzzle_completed;
     private int puzzle_attempts;
     private int puzzle_time;
@@ -50,28 +47,12 @@ public class Puzzle {
         this.puzzle_database_id = puzzle_database_id;
     }
 
-    public String getPuzzle_type() {
-        return puzzle_type;
-    }
-
-    public void setPuzzle_type(String puzzle_type) {
-        this.puzzle_type = puzzle_type;
-    }
-
     public String getPuzzle_instructions() {
         return puzzle_instructions;
     }
 
     public void setPuzzle_instructions(String puzzle_instructions) {
         this.puzzle_instructions = puzzle_instructions;
-    }
-
-    public String getPuzzle_expected_output() {
-        return puzzle_expected_output;
-    }
-
-    public void setPuzzle_expected_output(String puzzle_expected_output) {
-        this.puzzle_expected_output = puzzle_expected_output;
     }
 
     public String getPuzzle_data() {
@@ -111,13 +92,5 @@ public class Puzzle {
 
     public void setPuzzle_time(int puzzle_time) {
         this.puzzle_time = puzzle_time;
-    }
-
-    public String getPuzzle_answer() {
-        return puzzle_answer;
-    }
-
-    public void setPuzzle_answer(String puzzle_answer) {
-        this.puzzle_answer = puzzle_answer;
     }
 }

@@ -21,6 +21,8 @@ import adapters.AchievementAdapter;
 import adapters.LeaderboardAdapter;
 import models.Achievement;
 import models.User;
+import models.UserAchievement;
+import singletons.DatabaseHandlerSingleton;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,8 +30,9 @@ import models.User;
 public class AchievementFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
-    private ArrayList<Achievement> achievementList;
+    private ArrayList<UserAchievement> achievementList;
     private AchievementAdapter achievementAdapter;
+    private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
 
     public AchievementFragment() {
         // Required empty public constructor
@@ -43,27 +46,22 @@ public class AchievementFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        assignSingletons();
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(linearLayoutManager);
         achievementAdapter = new AchievementAdapter(getActivity());
         mRecyclerView.setAdapter(achievementAdapter);
-
-        ArrayList<Achievement> temp = new ArrayList<>();
-        temp.add(new Achievement("Total Achievement", "Achieve all achievement", 5, 3));
-        temp.add(new Achievement("Total Achievement", "Achieve all achievement", 5, 3));
-        temp.add(new Achievement("Total Achievement", "Achieve all achievement", 5, 3));
-        temp.add(new Achievement("Total Achievement", "Achieve all achievement", 5, 3));
-        temp.add(new Achievement("Total Achievement", "Achieve all achievement", 5, 3));
-        temp.add(new Achievement("Total Achievement", "Achieve all achievement", 5, 3));
-        temp.add(new Achievement("Total Achievement", "Achieve all achievement", 5, 3));
-        temp.add(new Achievement("Total Achievement", "Achieve all achievement", 5, 3));
-
+        ArrayList<UserAchievement> temp = mDatabaseHandlerSingleton.getLoggedUserAchievements();
+        Log.e("userachivementsize", temp.size()+"");
         addList(temp);
     }
 
+    private void assignSingletons() {
+        mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getActivity());
+    }
 
-    public void addList(ArrayList<Achievement> list) {
+    public void addList(ArrayList<UserAchievement> list) {
         if (!list.isEmpty()) {
             achievementList = new ArrayList<>();
             achievementList.addAll(list);
