@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activityPuzzleMainLayout"
     android:layout_width="match_parent"
-    android:orientation="vertical"
     android:layout_height="match_parent"
     tools:context="activities.PuzzleActivity">
 
@@ -12,6 +11,7 @@
         layout="@layout/app_actionbar" />
 
     <ScrollView
+        android:layout_below="@id/app_actionbar"
         android:layout_width="match_parent"
         android:layout_weight="1"
         android:layout_height="match_parent"
@@ -44,10 +44,18 @@
                         android:scrollHorizontally="false"
                         android:text="PLACEHOLDER" />
 
+                    <View
+                        android:id="@+id/levelRowDivider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:alpha="0.12"
+                        android:background="@color/black" />
+
                     <TextView
                         android:id="@+id/puzzleExpectedOutputText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:ellipsize="none"
                         android:layout_gravity="center"
                         android:maxLines="100"
@@ -122,7 +130,7 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <android.support.v7.widget.CardView
         android:id="@+id/resultPopup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -141,6 +149,6 @@
             android:gravity="center"
             android:text="CORRECT"
             android:textColor="@color/white" />
-    </LinearLayout>
+    </android.support.v7.widget.CardView>
 
-</LinearLayout>
+</RelativeLayout>

@@ -6,13 +6,12 @@
     tools:context="activities.LaunchActivity">
 
     <TextView
-        android:background="@color/primary"
-        android:id="@+id/launchScreenTextView"
-        android:gravity="center"
-        android:textSize="32sp"
+        android:id="@+id/text_launch_screen_message"
         android:layout_width="match_parent"
-        android:textColor="@color/white"
         android:layout_height="match_parent"
-        android:text="WELCOME"/>
+        android:background="@color/primary"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="32sp" />
 
 </RelativeLayout>

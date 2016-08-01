@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 
 import com.example.progamer.R;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import activities.PuzzleActivity;
-import puzzle.JavaInterpreter;
 import puzzle.PuzzleCodeBuilder;
 
 public class TrueFalseFragment extends Fragment {
@@ -55,7 +53,7 @@ public class TrueFalseFragment extends Fragment {
         List<String> toDisplayList = new ArrayList<>();
         toDisplayList.add("True");
         toDisplayList.add("False");
-        mArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.multiple_choice_row, toDisplayList);
+        mArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_checkbox, toDisplayList);
         mTrueFalseListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mTrueFalseListView.setAdapter(mArrayAdapter);
     }

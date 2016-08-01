@@ -7,12 +7,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.progamer.R;
@@ -25,7 +22,6 @@ import java.util.List;
 
 import activities.PuzzleActivity;
 import adapters.ItemAdapter;
-import models.Level;
 import puzzle.JavaInterpreter;
 import puzzle.PuzzleCodeBuilder;
 
@@ -75,10 +71,10 @@ public class DragListViewFragment extends Fragment {
             ArrayList<Pair<Long, String>> listToSend = new ArrayList<>();
             listToSend.addAll(mItemArray);
             Collections.shuffle(listToSend);
-            mItemAdapter = new ItemAdapter(listToSend, R.layout.drag_row, R.id.text, false, getContext());
+            mItemAdapter = new ItemAdapter(listToSend, R.layout.item_drag, R.id.text, false, getContext());
             mDragListView.setAdapter(mItemAdapter, true);
             mDragListView.setCanDragHorizontally(false);
-            mDragListView.setCustomDragItem(new MyDragItem(getContext(), R.layout.drag_row));
+            mDragListView.setCustomDragItem(new MyDragItem(getContext(), R.layout.item_drag));
         } else {
             mParentPuzzleActivity.finish();
         }

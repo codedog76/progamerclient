@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">ProGamer</string>
-    <string name="action_settings">Settings</string>
+    <string name="string_welcome">WELCOME</string>
+    <string name="string_welcome_back">WELCOME BACK</string>
+    <string name="string_try_again">Try Again</string>
+    <string name="string_continue">Continue</string>
+    <string name="string_start">Start</string>
     <string name="login_student_number_hint">Student Number</string>
     <string name="register_student_number_hint">Student Number*</string>
     <string name="login_password_hint">Password</string>
@@ -12,16 +16,17 @@
     <string name="drawer_close">Close</string>
     <string name="register_required">* Required</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="nav_levels">Levels</string>
     <string name="nav_leaderboard">Leaderboard</string>
     <string name="nav_logout">Logout</string>
     <string name="level_puzzle_progress">0/0</string>
     <string name="level_name">Level name</string>
     <string name="level_number">Level number</string>
-    <string name="level_continue_button">Continue</string>
+
     <string name="puzzle_check_button">Check</string>
     <string name="nav_settings">Settings</string>
+    <string name="level_title">Level Title</string>
+    <string name="level_description">Level Description</string>
+    <string name="score">Score</string>
 
 </resources>

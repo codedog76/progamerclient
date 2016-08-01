@@ -74,11 +74,11 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
         leaderboardRelativeLayout.setVisibility(View.VISIBLE);
         leaderboardProgressBarLinearLayout.setVisibility(View.VISIBLE);
         leaderboardTryAgainLinearLayout.setVisibility(View.GONE);
-        mNetworkManagerSingleton.uploadUserLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
+        mNetworkManagerSingleton.putUserLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
             @Override
             public void getResult(Boolean response, String message) {
                 if (response) {
-                    mNetworkManagerSingleton.downloadLeaderboardJSONRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+                    mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
                         @Override
                         public void getResult(ArrayList<User> object, Boolean response, String message) {
                             if (response) {
@@ -107,7 +107,7 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
         overallFragmentInterface.startRefreshing();
         attemptsFragmentInterface.startRefreshing();
         timeFragmentInterface.startRefreshing();
-        mNetworkManagerSingleton.downloadLeaderboardJSONRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+        mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
             @Override
             public void getResult(ArrayList<User> object, Boolean response, String message) {
                 if (response) {

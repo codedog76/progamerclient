@@ -1,48 +1,36 @@
 package activities;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.progamer.R;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import database.DatabaseHandler;
 import models.Level;
-import models.Puzzle;
 import singletons.DatabaseHandlerSingleton;
 import singletons.NetworkManagerSingleton;
 
 public class LevelActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
+    private Toolbar mToolbar;
     private Level mCurrentLevel;
     private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
     private NetworkManagerSingleton mNetworkManagerSingleton;
-    private TextView activityLevelTitleTextView, activityLevelDescription, currentUserScore, currentUserAttempts, currentUserTime, levelActivityPerformance;
+    private ProgressDialog mProgressDialog;
+    private TextView mLevelTitle, mLevelDescription, currentUserScore, currentUserAttempts, currentUserTime, levelActivityPerformance;
+
     private Button levelContinueButton;
     private String mClassName = getClass().toString();
     private int level_id;
-    private ProgressDialog progressDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,76 +47,73 @@ public class LevelActivity extends AppCompatActivity {
     }
 
     private void assignProgressDialog() {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Loading..");
-        progressDialog.setCancelable(false);
-        progressDialog.setCanceledOnTouchOutside(false);
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Loading..");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setCanceledOnTouchOutside(false);
     }
 
     private void assignFonts() {
         Typeface Roboto_Medium = Typeface.createFromAsset(getAssets(), "Roboto-Medium.ttf");
         Typeface Roboto_Regular = Typeface.createFromAsset(getAssets(), "Roboto-Regular.ttf");
-        activityLevelTitleTextView.setTypeface(Roboto_Regular);
-        activityLevelDescription.setTypeface(Roboto_Regular);
-        currentUserScore.setTypeface(Roboto_Regular);
+        mLevelTitle.setTypeface(Roboto_Regular);
+        mLevelDescription.setTypeface(Roboto_Regular);
+        /*currentUserScore.setTypeface(Roboto_Regular);
         currentUserAttempts.setTypeface(Roboto_Regular);
         currentUserTime.setTypeface(Roboto_Regular);
-        levelActivityPerformance.setTypeface(Roboto_Regular);
+        levelActivityPerformance.setTypeface(Roboto_Regular);*/
         levelContinueButton.setTypeface(Roboto_Medium);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        progressDialog.dismiss();
+        mProgressDialog.dismiss();
     }
 
     private void loadData() {
-        getSupportActionBar().setTitle("Level " + mCurrentLevel.getLevel_number());
-        activityLevelTitleTextView.setText(mCurrentLevel.getLevel_title());
-        activityLevelDescription.setText(mCurrentLevel.getLevel_description());
-        currentUserScore.setText(String.valueOf(mCurrentLevel.getLevel_score()));
-        currentUserAttempts.setText(String.valueOf(mCurrentLevel.getLevel_attempts()));
-        currentUserTime.setText(String.valueOf(mCurrentLevel.getLevel_time()));
-        if (mCurrentLevel.getLevel_puzzles_completed() == 0) {
-            if (mCurrentLevel.getPuzzles_completed()) {
-                levelContinueButton.setText("Try Again");
-            } else {
-                levelContinueButton.setText("Start");
-            }
-        } else {
-            levelContinueButton.setText("Continue");
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Level " + mCurrentLevel.getLevel_number());
         }
+        mLevelTitle.setText(mCurrentLevel.getLevel_title());
+        mLevelDescription.setText(mCurrentLevel.getLevel_description());
+        /*currentUserScore.setText(String.valueOf(mCurrentLevel.getLevel_score()));
+        currentUserAttempts.setText(String.valueOf(mCurrentLevel.getLevel_attempts()));
+        currentUserTime.setText(String.valueOf(mCurrentLevel.getLevel_time()));*/
+        if (mCurrentLevel.getLevel_puzzles_completed() == 0) {
+            if (mCurrentLevel.getPuzzles_completed()) levelContinueButton.setText(getString(R.string.string_try_again));
+            else levelContinueButton.setText(getString(R.string.string_start));
+        } else levelContinueButton.setText(getString(R.string.string_continue));
     }
 
     private void assignListeners() {
-                levelContinueButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                if(mCurrentLevel.getPuzzles_completed()) {
-                    progressDialog.show();
-                    mNetworkManagerSingleton.downloadPuzzlesJSONRequest(mCurrentLevel, new NetworkManagerSingleton.BooleanResponseListener() {
+        levelContinueButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCurrentLevel.getPuzzles_completed()) {
+                    mProgressDialog.show();
+                    mNetworkManagerSingleton.getPuzzlesJsonRequest(mCurrentLevel, new NetworkManagerSingleton.BooleanResponseListener() {
                         @Override
                         public void getResult(Boolean response, String message) {
-                            progressDialog.dismiss();
-                            Intent intent = new Intent(getApplicationContext(), PuzzleActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                            Bundle bundle = new Bundle();
-                            bundle.putInt("level_id", mCurrentLevel.getLevel_id());
-                            intent.putExtras(bundle);
-                            startActivity(intent);
+                            mProgressDialog.dismiss();
+                            loadPuzzleActivity();
                         }
                     });
                 } else {
-                    Intent intent = new Intent(getApplicationContext(), PuzzleActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    Bundle bundle = new Bundle();
-                    bundle.putInt("level_id", mCurrentLevel.getLevel_id());
-                    intent.putExtras(bundle);
-                    startActivity(intent);
+                    loadPuzzleActivity();
                 }
             }
         });
+    }
+
+    private void loadPuzzleActivity() {
+        Intent intent = new Intent(getApplicationContext(), PuzzleActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
+        Bundle bundle = new Bundle();
+        bundle.putInt("level_id", mCurrentLevel.getLevel_id());
+        intent.putExtras(bundle);
+        startActivity(intent);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
     private void assignSingletons() {
@@ -163,19 +148,18 @@ public class LevelActivity extends AppCompatActivity {
     }
 
     private void assignViews() {
-        toolbar = (Toolbar) findViewById(R.id.app_actionbar);
-        activityLevelTitleTextView = (TextView) findViewById(R.id.activityLevelTitleTextView);
-        activityLevelDescription = (TextView) findViewById(R.id.activityLevelDescription);
-        currentUserScore = (TextView) findViewById(R.id.currentUserScore);
-        currentUserAttempts = (TextView) findViewById(R.id.currentUserAttempts);
-        currentUserTime = (TextView) findViewById(R.id.currentUserTime);
-        levelActivityPerformance = (TextView) findViewById(R.id.levelActivityPerformance);
+        mToolbar = (Toolbar) findViewById(R.id.app_actionbar);
+        mLevelTitle = (TextView) findViewById(R.id.text_level_title);
+        mLevelDescription = (TextView) findViewById(R.id.text_level_description);
+        levelActivityPerformance = (TextView) findViewById(R.id.levelActivityScore);
         levelContinueButton = (Button) findViewById(R.id.levelContinueButton);
     }
 
     private void assignActionBar() {
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setSupportActionBar(mToolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     @Override

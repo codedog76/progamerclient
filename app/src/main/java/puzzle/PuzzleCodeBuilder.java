@@ -72,6 +72,9 @@ public class PuzzleCodeBuilder {
         return mCSharpCodeToRunAnswer;
     }
 
+    /*
+     *
+     */
     public void processCSharpCode(String cSharpCode) {
         List<String> cSharpCodeAfterComments = removeComments(cSharpCode);
         List<String> cSharpCodeAfterHeaderTags = processHeaderTags(cSharpCodeAfterComments);
@@ -131,17 +134,18 @@ public class PuzzleCodeBuilder {
         return bd.doubleValue();
     }
 
-
+    //Splits input string based on comment tag "//" and removes those tags
+    //Returns a string array of split string
     private List<String> removeComments(String cSharpCode) {
-        String[] codeStringArray = cSharpCode.split("//");
-        List<String> codeStringList = new ArrayList<>(Arrays.asList(codeStringArray));
+        List<String> codeStringList = new ArrayList<>(Arrays.asList(cSharpCode.split("//")));
         codeStringList.remove(0);
         return codeStringList;
     }
 
+    //Processes header tags, which determines the type of fragment for the code and what will be displayed in the expected output block of the puzzle
+    //Returns a string list with header string object removed
     private List<String> processHeaderTags(List<String> cSharpCodeList) {
         String header = cSharpCodeList.get(0);
-        Log.e("header", header);
         if (header.contains("<single>") || header.contains("<multiple>") || header.contains("<rearrange>") || header.contains("<truefalse>") || header.contains("<result>") || header.contains("<code>")) {
             if (header.contains("<single>")) {
                 mPuzzleFragmentType = "<single>";
@@ -174,6 +178,8 @@ public class PuzzleCodeBuilder {
         return cSharpCodeList;
     }
 
+    //Processes all code tags for each line of code in string list
+    //Returns string list with tags processed
     private List<String> processCodeTags(List<String> cSharpCodeList) {
         List<String> cSharpCodeAfterTags = new ArrayList<>();
         for (int x = 0; x < cSharpCodeList.size(); x++) {

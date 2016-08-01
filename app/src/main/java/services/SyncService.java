@@ -61,7 +61,7 @@ public class SyncService extends Service {
     private Runnable mSyncUserRunnable = new Runnable() {
         @Override
         public void run() {
-            sNetworkManagerSingleton.syncUserData(new NetworkManagerSingleton.BooleanResponseListener() {
+            sNetworkManagerSingleton.putUserJsonRequest(new NetworkManagerSingleton.BooleanResponseListener() {
                 @Override
                 public void getResult(Boolean response, String message) {
                     if(response) {

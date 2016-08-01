@@ -1,11 +1,9 @@
 package fragments;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,7 +12,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -139,7 +136,7 @@ public class RegisterFragment extends Fragment {
         registerProfileIconCircleImageView = (CircleImageView) view.findViewById(R.id.registerProfileIconCircleImageView);
         registerPrivateCheckBox = (CheckBox) view.findViewById(R.id.registerPrivateCheckBox);
         avatarDialog = new AlertDialog.Builder(getActivity()).create();
-        avatarView = View.inflate(getActivity(), R.layout.avatar_dialog, null);
+        avatarView = View.inflate(getActivity(), R.layout.dialog_change_avatar, null);
     }
 
     private void assignFonts() {
@@ -297,7 +294,7 @@ public class RegisterFragment extends Fragment {
             user.setUser_password(registerConfirmPasswordText.getText().toString());
             user.setUser_avatar(currentAvatar);
             user.setUser_is_private(registerPrivateCheckBox.isChecked());
-            networkManagerSingleton.registerJSONRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
+            networkManagerSingleton.postRegisterUserJsonRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
                 @Override
                 public void getResult(Boolean response, String message) {
                     if (response) {
@@ -315,7 +312,7 @@ public class RegisterFragment extends Fragment {
         User user = new User();
         user.setUser_student_number_id(registerStudentNumberText.getText().toString());
         user.setUser_password(registerConfirmPasswordText.getText().toString());
-        networkManagerSingleton.loginJSONRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
+        networkManagerSingleton.getLoginUserJsonRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
             @Override
             public void getResult(Boolean response, String message) {
                 if (response) {

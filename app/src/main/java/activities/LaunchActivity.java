@@ -2,26 +2,29 @@ package activities;
 
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.widget.TextView;
 
 import com.example.progamer.R;
 
-import java.util.ArrayList;
-
-import models.Level;
-import models.User;
 import singletons.DatabaseHandlerSingleton;
 import singletons.SettingsSingleton;
 
 public class LaunchActivity extends AppCompatActivity {
 
-    private TextView launchScreenTextView;
-    private final Handler launchScreenHandler = new Handler();
-    private DatabaseHandlerSingleton databaseHandlerSingleton;
-    private SettingsSingleton settingsSingleton;
+    private TextView mTextLaunchScreenMessage;
+    private Handler mLaunchScreenHandler = new Handler();
+    private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
+    private SettingsSingleton mSettingsSingleton;
+    //Adds a delay before calling launchActivity
+    private Runnable mLaunchScreenRunnable = new Runnable() {
+        @Override
+        public void run() {
+            launchActivity();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,56 +36,51 @@ public class LaunchActivity extends AppCompatActivity {
         doLaunchScreen();
     }
 
+    //Assigns all required singleton classes
     public void assignSingletons() {
-        settingsSingleton = SettingsSingleton.getInstance(this);
-        databaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
+        mSettingsSingleton = SettingsSingleton.getInstance(this);
+        mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
     }
 
+    //Checks settings preferences singleton for how the launch screen should behave
     public void doLaunchScreen() {
-        if (settingsSingleton.getLaunchScreenActive()) {
-            if (settingsSingleton.getFirstTimeLaunch()) {
-                launchScreenTextView.setText("WELCOME");
-                settingsSingleton.setFirstTimeLaunch(false);
+        if (mSettingsSingleton.getLaunchScreenActive()) {
+            if (mSettingsSingleton.getFirstTimeLaunch()) {
+                mTextLaunchScreenMessage.setText(getString(R.string.string_welcome));
+                mSettingsSingleton.setFirstTimeLaunch(false);
             } else {
-                launchScreenTextView.setText("WELCOME BACK");
+                mTextLaunchScreenMessage.setText(getString(R.string.string_welcome_back));
             }
-            launchScreenHandler.postDelayed(jobInboxRunnable, settingsSingleton.getLaunchScreenTime());
+            mLaunchScreenHandler.postDelayed(mLaunchScreenRunnable, mSettingsSingleton.getLaunchScreenTime());
         } else {
             launchActivity();
         }
     }
 
-    private Runnable jobInboxRunnable = new Runnable() {
-        @Override
-        public void run() {
-            launchActivity();
-        }
-    };
-
+    //If the there is a logged in user, go straight to main activity, preventing user from logging
+    //in every time
     private void launchActivity() {
-        /*User lucius = new User(); //todo:testing
-        lucius.setUser_student_number("s211266337");
-        lucius.setUser_nickname("Lucien");
-        lucius.setUser_avatar(5);
-        lucius.setUser_logged_in(1);
-        databaseHandlerSingleton.insertOrUpdateUser(lucius);*/
-        if (databaseHandlerSingleton.getLoggedUser() != null) {
+        if (mDatabaseHandlerSingleton.getLoggedUser() != null) {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         } else {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 
+    //assigns all views for this activity
     private void assignViews() {
-        launchScreenTextView = (TextView) findViewById(R.id.launchScreenTextView);
+        mTextLaunchScreenMessage = (TextView) findViewById(R.id.text_launch_screen_message);
     }
 
+    //assigns fonts for the views in this activity
     private void assignFonts() {
         Typeface Roboto_Medium = Typeface.createFromAsset(getAssets(), "Roboto-Medium.ttf");
-        launchScreenTextView.setTypeface(Roboto_Medium);
+        mTextLaunchScreenMessage.setTypeface(Roboto_Medium);
     }
 }

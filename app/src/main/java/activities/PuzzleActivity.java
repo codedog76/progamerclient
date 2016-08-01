@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -39,7 +40,8 @@ public class PuzzleActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TextView puzzleInstructionsText, puzzleExpectedOutputText, puzzleTimerText, puzzleAttemptsText,
             resultPopupTextView;
-    private LinearLayout resultPopup, bottomBar;
+    private CardView resultPopup;
+    private LinearLayout bottomBar;
     private Button puzzleButton;
     private long startTime = 0;
     private Handler timerHandler = new Handler();
@@ -182,15 +184,15 @@ public class PuzzleActivity extends AppCompatActivity {
         resultPopup.startAnimation(bottomDown);
         resultPopup.setVisibility(View.GONE);
         puzzleButton.setText("Check");
-        bottomBar.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.green_200));
+        //bottomBar.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.green_200));
         reloadData();
     }
 
     private void showIncorrectPopup() {
         puzzleButton.setText("Retry?");
         resultPopupTextView.setText("INCORRECT!");
-        resultPopup.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.red_500));
-        bottomBar.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.red_200));
+        //resultPopup.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.red_500));
+        //bottomBar.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.red_200));
         resultPopup.startAnimation(bottomUp);
         resultPopup.setVisibility(View.VISIBLE);
         puzzleAttemptsText.setText("Attempts: " + String.valueOf(mAttemptsCount));
@@ -203,7 +205,7 @@ public class PuzzleActivity extends AppCompatActivity {
         } else {
             puzzleButton.setText("Continue");
             resultPopupTextView.setText("CORRECT!");
-            resultPopup.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.green_500));
+            //resultPopup.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.green_500));
             resultPopup.startAnimation(bottomUp);
             resultPopup.setVisibility(View.VISIBLE);
         }
@@ -307,7 +309,7 @@ public class PuzzleActivity extends AppCompatActivity {
         puzzleAttemptsText = (TextView) findViewById(R.id.puzzleAttemptsText);
         resultPopupTextView = (TextView) findViewById(R.id.resultPopupTextView);
         puzzleButton = (Button) findViewById(R.id.puzzleButton);
-        resultPopup = (LinearLayout) findViewById(R.id.resultPopup);
+        resultPopup = (CardView) findViewById(R.id.resultPopup);
         bottomBar = (LinearLayout) findViewById(R.id.bottomBar);
         bottomUp = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.bottom_up);
         bottomDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.bottom_down);

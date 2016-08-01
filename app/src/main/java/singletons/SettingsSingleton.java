@@ -4,18 +4,18 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SettingsSingleton {
-    private static SettingsSingleton sInstance;
+    private static SettingsSingleton sSettingsSingletonInstance;
     private SharedPreferences mSharedPreferences;
-    private final static String PREFERENCES = "progamer_preferences";
+    private final static String PREF_SETTINGS = "progamer_preferences";
 
     public static SettingsSingleton getInstance(Context mContext) {
-        if(sInstance==null)
-            sInstance = new SettingsSingleton(mContext);
-        return sInstance;
+        if(sSettingsSingletonInstance==null)
+            sSettingsSingletonInstance = new SettingsSingleton(mContext);
+        return sSettingsSingletonInstance;
     }
 
     private SettingsSingleton(Context mContext) {
-        mSharedPreferences = mContext.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        mSharedPreferences = mContext.getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);
     }
 
     public boolean getLaunchScreenActive() {

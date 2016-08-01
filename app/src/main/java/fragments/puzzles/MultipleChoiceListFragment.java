@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import activities.PuzzleActivity;
-import models.Level;
 import puzzle.JavaInterpreter;
 import puzzle.PuzzleCodeBuilder;
 
@@ -61,7 +59,7 @@ public class MultipleChoiceListFragment extends Fragment {
                 if (pair.first != null && !pair.first.equals(""))
                     toDisplayList.add(pair.first);
             }
-            mArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.multiple_choice_row, toDisplayList);
+            mArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_checkbox, toDisplayList);
             mMultipleSelectionListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
             mMultipleSelectionListView.setAdapter(mArrayAdapter);
         } else {

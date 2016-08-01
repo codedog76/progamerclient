@@ -163,7 +163,7 @@ public class LoginFragment extends Fragment {
             User user = new User();
             user.setUser_student_number_id(loginStudentNumberText.getText().toString());
             user.setUser_password(loginPasswordText.getText().toString());
-            networkManagerSingleton.loginJSONRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
+            networkManagerSingleton.getLoginUserJsonRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
                 @Override
                 public void getResult(Boolean response, String message) {
                     if (response) {

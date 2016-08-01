@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
         navLogoutLayout.setOnClickListener(new View.OnClickListener() {
@@ -160,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
                 bundle.putBoolean("is_logged_user", true);
                 intent.putExtras(bundle);
                 startActivity(intent);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
     }
@@ -175,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
                         Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
-
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                     }
                 })
                 .setNegativeButton("No", null).show();
@@ -210,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         try {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
             fragmentTransaction.replace(R.id.fragment_container, fragment, tag);
             fragmentTransaction.addToBackStack(tag);
             fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);

@@ -99,7 +99,7 @@ public class UserProfileActivity extends AppCompatActivity {
             } else {
                 User selected_user = (User)bundle.getSerializable("selected_user");
                 if (selected_user != null) {
-                    networkManagerSingleton.downloadUserJSONRequest(selected_user, new NetworkManagerSingleton.ObjectResponseListener<User>() {
+                    networkManagerSingleton.getUserJsonRequest(selected_user, new NetworkManagerSingleton.ObjectResponseListener<User>() {
                         @Override
                         public void getResult(User object, Boolean response, String message) {
                             if (response) {
@@ -115,12 +115,14 @@ public class UserProfileActivity extends AppCompatActivity {
                             } else {
                                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
                                 finish();
+                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                             }
                         }
                     });
 
                 } else {
                     finish();
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                 }
             }
         }
@@ -139,6 +141,7 @@ public class UserProfileActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                 return true;
 
             default:
