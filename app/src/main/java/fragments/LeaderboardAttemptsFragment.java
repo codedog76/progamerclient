@@ -1,6 +1,5 @@
 package fragments;
 
-
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -9,7 +8,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,28 +23,24 @@ import java.util.Comparator;
 
 import adapters.LeaderboardAdapter;
 import de.hdodenhof.circleimageview.CircleImageView;
-import singletons.DatabaseHandlerSingleton;
 import models.User;
-import singletons.NetworkManagerSingleton;
+import singletons.DatabaseHandlerSingleton;
 
-/**
- * A simple {@link Fragment} subclass.
- */
-public class LeaderboardAttemptsFragment extends Fragment implements LeaderboardAdapter.clickListener {
+public class LeaderboardAttemptsFragment extends Fragment implements LeaderboardAdapter.ClickListener {
 
     private RecyclerView mRecyclerView;
-    private ArrayList<User> userList;
-    private LeaderboardAdapter leaderboardAdapter;
-    private LinearLayout overallTopLinearLayout, overallBottomLinearLayout;
-    private RelativeLayout leaderboardProgressBarLayout;
-    private InterfaceListener interfaceListener;
-    private TextView overallTopNameTextView, overallTopScoreTextView, overallBottomNameTextView, overallBottomScoreTextView, overallTopRankTextView, overallBottomRankTextView;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private NetworkManagerSingleton networkManagerSingleton;
-    private DatabaseHandlerSingleton databaseHandlerSingleton;
-    private CircleImageView overallTopRankCircleImageView, overallBottomRankCircleImageView;
-    private int currentUserPos;
-    private User currentUser;
+    private ArrayList<User> mUserList;
+    private LeaderboardAdapter mLeaderboardAdapter;
+    private LinearLayout mLinearTop, mLinearBottom;
+    private RelativeLayout mRelativeProgress;
+    private InterfaceListener mInterfaceListener;
+    private TextView mTextTopNickname, mTextTopScore, mTextBottomNickname, mTextBottomScore, mTextTopRank,
+            mTextBottomRank;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
+    private CircleImageView mCircleImageAvatarTop, mCircleImageAvatarBottom;
+    private int mCurrentUserPos;
+    private User mCurrentUser;
 
     public LeaderboardAttemptsFragment() {
         // Required empty public constructor
@@ -65,80 +59,92 @@ public class LeaderboardAttemptsFragment extends Fragment implements Leaderboard
         assignAdapter();
         assignListeners();
         loadData();
-        ((LeaderboardFragment) getParentFragment()).syncLeaderboardData("attempts");
+    }
+
+    @Override
+    public void itemClicked(int position, String user_student_number) {
+        mInterfaceListener.itemClicked(position, user_student_number);
+    }
+
+    private void assignSingletons() {
+        mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getActivity());
     }
 
     private void loadData() {
-        addList(((LeaderboardFragment)getParentFragment()).getLeaderboardList());
-        if(leaderboardAdapter.getItemCount()>1) {
-            overallTopNameTextView.setText(currentUser.getUser_nickname());
-            overallTopScoreTextView.setText(String.valueOf(currentUser.getUser_overall_attempts()));
-            overallBottomNameTextView.setText(currentUser.getUser_nickname());
-            overallBottomScoreTextView.setText(String.valueOf(currentUser.getUser_overall_attempts()));
-            overallTopRankTextView.setText("#"+String.valueOf(currentUserPos + 1));
-            overallBottomRankTextView.setText("#"+String.valueOf(currentUserPos + 1));
-            int id = getContext().getResources().getIdentifier("avatar_"+String.valueOf(currentUser.getUser_avatar()), "drawable", getContext().getPackageName());
+        addList(((LeaderboardFragment) getParentFragment()).getLeaderboardList());
+        if (mLeaderboardAdapter.getItemCount() > 1) {
+            mTextTopNickname.setText(mCurrentUser.getUser_nickname());
+            mTextTopScore.setText(String.valueOf(mCurrentUser.getUser_overall_attempts()));
+            mTextBottomNickname.setText(mCurrentUser.getUser_nickname());
+            mTextBottomScore.setText(String.valueOf(mCurrentUser.getUser_overall_attempts()));
+            mTextTopRank.setText(getString(R.string.string_rank, mCurrentUserPos + 1));
+            mTextBottomRank.setText(getString(R.string.string_rank, mCurrentUserPos + 1));
+            int id = getContext().getResources().getIdentifier("avatar_" + String.valueOf(mCurrentUser.getUser_avatar()),
+                    "drawable", getContext().getPackageName());
             Drawable drawable = ContextCompat.getDrawable(getContext(), id);
-            overallTopRankCircleImageView.setImageDrawable(drawable);
-            overallBottomRankCircleImageView.setImageDrawable(drawable);
-            if (currentUserPos <= 2) {
-                overallTopRankCircleImageView.setBorderWidth(5);
-                overallBottomRankCircleImageView.setBorderWidth(5);
-                if (currentUserPos == 0) {
-                    overallTopRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.gold));
-                    overallBottomRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.gold));
+            mCircleImageAvatarTop.setImageDrawable(drawable);
+            mCircleImageAvatarBottom.setImageDrawable(drawable);
+            if (mCurrentUserPos <= 2) {
+                mCircleImageAvatarTop.setBorderWidth(5);
+                mCircleImageAvatarBottom.setBorderWidth(5);
+                if (mCurrentUserPos == 0) {
+                    mCircleImageAvatarTop.setBorderColor(ContextCompat.getColor(getContext(), R.color.gold));
+                    mCircleImageAvatarBottom.setBorderColor(ContextCompat.getColor(getContext(), R.color.gold));
                 }
-                if (currentUserPos == 1) {
-                    overallTopRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.silver));
-                    overallBottomRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.silver));
+                if (mCurrentUserPos == 1) {
+                    mCircleImageAvatarTop.setBorderColor(ContextCompat.getColor(getContext(), R.color.silver));
+                    mCircleImageAvatarBottom.setBorderColor(ContextCompat.getColor(getContext(), R.color.silver));
                 }
-                if (currentUserPos == 2) {
-                    overallTopRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.bronze));
-                    overallBottomRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.bronze));
+                if (mCurrentUserPos == 2) {
+                    mCircleImageAvatarTop.setBorderColor(ContextCompat.getColor(getContext(), R.color.bronze));
+                    mCircleImageAvatarBottom.setBorderColor(ContextCompat.getColor(getContext(), R.color.bronze));
                 }
             } else {
-                overallTopRankCircleImageView.setBorderWidth(0);
-                overallBottomRankCircleImageView.setBorderWidth(0);
-                overallTopRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.grey_50));
-                overallBottomRankCircleImageView.setBorderColor(ContextCompat.getColor(getContext(), R.color.grey_50));
+                mCircleImageAvatarTop.setBorderWidth(0);
+                mCircleImageAvatarBottom.setBorderWidth(0);
+                mCircleImageAvatarTop.setBorderColor(ContextCompat.getColor(getContext(), R.color.grey_50));
+                mCircleImageAvatarBottom.setBorderColor(ContextCompat.getColor(getContext(), R.color.grey_50));
             }
         } else {
-            overallTopLinearLayout.setVisibility(View.GONE);
-            overallBottomLinearLayout.setVisibility(View.GONE);
+            mLinearTop.setVisibility(View.GONE);
+            mLinearBottom.setVisibility(View.GONE);
         }
-        leaderboardProgressBarLayout.setVisibility(View.GONE);
+        mRelativeProgress.setVisibility(View.GONE);
     }
 
     private void assignFonts() {
         Typeface Roboto_Medium = Typeface.createFromAsset(getActivity().getAssets(), "Roboto-Medium.ttf");
         Typeface Roboto_Regular = Typeface.createFromAsset(getActivity().getAssets(), "Roboto-Regular.ttf");
-        overallTopNameTextView.setTypeface(Roboto_Regular);
-        overallTopScoreTextView.setTypeface(Roboto_Regular);
-        overallBottomNameTextView.setTypeface(Roboto_Regular);
-        overallBottomScoreTextView.setTypeface(Roboto_Regular);
-        overallTopRankTextView.setTypeface(Roboto_Regular);
-        overallBottomRankTextView.setTypeface(Roboto_Regular);
-    }
-
-    public void assignSingletons() {
-        databaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getActivity());
-        networkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
+        mTextTopNickname.setTypeface(Roboto_Regular);
+        mTextTopScore.setTypeface(Roboto_Regular);
+        mTextTopRank.setTypeface(Roboto_Regular);
+        mTextBottomNickname.setTypeface(Roboto_Regular);
+        mTextBottomScore.setTypeface(Roboto_Regular);
+        mTextBottomRank.setTypeface(Roboto_Regular);
     }
 
     private void assignViews(View view) {
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-        overallTopLinearLayout = (LinearLayout) view.findViewById(R.id.overallTopLinearLayout);
-        overallBottomLinearLayout = (LinearLayout) view.findViewById(R.id.overallBottomLinearLayout);
-        leaderboardProgressBarLayout = (RelativeLayout) view.findViewById(R.id.leaderboardProgressBarLayout);
-        overallTopNameTextView = (TextView) view.findViewById(R.id.overallTopNameTextView);
-        overallTopScoreTextView = (TextView) view.findViewById(R.id.overallTopScoreTextView);
-        overallBottomNameTextView = (TextView) view.findViewById(R.id.overallBottomNameTextView);
-        overallBottomScoreTextView = (TextView) view.findViewById(R.id.overallBottomScoreTextView);
-        overallTopRankTextView = (TextView) view.findViewById(R.id.overallTopRankTextView);
-        overallBottomRankTextView = (TextView) view.findViewById(R.id.overallBottomRankTextView);
-        overallTopRankCircleImageView = (CircleImageView) view.findViewById(R.id.overallTopRankCircleImageView);
-        overallBottomRankCircleImageView = (CircleImageView) view.findViewById(R.id.overallBottomRankCircleImageView);
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        mLinearTop = (LinearLayout) view.findViewById(R.id.linear_top);
+        mLinearBottom = (LinearLayout) view.findViewById(R.id.linear_bottom);
+        mRelativeProgress = (RelativeLayout) view.findViewById(R.id.relative_progress);
+        mTextTopNickname = (TextView) view.findViewById(R.id.text_top_nickame);
+        mTextTopScore = (TextView) view.findViewById(R.id.text_top_score);
+        mTextTopRank = (TextView) view.findViewById(R.id.text_top_rank);
+        mTextBottomNickname = (TextView) view.findViewById(R.id.text_bottom_nickname);
+        mTextBottomScore = (TextView) view.findViewById(R.id.text_bottom_score);
+        mTextBottomRank = (TextView) view.findViewById(R.id.text_bottom_rank);
+        mCircleImageAvatarTop = (CircleImageView) view.findViewById(R.id.circle_image_avatar_top);
+        mCircleImageAvatarBottom = (CircleImageView) view.findViewById(R.id.circle_image_avatar_bottom);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+    }
+
+    private void assignAdapter() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mLeaderboardAdapter = new LeaderboardAdapter(getActivity());
+        mLeaderboardAdapter.setListener(this);
+        mRecyclerView.setAdapter(mLeaderboardAdapter);
     }
 
     private void assignListeners() {
@@ -154,47 +160,49 @@ public class LeaderboardAttemptsFragment extends Fragment implements Leaderboard
                 LinearLayoutManager LM = (LinearLayoutManager) recyclerView.getLayoutManager();
                 int posTop = LM.findFirstCompletelyVisibleItemPosition();
                 int posBottom = LM.findLastCompletelyVisibleItemPosition();
-                if (posTop > currentUserPos) {
-                    overallTopLinearLayout.setVisibility(View.VISIBLE);
+                if (posTop > mCurrentUserPos) {
+                    mLinearTop.setVisibility(View.VISIBLE);
                 } else {
-                    overallTopLinearLayout.setVisibility(View.GONE);
+                    mLinearTop.setVisibility(View.GONE);
                 }
-                if (posBottom < currentUserPos) {
-                    overallBottomLinearLayout.setVisibility(View.VISIBLE);
+                if (posBottom < mCurrentUserPos) {
+                    mLinearBottom.setVisibility(View.VISIBLE);
                 } else {
-                    overallBottomLinearLayout.setVisibility(View.GONE);
+                    mLinearBottom.setVisibility(View.GONE);
                 }
             }
         });
 
-        overallTopLinearLayout.setOnClickListener(new View.OnClickListener() {
+        mLinearTop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mRecyclerView.smoothScrollToPosition(currentUserPos);
+                mRecyclerView.smoothScrollToPosition(mCurrentUserPos);
             }
         });
 
-        overallBottomLinearLayout.setOnClickListener(new View.OnClickListener() {
+        mLinearBottom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mRecyclerView.smoothScrollToPosition(currentUserPos);
+                mRecyclerView.smoothScrollToPosition(mCurrentUserPos);
             }
         });
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                interfaceListener.startRefreshData();
+                mInterfaceListener.startRefreshData();
             }
         });
         ((LeaderboardFragment) getParentFragment()).setListener(new LeaderboardFragment.AttemptsFragmentInterface() {
             @Override
             public void stopRefreshing() {
-                swipeRefreshLayout.setRefreshing(false);
+                mSwipeRefreshLayout.setRefreshing(false);
             }
+
             @Override
             public void startRefreshing() {
-                swipeRefreshLayout.setRefreshing(true);
+                mSwipeRefreshLayout.setRefreshing(true);
             }
+
             @Override
             public void reloadData() {
                 loadData();
@@ -202,19 +210,11 @@ public class LeaderboardAttemptsFragment extends Fragment implements Leaderboard
         });
     }
 
-    private void assignAdapter() {
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(linearLayoutManager);
-        leaderboardAdapter = new LeaderboardAdapter(getActivity());
-        leaderboardAdapter.setListener(this);
-        mRecyclerView.setAdapter(leaderboardAdapter);
-    }
-
-    public int findPosition() {
-        for (User user : userList) {
-            if (user.getUser_student_number_id().equals(databaseHandlerSingleton.getLoggedUser().getUser_student_number_id())) {
-                currentUser = user;
-                return userList.indexOf(user);
+    private int findPosition() {
+        for (User user : mUserList) {
+            if (user.getUser_student_number_id().equals(mDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id())) {
+                mCurrentUser = user;
+                return mUserList.indexOf(user);
             }
         }
         return -1;
@@ -236,26 +236,21 @@ public class LeaderboardAttemptsFragment extends Fragment implements Leaderboard
     public void addList(ArrayList<User> list) {
         if (!list.isEmpty()) {
             sortList(list);
-            userList = new ArrayList<>();
-            userList.addAll(list);
-            leaderboardAdapter.setUserList(userList, "attempts");
-            currentUserPos = findPosition();
+            mUserList = new ArrayList<>();
+            mUserList.addAll(list);
+            mLeaderboardAdapter.setUserList(mUserList, "attempts");
+            mCurrentUserPos = findPosition();
         } else {
-            leaderboardAdapter.clearUserList();
+            mLeaderboardAdapter.clearUserList();
         }
     }
 
     public void setListener(InterfaceListener interfaceListener) {
-        this.interfaceListener = interfaceListener;
-    }
-
-    @Override
-    public void itemClicked(int position, User selected_user) {
-        interfaceListener.itemClicked(position, selected_user);
+        this.mInterfaceListener = interfaceListener;
     }
 
     public interface InterfaceListener {
-        void itemClicked(int position, User selected_user);
+        void itemClicked(int position, String user_student_number);
 
         void startRefreshData();
     }

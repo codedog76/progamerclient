@@ -72,9 +72,6 @@ public class PuzzleCodeBuilder {
         return mCSharpCodeToRunAnswer;
     }
 
-    /*
-     *
-     */
     public void processCSharpCode(String cSharpCode) {
         List<String> cSharpCodeAfterComments = removeComments(cSharpCode);
         List<String> cSharpCodeAfterHeaderTags = processHeaderTags(cSharpCodeAfterComments);

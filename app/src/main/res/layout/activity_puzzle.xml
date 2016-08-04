@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activityPuzzleMainLayout"
     android:layout_width="match_parent"
@@ -11,19 +12,17 @@
         layout="@layout/app_actionbar" />
 
     <ScrollView
-        android:layout_below="@id/app_actionbar"
         android:layout_width="match_parent"
-        android:layout_weight="1"
         android:layout_height="match_parent"
+        android:layout_below="@id/app_actionbar"
         android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <android.support.v7.widget.CardView
-                android:id="@+id/topView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp">
@@ -35,32 +34,30 @@
                     android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/puzzleInstructionsText"
+                        android:id="@+id/text_instructions"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
                         android:ellipsize="none"
                         android:maxLines="100"
-                        android:scrollHorizontally="false"
-                        android:text="PLACEHOLDER" />
+                        android:scrollHorizontally="false" />
 
                     <View
-                        android:id="@+id/levelRowDivider"
+                        android:id="@+id/view_divider"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:alpha="0.12"
                         android:background="@color/black" />
 
                     <TextView
-                        android:id="@+id/puzzleExpectedOutputText"
+                        android:id="@+id/text_expected_output"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:layout_marginTop="10dp"
                         android:ellipsize="none"
-                        android:layout_gravity="center"
                         android:maxLines="100"
-                        android:scrollHorizontally="false"
-                        android:text="PLACEHOLDER" />
+                        android:scrollHorizontally="false" />
 
                 </LinearLayout>
 
@@ -70,10 +67,9 @@
                 android:id="@+id/puzzleView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/topView"
                 android:layout_marginLeft="6dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginRight="6dp">
+                android:layout_marginRight="6dp"
+                android:layout_marginTop="6dp">
 
                 <FrameLayout
                     android:id="@+id/fragment_container"
@@ -81,13 +77,13 @@
                     android:layout_height="wrap_content" />
 
             </android.support.v7.widget.CardView>
+
         </LinearLayout>
 
     </ScrollView>
 
-
     <LinearLayout
-        android:id="@+id/bottomBar"
+        android:id="@+id/linear_bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -95,43 +91,36 @@
         android:elevation="2dp"
         android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/text_timer"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal">
+            android:gravity="center"
+            android:text="@string/string_attempts_counter" />
 
-            <TextView
-                android:id="@+id/puzzleTimerText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Time: 00:00" />
-
-            <TextView
-                android:id="@+id/puzzleAttemptsText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Attempts: 1" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/text_attempts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/string_timer" />
 
         <Button
-            android:id="@+id/puzzleButton"
+            android:id="@+id/button_next"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:layout_margin="6dp"
             android:background="@drawable/round_corner_button_login"
-            android:text="@string/puzzle_check_button"
+            android:text="@string/string_check"
             android:textColor="@color/white"
             android:textSize="14sp" />
 
     </LinearLayout>
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/resultPopup"
+    <LinearLayout
+        android:id="@+id/linear_result_popup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -140,15 +129,15 @@
         android:elevation="2dp"
         android:minHeight="50dp"
         android:minWidth="100dp"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <TextView
-            android:id="@+id/resultPopupTextView"
+            android:id="@+id/text_result_popup"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="CORRECT"
             android:textColor="@color/white" />
-    </android.support.v7.widget.CardView>
+
+    </LinearLayout>
 
 </RelativeLayout>

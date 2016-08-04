@@ -4,37 +4,32 @@ package fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.progamer.R;
+
 import java.util.ArrayList;
 
 import activities.LevelActivity;
-import activities.LoginActivity;
-import activities.UserProfileActivity;
 import adapters.LevelAdapter;
 import models.Level;
-import models.Puzzle;
 import singletons.DatabaseHandlerSingleton;
 
-public class LevelsFragment extends Fragment implements LevelAdapter.clickListener {
+public class LevelsFragment extends Fragment implements LevelAdapter.ClickListener {
 
     private RecyclerView mRecyclerView;
-    private ArrayList<Level> levelList;
-    private LevelAdapter levelAdapter;
+    private ArrayList<Level> mLevelList;
+    private LevelAdapter mLevelAdapter;
     private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
 
     public LevelsFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,6 +50,16 @@ public class LevelsFragment extends Fragment implements LevelAdapter.clickListen
         addList(mDatabaseHandlerSingleton.getLevels());
     }
 
+    @Override
+    public void itemClicked(int position, int level_id) {
+        Intent intent = new Intent(getContext(), LevelActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putInt("level_id", level_id);
+        intent.putExtras(bundle);
+        startActivity(intent);
+        getActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+    }
+
     private void assignSingletons() {
         mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getActivity());
     }
@@ -62,31 +67,23 @@ public class LevelsFragment extends Fragment implements LevelAdapter.clickListen
     private void assignAdapter() {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(linearLayoutManager);
-        levelAdapter = new LevelAdapter(getActivity());
-        levelAdapter.setListener(this);
-        mRecyclerView.setAdapter(levelAdapter);
+        mLevelAdapter = new LevelAdapter(getActivity());
+        mLevelAdapter.setListener(this);
+        mRecyclerView.setAdapter(mLevelAdapter);
     }
 
     private void assignViews(View view) {
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
     }
 
     public void addList(ArrayList<Level> list) {
         if (!list.isEmpty()) {
-            levelList = new ArrayList<>();
-            levelList.addAll(list);
-            levelAdapter.setLevelList(levelList);
-        } else{
-            levelAdapter.clearLevelList();
+            mLevelList = new ArrayList<>();
+            mLevelList.addAll(list);
+            mLevelAdapter.setLevelList(mLevelList);
+        } else {
+            mLevelAdapter.clearLevelList();
         }
     }
 
-    @Override
-    public void itemClicked(int position, Level selected_level) {
-        Intent intent = new Intent(getContext(), LevelActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putInt("level_id", selected_level.getLevel_id());
-        intent.putExtras(bundle);
-        startActivity(intent);
-    }
 }

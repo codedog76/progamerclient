@@ -5,7 +5,7 @@
     tools:context="fragments.puzzles.SingleChoiceListFragment">
 
     <ListView
-        android:id="@+id/singleSelectionListView"
+        android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

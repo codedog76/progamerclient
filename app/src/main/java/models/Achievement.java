@@ -7,9 +7,18 @@ public class Achievement {
     private String achievement_title;
     private String achievement_description;
     private int achievement_total;
+    private String achievement_target;
 
     public Achievement() {
 
+    }
+
+    public String getAchievement_target() {
+        return achievement_target;
+    }
+
+    public void setAchievement_target(String achievement_target) {
+        this.achievement_target = achievement_target;
     }
 
     public int getAchievement_id() {

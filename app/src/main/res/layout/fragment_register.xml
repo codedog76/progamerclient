@@ -57,14 +57,14 @@
 
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/registerStudentNumberTextInputLayout"
+                    android:id="@+id/text_input_student_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="80dp"
                     android:paddingTop="16dp">
 
                     <EditText
-                        android:id="@+id/registerStudentNumberText"
+                        android:id="@+id/edit_student_number"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:hint="@string/register_student_number_hint"
@@ -73,18 +73,19 @@
                         android:maxLength="75"
                         android:paddingBottom="16dp"
                         android:paddingTop="8dp"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        tools:ignore="TextFields" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/registerStudentNicknameTextInputLayout"
+                    android:id="@+id/text_input_nickname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="80dp"
                     android:paddingTop="16dp">
 
                     <EditText
-                        android:id="@+id/registerStudentNicknameText"
+                        android:id="@+id/edit_nickname"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:hint="Nickname*"
@@ -97,14 +98,14 @@
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/registerPasswordTextInputLayout"
+                    android:id="@+id/text_input_password_1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="80dp"
                     android:paddingTop="16dp">
 
                     <com.xwray.passwordview.PasswordView
-                        android:id="@+id/registerPasswordText"
+                        android:id="@+id/password_view_1"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:hint="@string/register_password_hint"
@@ -115,14 +116,14 @@
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/registerConfirmPasswordTextInputLayout"
+                    android:id="@+id/text_input_password_2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="80dp"
                     android:paddingTop="16dp">
 
                     <com.xwray.passwordview.PasswordView
-                        android:id="@+id/registerConfirmPasswordText"
+                        android:id="@+id/password_view_2"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:hint="@string/register_confirm_password_hint"
@@ -156,7 +157,7 @@
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/registerButton"
+                    android:id="@+id/button_register"
                     android:layout_width="match_parent"
                     android:layout_height="36dp"
                     android:layout_gravity="center_horizontal"

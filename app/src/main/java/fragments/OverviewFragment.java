@@ -33,11 +33,13 @@ import java.util.ArrayList;
  */
 public class OverviewFragment extends Fragment {
 
+    private BarChart mChart;
+    private SeekBar mSeekBarX, mSeekBarY;
+    private TextView tvX, tvY;
 
     public OverviewFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,10 +47,6 @@ public class OverviewFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_overview, container, false);
     }
-
-    private BarChart mChart;
-    private SeekBar mSeekBarX, mSeekBarY;
-    private TextView tvX, tvY;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {

@@ -24,7 +24,7 @@ import puzzle.PuzzleCodeBuilder;
 public class MultipleChoiceListFragment extends Fragment {
 
     private String mClassName = getClass().toString();
-    private ListView mMultipleSelectionListView;
+    private ListView mListView;
     private ArrayAdapter<String> mArrayAdapter;
     private PuzzleActivity mParentPuzzleActivity;
     private PuzzleCodeBuilder mCurrentPuzzleCodeBuilder;
@@ -60,8 +60,8 @@ public class MultipleChoiceListFragment extends Fragment {
                     toDisplayList.add(pair.first);
             }
             mArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_checkbox, toDisplayList);
-            mMultipleSelectionListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-            mMultipleSelectionListView.setAdapter(mArrayAdapter);
+            mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+            mListView.setAdapter(mArrayAdapter);
         } else {
             mParentPuzzleActivity.finish();
         }
@@ -70,10 +70,10 @@ public class MultipleChoiceListFragment extends Fragment {
     public Boolean checkIfCorrect() {
         List<String> codeToRun = new ArrayList<>();
         List<String> checkedItems = new ArrayList<>();
-        SparseBooleanArray checked = mMultipleSelectionListView.getCheckedItemPositions();
+        SparseBooleanArray checked = mListView.getCheckedItemPositions();
         for (int i = 0; i < checked.size(); i++) {
             if (checked.valueAt(i)) {
-                checkedItems.add(mMultipleSelectionListView.getItemAtPosition(checked.keyAt(i)).toString());
+                checkedItems.add(mListView.getItemAtPosition(checked.keyAt(i)).toString());
             }
         }
         if (mCurrentPuzzleCodeBuilder.getProcessCodeSelected()) {
@@ -119,6 +119,6 @@ public class MultipleChoiceListFragment extends Fragment {
     }
 
     private void assignViews(View view) {
-        mMultipleSelectionListView = (ListView) view.findViewById(R.id.multipleSelectionListView);
+        mListView = (ListView) view.findViewById(R.id.list_view);
     }
 }

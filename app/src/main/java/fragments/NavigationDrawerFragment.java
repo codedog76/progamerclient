@@ -16,7 +16,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
-    private drawerListener listener;
+    private DrawerListener mDrawerListener;
 
     public NavigationDrawerFragment() {
         // Required empty public constructor
@@ -29,27 +29,24 @@ public class NavigationDrawerFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
     }
 
-    public void setListener(drawerListener listener)
-    {
-        this.listener = listener;
+    public void setListener(DrawerListener listener) {
+        this.mDrawerListener = listener;
     }
 
 
     public void setUp(DrawerLayout drawerLayout, Toolbar toolbar) {
         mDrawerLayout = drawerLayout;
-        mDrawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close)
-        {
+        mDrawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
             @Override
-            public void onDrawerOpened(View drawerView)
-            {
+            public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                listener.drawerOpened();
+                mDrawerListener.drawerOpened();
             }
 
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                listener.drawerClosed();
+                mDrawerListener.drawerClosed();
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -61,8 +58,9 @@ public class NavigationDrawerFragment extends Fragment {
         });
     }
 
-    public interface drawerListener {
+    public interface DrawerListener {
         void drawerClosed();
+
         void drawerOpened();
     }
 

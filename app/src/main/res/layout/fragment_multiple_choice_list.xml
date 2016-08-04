@@ -6,7 +6,7 @@
     tools:context="fragments.puzzles.MultipleChoiceListFragment">
 
     <ListView
-        android:id="@+id/multipleSelectionListView"
+        android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

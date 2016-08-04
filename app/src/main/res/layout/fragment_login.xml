@@ -32,14 +32,14 @@
                 android:padding="16dp">
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/loginStudentNumberTextInputLayout"
+                    android:id="@+id/text_input_student_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="80dp"
                     android:paddingTop="16dp">
 
                     <EditText
-                        android:id="@+id/loginStudentNumberText"
+                        android:id="@+id/edit_student_number"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:hint="@string/login_student_number_hint"
@@ -47,18 +47,19 @@
                         android:inputType="text"
                         android:paddingBottom="16dp"
                         android:paddingTop="8dp"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        tools:ignore="TextFields" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/loginPasswordTextInputLayout"
+                    android:id="@+id/text_input_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="80dp"
                     android:paddingTop="16dp">
 
                     <com.xwray.passwordview.PasswordView
-                        android:id="@+id/loginPasswordText"
+                        android:id="@+id/password_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:hint="@string/login_password_hint"
@@ -70,7 +71,7 @@
 
 
                 <Button
-                    android:id="@+id/loginButton"
+                    android:id="@+id/button_login"
                     android:layout_width="match_parent"
                     android:layout_height="36dp"
                     android:layout_gravity="center_horizontal"

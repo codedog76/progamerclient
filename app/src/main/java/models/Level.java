@@ -2,7 +2,7 @@ package models;
 
 import java.io.Serializable;
 
-public class Level implements Serializable {
+public class Level {
 
     private int level_id; //PK
     private String level_user_student_number_ID; //fk

@@ -14,18 +14,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.progamer.R;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import activities.MainActivity;
 import activities.UserProfileActivity;
 import models.User;
 import singletons.NetworkManagerSingleton;
@@ -34,23 +30,23 @@ import singletons.NetworkManagerSingleton;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class LeaderboardFragment extends Fragment implements LeaderboardOverallFragment.InterfaceListener, LeaderboardAttemptsFragment.InterfaceListener, LeaderboardTimeFragment.InterfaceListener {
+public class LeaderboardFragment extends Fragment implements LeaderboardScoreFragment.InterfaceListener, LeaderboardAttemptsFragment.InterfaceListener, LeaderboardTimeFragment.InterfaceListener {
 
-    private TabLayout leaderboardTabLayout;
-    private ViewPager leaderboardViewPager;
-    private LeaderboardOverallFragment leaderboardOverallFragment;
-    private LeaderboardAttemptsFragment leaderboardAttemptsFragment;
-    private LeaderboardTimeFragment leaderboardTimeFragment;
-    private TextView leaderboardLoadingTextView, leaderboardTryAgainTextView;
-    private RelativeLayout leaderboardRelativeLayout;
-    private LinearLayout leaderboardProgressBarLinearLayout, leaderboardTryAgainLinearLayout;
-    private ViewPagerAdapter adapter;
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
+    private LeaderboardScoreFragment mLeaderboardScoreFragment;
+    private LeaderboardAttemptsFragment mLeaderboardAttemptsFragment;
+    private LeaderboardTimeFragment mLeaderboardTimeFragment;
+    private TextView mTextLoading, mTextTryAgain;
+    private RelativeLayout mRelativeLayout;
+    private LinearLayout mLinearProgressBar, mLinearTryAgain;
+    private ViewPagerAdapter mViewPagerAdapter;
     private NetworkManagerSingleton mNetworkManagerSingleton;
-    private OverallFragmentInterface overallFragmentInterface;
-    private AttemptsFragmentInterface attemptsFragmentInterface;
-    private TimeFragmentInterface timeFragmentInterface;
-    private Button leaderboardTryAgainButton;
-    private ArrayList<User> leaderboardList = new ArrayList<>();
+    private ScoreFragmentInterface mScoreFragmentInterface;
+    private AttemptsFragmentInterface mAttemptsFragmentInterface;
+    private TimeFragmentInterface mTimeFragmentInterface;
+    private Button mButtonTryAgain;
+    private ArrayList<User> mLeaderboardList = new ArrayList<>();
 
     public LeaderboardFragment() {
         // Required empty public constructor
@@ -70,119 +66,11 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
         initializeData();
     }
 
-    private void initializeData() {
-        leaderboardRelativeLayout.setVisibility(View.VISIBLE);
-        leaderboardProgressBarLinearLayout.setVisibility(View.VISIBLE);
-        leaderboardTryAgainLinearLayout.setVisibility(View.GONE);
-        mNetworkManagerSingleton.putUserLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
-            @Override
-            public void getResult(Boolean response, String message) {
-                if (response) {
-                    mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
-                        @Override
-                        public void getResult(ArrayList<User> object, Boolean response, String message) {
-                            if (response) {
-                                leaderboardList.clear();
-                                leaderboardList = object;
-                                assignViewPager();
-                                leaderboardRelativeLayout.setVisibility(View.GONE);
-                                leaderboardProgressBarLinearLayout.setVisibility(View.GONE);
-                                leaderboardTryAgainLinearLayout.setVisibility(View.GONE);
-                            } else {
-                                leaderboardProgressBarLinearLayout.setVisibility(View.GONE);
-                                leaderboardTryAgainLinearLayout.setVisibility(View.VISIBLE);
-                            }
-                        }
-                    });
-                } else {
-                    leaderboardProgressBarLinearLayout.setVisibility(View.GONE);
-                    leaderboardTryAgainLinearLayout.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
-    }
-
-    private void refreshData() {
-        overallFragmentInterface.startRefreshing();
-        attemptsFragmentInterface.startRefreshing();
-        timeFragmentInterface.startRefreshing();
-        mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
-            @Override
-            public void getResult(ArrayList<User> object, Boolean response, String message) {
-                if (response) {
-                    leaderboardList.clear();
-                    leaderboardList = object;
-                    overallFragmentInterface.reloadData();
-                    attemptsFragmentInterface.reloadData();
-                    timeFragmentInterface.reloadData();
-                }
-                overallFragmentInterface.stopRefreshing();
-                attemptsFragmentInterface.stopRefreshing();
-                timeFragmentInterface.stopRefreshing();
-            }
-        });
-    }
-
-    public ArrayList<User> getLeaderboardList() {
-        return leaderboardList;
-    }
-
-    private void assignSingletons() {
-        mNetworkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
-    }
-
-    private void assignViews(View view) {
-        leaderboardViewPager = (ViewPager) view.findViewById(R.id.leaderboardViewPager);
-        leaderboardTabLayout = (TabLayout) view.findViewById(R.id.leaderboardTabLayout);
-        leaderboardRelativeLayout = (RelativeLayout) view.findViewById(R.id.leaderboardRelativeLayout);
-        leaderboardProgressBarLinearLayout = (LinearLayout) view.findViewById(R.id.leaderboardProgressBarLinearLayout);
-        leaderboardTryAgainLinearLayout = (LinearLayout) view.findViewById(R.id.leaderboardTryAgainLinearLayout);
-        leaderboardTryAgainButton = (Button) view.findViewById(R.id.leaderboardTryAgainButton);
-        leaderboardLoadingTextView = (TextView) view.findViewById(R.id.leaderboardLoadingTextView);
-        leaderboardTryAgainTextView = (TextView) view.findViewById(R.id.leaderboardTryAgainTextView);
-    }
-
-    private void assignFonts() {
-        Typeface Roboto_Regular = Typeface.createFromAsset(getContext().getAssets(), "Roboto-Regular.ttf");
-        leaderboardLoadingTextView.setTypeface(Roboto_Regular);
-        leaderboardTryAgainTextView.setTypeface(Roboto_Regular);
-    }
-
-    private void assingListeners() {
-        leaderboardTryAgainButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                initializeData();
-            }
-        });
-    }
-
-    private void assignViewPager() {
-        setupViewPager(leaderboardViewPager);
-        leaderboardTabLayout.setupWithViewPager(leaderboardViewPager);
-    }
-
-    private void setupViewPager(ViewPager viewPager) {
-        viewPager.setOffscreenPageLimit(3);
-        adapter = new ViewPagerAdapter(getChildFragmentManager());
-        leaderboardOverallFragment = new LeaderboardOverallFragment();
-        leaderboardOverallFragment.setListener(this);
-        adapter.addFragment(leaderboardOverallFragment, "Score");
-        leaderboardAttemptsFragment = new LeaderboardAttemptsFragment();
-        leaderboardAttemptsFragment.setListener(this);
-        adapter.addFragment(leaderboardAttemptsFragment, "Attempts");
-        leaderboardTimeFragment = new LeaderboardTimeFragment();
-        leaderboardTimeFragment.setListener(this);
-        adapter.addFragment(leaderboardTimeFragment, "Time");
-        viewPager.setAdapter(adapter);
-    }
-
     @Override
-    public void itemClicked(int position, User selected_user) {
+    public void itemClicked(int position, String user_student_number) {
         Intent intent = new Intent(getContext(), UserProfileActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("selected_user", selected_user);
+        bundle.putSerializable("selected_user", user_student_number);
         intent.putExtras(bundle);
         startActivity(intent);
     }
@@ -192,7 +80,123 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
         refreshData();
     }
 
-    public interface OverallFragmentInterface {
+    @Override
+    public void onStop() {
+        super.onStop();
+        mNetworkManagerSingleton.cancelJSONRequest("getLeaderboardJsonRequest");
+    }
+
+    private void initializeData() {
+        mRelativeLayout.setVisibility(View.VISIBLE);
+        mLinearProgressBar.setVisibility(View.VISIBLE);
+        mLinearTryAgain.setVisibility(View.GONE);
+        mNetworkManagerSingleton.putUserLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
+            @Override
+            public void getResult(Boolean response, String message) {
+                if (response) {
+                    mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+                        @Override
+                        public void getResult(ArrayList<User> object, Boolean response, String message) {
+                            if (response) {
+                                mLeaderboardList.clear();
+                                mLeaderboardList = object;
+                                assignViewPager();
+                                mRelativeLayout.setVisibility(View.GONE);
+                                mLinearProgressBar.setVisibility(View.GONE);
+                                mLinearTryAgain.setVisibility(View.GONE);
+                            } else {
+                                mLinearProgressBar.setVisibility(View.GONE);
+                                mLinearTryAgain.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    });
+                } else {
+                    mLinearProgressBar.setVisibility(View.GONE);
+                    mLinearTryAgain.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+    }
+
+    private void refreshData() {
+        mScoreFragmentInterface.startRefreshing();
+        mAttemptsFragmentInterface.startRefreshing();
+        mTimeFragmentInterface.startRefreshing();
+        mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+            @Override
+            public void getResult(ArrayList<User> object, Boolean response, String message) {
+                if (response) {
+                    mLeaderboardList.clear();
+                    mLeaderboardList = object;
+                    mScoreFragmentInterface.reloadData();
+                    mAttemptsFragmentInterface.reloadData();
+                    mTimeFragmentInterface.reloadData();
+                }
+                mScoreFragmentInterface.stopRefreshing();
+                mAttemptsFragmentInterface.stopRefreshing();
+                mTimeFragmentInterface.stopRefreshing();
+            }
+        });
+    }
+
+    private void assignSingletons() {
+        mNetworkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
+    }
+
+    private void assignViews(View view) {
+        mViewPager = (ViewPager) view.findViewById(R.id.view_pager);
+        mTabLayout = (TabLayout) view.findViewById(R.id.tab_layout);
+        mRelativeLayout = (RelativeLayout) view.findViewById(R.id.relative_layout);
+        mLinearProgressBar = (LinearLayout) view.findViewById(R.id.linear_progress_bar);
+        mLinearTryAgain = (LinearLayout) view.findViewById(R.id.linear_try_again);
+        mButtonTryAgain = (Button) view.findViewById(R.id.button_try_again);
+        mTextLoading = (TextView) view.findViewById(R.id.text_loading);
+        mTextTryAgain = (TextView) view.findViewById(R.id.text_try_again);
+    }
+
+    private void assignFonts() {
+        Typeface Roboto_Medium = Typeface.createFromAsset(getActivity().getAssets(), "Roboto-Medium.ttf");
+        Typeface Roboto_Regular = Typeface.createFromAsset(getContext().getAssets(), "Roboto-Regular.ttf");
+        mButtonTryAgain.setTypeface(Roboto_Medium);
+        mTextLoading.setTypeface(Roboto_Regular);
+        mTextTryAgain.setTypeface(Roboto_Regular);
+    }
+
+    private void assingListeners() {
+        mButtonTryAgain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initializeData();
+            }
+        });
+    }
+
+    private void assignViewPager() {
+        setupViewPager(mViewPager);
+        mTabLayout.setupWithViewPager(mViewPager);
+    }
+
+    private void setupViewPager(ViewPager viewPager) {
+        viewPager.setOffscreenPageLimit(3);
+        mViewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager());
+        mLeaderboardScoreFragment = new LeaderboardScoreFragment();
+        mLeaderboardScoreFragment.setListener(this);
+        mViewPagerAdapter.addFragment(mLeaderboardScoreFragment, "Score");
+        mLeaderboardAttemptsFragment = new LeaderboardAttemptsFragment();
+        mLeaderboardAttemptsFragment.setListener(this);
+        mViewPagerAdapter.addFragment(mLeaderboardAttemptsFragment, "Attempts");
+        mLeaderboardTimeFragment = new LeaderboardTimeFragment();
+        mLeaderboardTimeFragment.setListener(this);
+        mViewPagerAdapter.addFragment(mLeaderboardTimeFragment, "Time");
+        viewPager.setAdapter(mViewPagerAdapter);
+    }
+
+    public ArrayList<User> getLeaderboardList() {
+        return mLeaderboardList;
+    }
+
+    public interface ScoreFragmentInterface {
         void stopRefreshing();
 
         void startRefreshing();
@@ -216,29 +220,16 @@ public class LeaderboardFragment extends Fragment implements LeaderboardOverallF
         void reloadData();
     }
 
-    public void setListener(OverallFragmentInterface overallFragmentInterface) {
-        this.overallFragmentInterface = overallFragmentInterface;
+    public void setListener(ScoreFragmentInterface scoreFragmentInterface) {
+        this.mScoreFragmentInterface = scoreFragmentInterface;
     }
 
     public void setListener(AttemptsFragmentInterface attemptsFragmentInterface) {
-        this.attemptsFragmentInterface = attemptsFragmentInterface;
+        this.mAttemptsFragmentInterface = attemptsFragmentInterface;
     }
 
     public void setListener(TimeFragmentInterface timeFragmentInterface) {
-        this.timeFragmentInterface = timeFragmentInterface;
-    }
-
-    private boolean isFragmentOverallLoaded, isFragmentAttemptsLoaded, isFragmentTimeLoaded;
-
-    public void syncLeaderboardData(String fragment) {
-        if (fragment.equals("overall"))
-            isFragmentOverallLoaded = true;
-        if (fragment.equals("attempts"))
-            isFragmentAttemptsLoaded = true;
-        if (fragment.equals("time"))
-            isFragmentTimeLoaded = true;
-        if (isFragmentOverallLoaded && isFragmentAttemptsLoaded && isFragmentTimeLoaded) {
-        }
+        this.mTimeFragmentInterface = timeFragmentInterface;
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {

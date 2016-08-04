@@ -23,7 +23,7 @@ import puzzle.PuzzleCodeBuilder;
 public class TrueFalseFragment extends Fragment {
 
     private String mClassName = getClass().toString();
-    private ListView mTrueFalseListView;
+    private ListView mListView;
     private ArrayAdapter<String> mArrayAdapter;
     private PuzzleActivity mParentPuzzleActivity;
     private PuzzleCodeBuilder mCurrentPuzzleCodeBuilder;
@@ -54,16 +54,16 @@ public class TrueFalseFragment extends Fragment {
         toDisplayList.add("True");
         toDisplayList.add("False");
         mArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_checkbox, toDisplayList);
-        mTrueFalseListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        mTrueFalseListView.setAdapter(mArrayAdapter);
+        mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        mListView.setAdapter(mArrayAdapter);
     }
 
     public Boolean checkIfCorrect() {
         String checkedItem = "";
-        SparseBooleanArray checked = mTrueFalseListView.getCheckedItemPositions();
+        SparseBooleanArray checked = mListView.getCheckedItemPositions();
         for (int i = 0; i < checked.size(); i++) {
             if (checked.valueAt(i)) {
-                checkedItem = mTrueFalseListView.getItemAtPosition(checked.keyAt(i)).toString();
+                checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
             }
         }
         String expectedAnswer = mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer().get(0).toString();
@@ -72,6 +72,6 @@ public class TrueFalseFragment extends Fragment {
     }
 
     private void assignViews(View view) {
-        mTrueFalseListView = (ListView) view.findViewById(R.id.trueFalseListView);
+        mListView = (ListView) view.findViewById(R.id.list_view);
     }
 }

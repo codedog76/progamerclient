@@ -22,7 +22,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/settingLaunchTextView1"
+            android:id="@+id/text_launch_screen_title"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:gravity="center_vertical"
@@ -46,7 +46,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/settingLaunchTextView2"
+                    android:id="@+id/text_launch_screen_active"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Launch screen"
@@ -54,7 +54,7 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/settingLaunchTextView3"
+                    android:id="@+id/text_launch_screen_active_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingRight="10dp"
@@ -63,7 +63,7 @@
             </LinearLayout>
 
             <Switch
-                android:id="@+id/settingsLaunchActiveSwitch"
+                android:id="@+id/switch_launch_screen_active"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -85,7 +85,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/settingLaunchTextView4"
+                    android:id="@+id/text_launch_screen_time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Launch screen time"
@@ -93,7 +93,7 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/settingLaunchTextView5"
+                    android:id="@+id/text_launch_screen_time_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingRight="10dp"
@@ -102,7 +102,7 @@
             </LinearLayout>
 
             <Spinner
-                android:id="@+id/settingsLaunchDurationSpinner"
+                android:id="@+id/spinner_launch_screen_time"
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical" />
@@ -118,7 +118,7 @@
             android:background="@color/black" />
 
         <TextView
-            android:id="@+id/settingLaunchTextView6"
+            android:id="@+id/text_data_usage_title"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:gravity="center_vertical"
@@ -142,7 +142,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/settingLaunchTextView7"
+                    android:id="@+id/text_sync_over_wifi"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Sync over Wi-Fi only"
@@ -151,7 +151,7 @@
             </LinearLayout>
 
             <Switch
-                android:id="@+id/settingsSyncWifiSwitch"
+                android:id="@+id/switch_sync_over_wifi"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"

@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import models.Achievement;
@@ -40,7 +41,7 @@ public class NetworkManagerSingleton {
     private SettingsSingleton mSettingsSingleton;
     private RequestQueue mRequestQueue;
     private Context mContext;
-    private final String mClassName = getClass().toString();
+    private String mClassName = getClass().toString();
 
     private static final int TIME_OUT_INTERVAL = 5000;
     private static final String LOGIN_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/login";
@@ -53,6 +54,8 @@ public class NetworkManagerSingleton {
     private static final String PUZZLES_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/puzzles";
     private static final String ACHIEVEMENTS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/achievements";
     private static final String USERACHIEVEMENTS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/userachievements";
+    private static final String AVERAGEUSER_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/averagelevel";
+    private static final String UPDATE_USERACHIEVEMENTS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/updateuserachievements";
 
     private NetworkManagerSingleton(Context context) {
         mContext = context;
@@ -280,6 +283,7 @@ public class NetworkManagerSingleton {
                                         achievement.setAchievement_title(jsonObject.getString("achievement_title"));
                                         achievement.setAchievement_description(jsonObject.getString("achievement_description"));
                                         achievement.setAchievement_total(jsonObject.getInt("achievement_total"));
+                                        achievement.setAchievement_target(jsonObject.getString("achievement_target"));
                                         mDatabaseHandlerSingleton.insertAchievement(achievement);
                                     }
                                     getLoggedUserAchievementsJSONRequest(user, booleanResponseListener);
@@ -328,7 +332,6 @@ public class NetworkManagerSingleton {
                                 if (validResponse(response)) {
                                     JSONArray jsonArray = response.getJSONArray("userachievement_list");
                                     for (int x = 0; x < jsonArray.length(); x++) {
-                                        Log.e("UserAchievsonArray", jsonArray.length() + "");
                                         JSONObject jsonObject = jsonArray.getJSONObject(x);
                                         UserAchievement userAchievement = new UserAchievement();
                                         //pk auto increment
@@ -336,8 +339,10 @@ public class NetworkManagerSingleton {
                                         userAchievement.setUser_student_number(jsonObject.getString("user_student_number")); //database pk
                                         userAchievement.setAchievement_id(jsonObject.getInt("achievement_id"));
                                         userAchievement.setUserachievement_progress(jsonObject.getInt("userachievement_progress"));
+                                        userAchievement.setUserachievement_completed(jsonObject.getInt("userachievement_completed"));
+                                        userAchievement.setUserachievement_notified(jsonObject.getInt("userachievement_notified"));
+                                        userAchievement.setUserachievement_date_completed(jsonObject.getString("userachievement_date_completed"));
                                         long achievement_id = mDatabaseHandlerSingleton.insertUserAchievement(userAchievement);
-                                        Log.e("achievement_id", achievement_id + "");
                                     }
                                     getLevelsJsonRequest(user, booleanResponseListener);
                                 } else {
@@ -401,12 +406,12 @@ public class NetworkManagerSingleton {
                                         for (int a = 0; a < jsonArray2.length(); a++) {
                                             JSONObject jsonObject2 = jsonArray2.getJSONObject(a);
                                             Puzzle puzzle = new Puzzle();
-                                            puzzle.setPuzzle_database_id(jsonObject2.getInt("puzzle_id")); //refers to database pk
                                             // pk auto increment
+                                            puzzle.setPuzzle_database_id(jsonObject2.getInt("puzzle_id")); //refers to database pk
                                             puzzle.setPuzzle_level_id((int) level_id); //fk
                                             puzzle.setPuzzle_instructions(jsonObject2.getString("puzzle_instructions"));
                                             puzzle.setPuzzle_data(jsonObject2.getString("puzzle_data"));
-                                            long puzzle_id = mDatabaseHandlerSingleton.insertPuzzle(puzzle);
+                                            mDatabaseHandlerSingleton.insertPuzzle(puzzle);
                                         }
                                     }
                                     booleanResponseListener.getResult(true, response.getString("response_message"));
@@ -502,12 +507,17 @@ public class NetworkManagerSingleton {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
-                                User user = new User();
-                                user.setUser_student_number_id(response.getString("user_student_number"));
-                                user.setUser_nickname(response.getString("user_nickname"));
-                                user.setUser_avatar(response.getInt("user_avatar"));
-                                user.setUser_is_private(response.getInt("user_is_private"));
-                                objectResponseListener.getResult(user, true, "");
+                                if (response.getBoolean("response")) {
+                                    User user = new User();
+                                    user.setUser_student_number_id(response.getString("user_student_number"));
+                                    user.setUser_nickname(response.getString("user_nickname"));
+                                    user.setUser_avatar(response.getInt("user_avatar"));
+                                    user.setUser_is_private(response.getInt("user_is_private"));
+                                    objectResponseListener.getResult(user, true, "");
+                                } else {
+                                    Log.e(mClassName, "getAverageLevelDataJsonRequest Error: Invalid response");
+                                    objectResponseListener.getResult(null, false, response.getString("response_message"));
+                                }
                             } catch (JSONException ex) {
                                 Log.e(mClassName, "Error downloadUserJSONRequest: " + ex.getMessage());
                                 objectResponseListener.getResult(null, false, ex.getMessage());
@@ -593,96 +603,35 @@ public class NetworkManagerSingleton {
 
     //PUT METHOD:inserts/updates user in external database
     //If successful true is passed to listener, else false with error message.
-    public synchronized void putUserJsonRequest(final BooleanResponseListener booleanResponseListener) {
+    public synchronized void putUserJsonRequest(User current_user, final BooleanResponseListener booleanResponseListener) {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
-            User current_user = mDatabaseHandlerSingleton.getLoggedUser();
             jsonParams.put("user_student_number", current_user.getUser_student_number_id());
             jsonParams.put("user_nickname", current_user.getUser_nickname());
             jsonParams.put("user_avatar", current_user.getUser_avatar());
             jsonParams.put("user_is_private", current_user.getUser_avatar());
-            if (current_user.getUser_updated() == 1) {
-                JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, UPDATE_USER_URL_STRING, new JSONObject(jsonParams),
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                try {
-                                    if (response.getBoolean("response")) {
-                                        if (mDatabaseHandlerSingleton.resetUserUpdated() == 1) {
-                                            putUserLevelsJSONRequest(booleanResponseListener);
-                                        }
-                                    } else {
-                                        booleanResponseListener.getResult(false, "");
-                                    }
-                                } catch (JSONException ex) {
-                                    Log.e(mClassName + ": ", "Error: " + ex.getMessage());
-                                    booleanResponseListener.getResult(false, ex.getMessage());
-                                }
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError ex) {
-                                if (ex != null) {
-                                    String error = getVolleyError(ex);
-                                    Log.e(mClassName + ": ", error);
-                                    booleanResponseListener.getResult(false, error);
-                                }
-                            }
-                        }
-                );
-                RetryPolicy policy = new DefaultRetryPolicy(TIME_OUT_INTERVAL, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-                objectRequest.setRetryPolicy(policy);
-                objectRequest.setTag("uploadUserJSONRequest");
-                getRequestQueue().add(objectRequest);
-            } else {
+            if (current_user.getUser_updated() == 0) {
                 putUserLevelsJSONRequest(booleanResponseListener);
+                return;
             }
-        } else {
-            Log.e(mClassName + ": ", "Prevented from syncing");
-            booleanResponseListener.getResult(false, "");
-        }
-    }
-
-    //PUT METHOD:inserts/updates user levels in external database
-    //If successful true is passed to listener, else false with error message.
-    public synchronized void putUserLevelsJSONRequest(final BooleanResponseListener booleanResponseListener) {
-        if (canSyncData()) {
-            ArrayList<Level> current_levels = mDatabaseHandlerSingleton.getLevels();
-            JSONObject jsonObject = new JSONObject();
-            try {
-                JSONArray outgoing_levels = new JSONArray();
-                for (Level current_level : current_levels) {
-                    JSONObject outgoing_level = new JSONObject();
-                    outgoing_level.put("level_user_student_number_id", current_level.getLevel_user_student_number_ID());
-                    outgoing_level.put("level_id", current_level.getLevel_id());
-                    outgoing_level.put("level_completed", current_level.getLevel_completed());
-                    outgoing_level.put("level_score", current_level.getLevel_score());
-                    outgoing_level.put("level_attempts", current_level.getLevel_attempts());
-                    outgoing_level.put("level_time", current_level.getLevel_time());
-                    if (current_level.getLevel_updated() == 1)
-                        outgoing_levels.put(outgoing_level);
-                }
-                jsonObject.put("level_list", outgoing_levels);
-            } catch (JSONException e) {
-                if (e.getMessage() != null) {
-                    Log.e("JSONException", e.getMessage());
-                }
-            }
-            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, UPDATE_USERLEVEL_URL_STRING, jsonObject,
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, UPDATE_USER_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
                                 if (validResponse(response)) {
-                                    mDatabaseHandlerSingleton.resetLevelsUpdated();
-                                    booleanResponseListener.getResult(true, response.getString("response_message"));
+                                    if (mDatabaseHandlerSingleton.resetUserUpdated() == 1) {
+                                        putUserLevelsJSONRequest(booleanResponseListener);
+                                    } else {
+                                        Log.e(mClassName, "putRegisterUserJsonRequest Error: failed to reset user update fields");
+                                        booleanResponseListener.getResult(false, "putRegisterUserJsonRequest Error: failed to reset user update fields");
+                                    }
                                 } else {
-                                    Log.e(mClassName, "uploadUserLevelsJSONRequest Error: Invalid response");
+                                    Log.e(mClassName, "putRegisterUserJsonRequest Error: " + response.getString("response_message"));
                                     booleanResponseListener.getResult(false, response.getString("response_message"));
                                 }
                             } catch (JSONException ex) {
-                                Log.e(mClassName, "uploadUserLevelsJSONRequest Error: " + ex.getMessage());
+                                Log.e(mClassName, "putRegisterUserJsonRequest Error: " + ex.getMessage());
                                 booleanResponseListener.getResult(false, ex.getMessage());
                             }
                         }
@@ -692,7 +641,7 @@ public class NetworkManagerSingleton {
                         public void onErrorResponse(VolleyError ex) {
                             if (ex != null) {
                                 String error = getVolleyError(ex);
-                                Log.e(mClassName, "uploadUserLevelsJSONRequest Error: " + error);
+                                Log.e(mClassName, "putRegisterUserJsonRequest Error: " + error);
                                 booleanResponseListener.getResult(false, error);
                             }
                         }
@@ -700,11 +649,201 @@ public class NetworkManagerSingleton {
             );
             RetryPolicy policy = new DefaultRetryPolicy(TIME_OUT_INTERVAL, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
             objectRequest.setRetryPolicy(policy);
-            objectRequest.setTag("uploadUserLevelsJSONRequest");
+            objectRequest.setTag("putUserJsonRequest");
             getRequestQueue().add(objectRequest);
         } else {
-            Log.e(mClassName, "uploadUserLevelsJSONRequest Error: Prevented from syncing");
-            booleanResponseListener.getResult(false, "");
+            putUserLevelsJSONRequest(booleanResponseListener);
+        }
+    }
+
+    //PUT METHOD:inserts/updates user levels in external database
+    //If successful true is passed to listener, else false with error message.
+    public synchronized void putUserLevelsJSONRequest(final BooleanResponseListener booleanResponseListener) {
+        ArrayList<Level> current_levels = mDatabaseHandlerSingleton.getLevels();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            JSONArray outgoing_levels = new JSONArray();
+            for (Level current_level : current_levels) {
+                JSONObject outgoing_level = new JSONObject();
+                outgoing_level.put("level_user_student_number_id", current_level.getLevel_user_student_number_ID());
+                outgoing_level.put("level_id", current_level.getLevel_id());
+                outgoing_level.put("level_completed", current_level.getLevel_completed());
+                outgoing_level.put("level_score", current_level.getLevel_score());
+                outgoing_level.put("level_attempts", current_level.getLevel_attempts());
+                outgoing_level.put("level_time", current_level.getLevel_time());
+                if (current_level.getLevel_updated() == 1)
+                    outgoing_levels.put(outgoing_level);
+            }
+            if (outgoing_levels.length() == 0) {
+                putUserAchievementsJSONRequest(booleanResponseListener);
+                return;
+            }
+            jsonObject.put("level_list", outgoing_levels);
+        } catch (JSONException e) {
+            if (e.getMessage() != null) {
+                Log.e("JSONException", e.getMessage());
+            }
+        }
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, UPDATE_USERLEVEL_URL_STRING, jsonObject,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if (validResponse(response)) {
+                                if (mDatabaseHandlerSingleton.resetLevelsUpdated() == 1) {
+                                    putUserAchievementsJSONRequest(booleanResponseListener);
+                                } else {
+                                    Log.e(mClassName, "putUserLevelsJSONRequest Error: failed to reset user update fields\"");
+                                    booleanResponseListener.getResult(false, "putUserLevelsJSONRequest Error: failed to reset user update fields");
+                                }
+                            } else {
+                                Log.e(mClassName, "putUserLevelsJSONRequest Error: Invalid response");
+                                booleanResponseListener.getResult(false, response.getString("response_message"));
+                            }
+                        } catch (JSONException ex) {
+                            Log.e(mClassName, "putUserLevelsJSONRequest Error: " + ex.getMessage());
+                            booleanResponseListener.getResult(false, ex.getMessage());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError ex) {
+                        if (ex != null) {
+                            String error = getVolleyError(ex);
+                            Log.e(mClassName, "putUserLevelsJSONRequest Error: " + error);
+                            booleanResponseListener.getResult(false, error);
+                        }
+                    }
+                }
+        );
+        RetryPolicy policy = new DefaultRetryPolicy(TIME_OUT_INTERVAL, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        objectRequest.setRetryPolicy(policy);
+        objectRequest.setTag("uploadUserLevelsJSONRequest");
+        getRequestQueue().add(objectRequest);
+    }
+
+    //PUT METHOD:inserts/updates user achievements in external database
+    //If successful true is passed to listener, else false with error message.
+    public synchronized void putUserAchievementsJSONRequest(final BooleanResponseListener booleanResponseListener) {
+        List<UserAchievement> current_userachievements = mDatabaseHandlerSingleton.getUserAchievementsUpdated();
+        if (current_userachievements.size() == 0) {
+            booleanResponseListener.getResult(true, "Data successfully synced");
+            return;
+        }
+        JSONObject jsonObject = new JSONObject();
+        try {
+            JSONArray outgoing_userachievements = new JSONArray();
+            for (UserAchievement current_userachievement : current_userachievements) {
+                JSONObject outgoing_userachievement = new JSONObject();
+                outgoing_userachievement.put("userachievement_id", current_userachievement.getUserachievement_id());
+                Log.e("achId", current_userachievement.getUserachievement_id() + "");
+                outgoing_userachievement.put("userachievement_progress", current_userachievement.getUserachievement_progress());
+                outgoing_userachievement.put("userachievement_completed", current_userachievement.getUserachievement_completed());
+                outgoing_userachievement.put("userachievement_notified", current_userachievement.getUserachievement_notified());
+                Log.e("notified", current_userachievement.getUserachievement_notified() + "");
+                outgoing_userachievements.put(outgoing_userachievement);
+            }
+            jsonObject.put("userachievement_list", outgoing_userachievements);
+        } catch (JSONException e) {
+            if (e.getMessage() != null) {
+                Log.e("JSONException", e.getMessage());
+            }
+        }
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, UPDATE_USERACHIEVEMENTS_URL_STRING, jsonObject,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if (validResponse(response)) {
+                                JSONArray jsonArray = response.getJSONArray("userachievement_list");
+                                for (int x = 0; x < jsonArray.length(); x++) {
+                                    JSONObject jsonObject = jsonArray.getJSONObject(x);
+                                    UserAchievement userAchievement = new UserAchievement();
+                                    //pk auto increment
+                                    userAchievement.setUserachievement_database_id(jsonObject.getInt("userachievement_id")); //fk
+                                    userAchievement.setUser_student_number(jsonObject.getString("user_student_number")); //database pk
+                                    userAchievement.setAchievement_id(jsonObject.getInt("achievement_id"));
+                                    userAchievement.setUserachievement_progress(jsonObject.getInt("userachievement_progress"));
+                                    userAchievement.setUserachievement_completed(jsonObject.getInt("userachievement_completed"));
+                                    userAchievement.setUserachievement_notified(jsonObject.getInt("userachievement_notified"));
+                                    userAchievement.setUserachievement_date_completed(jsonObject.getString("userachievement_date_completed"));
+                                    userAchievement.setUserachievement_updated(0);
+                                    mDatabaseHandlerSingleton.updateUserAchievementsUpdated(userAchievement);
+                                }
+                                booleanResponseListener.getResult(true, response.getString("response_message"));
+                            } else {
+                                Log.e(mClassName, "putUserAchievementsJSONRequest Error: Invalid response");
+                                booleanResponseListener.getResult(false, response.getString("response_message"));
+                            }
+                        } catch (JSONException ex) {
+                            Log.e(mClassName, "putUserAchievementsJSONRequest Error: " + ex.getMessage());
+                            booleanResponseListener.getResult(false, ex.getMessage());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError ex) {
+                        if (ex != null) {
+                            String error = getVolleyError(ex);
+                            Log.e(mClassName, "putUserAchievementsJSONRequest Error: " + error);
+                            booleanResponseListener.getResult(false, error);
+                        }
+                    }
+                }
+        );
+        RetryPolicy policy = new DefaultRetryPolicy(TIME_OUT_INTERVAL, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        objectRequest.setRetryPolicy(policy);
+        objectRequest.setTag("putUserAchievementsJSONRequest");
+        getRequestQueue().add(objectRequest);
+    }
+
+    //GET METHOD: fetches the average users data from external database
+    //If successful the user is passed to listener and true, else false and error message
+    public synchronized void getAverageLevelDataJsonRequest(Level current_level, final ObjectResponseListener<Level> objectResponseListener) {
+        if (canSyncData()) {
+            Map<String, Object> jsonParams = new HashMap<>();
+            jsonParams.put("level_id", current_level.getLevel_database_id());
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, AVERAGEUSER_URL_STRING, new JSONObject(jsonParams),
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                if (validResponse(response)) {
+                                    Level level = new Level();
+                                    level.setLevel_score(response.getInt("level_score"));
+                                    level.setLevel_attempts(response.getInt("level_attempts"));
+                                    level.setLevel_time(response.getInt("level_time"));
+                                    objectResponseListener.getResult(level, true, "");
+                                } else {
+                                    Log.e(mClassName, "getAverageLevelDataJsonRequest Error: Invalid response");
+                                    objectResponseListener.getResult(null, false, response.getString("response_message"));
+                                }
+                            } catch (JSONException ex) {
+                                Log.e(mClassName, "Error getAverageLevelDataJsonRequest: " + ex.getMessage());
+                                objectResponseListener.getResult(null, false, ex.getMessage());
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError ex) {
+                            if (ex != null) {
+                                String error = getVolleyError(ex);
+                                Log.e(mClassName, "Error getAverageLevelDataJsonRequest: " + error);
+                                objectResponseListener.getResult(null, false, error);
+                            }
+                        }
+                    }
+            );
+            RetryPolicy policy = new DefaultRetryPolicy(TIME_OUT_INTERVAL, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+            objectRequest.setRetryPolicy(policy);
+            objectRequest.setTag("getAverageLevelDataJsonRequest");
+            getRequestQueue().add(objectRequest);
+        } else {
+            Log.e(mClassName, "Error getAverageLevelDataJsonRequest: Prevented from syncing");
+            objectResponseListener.getResult(null, false, "");
         }
     }
 

@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.example.progamer.R;
@@ -20,9 +21,10 @@ import fragments.RegisterFragment;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
-    private TextView logoTextView;
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
+    private TextView mTextTitle;
+    private String mClassName = getClass().toString();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,17 +35,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void assignViews() {
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
-        setupViewPager(viewPager);
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        if (tabLayout != null)
-            tabLayout.setupWithViewPager(viewPager);
-        logoTextView = (TextView)findViewById(R.id.logoTextView);
+        mViewPager = (ViewPager) findViewById(R.id.viewPager);
+        setupViewPager(mViewPager);
+        mTabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        if (mTabLayout != null) mTabLayout.setupWithViewPager(mViewPager);
+        else Log.e(mClassName, "mTabLayout null");
+        mTextTitle = (TextView) findViewById(R.id.text_title);
     }
 
-    private void assignFonts(){
+    private void assignFonts() {
         Typeface Roboto_Medium = Typeface.createFromAsset(getAssets(), "Roboto-Medium.ttf");
-        logoTextView.setTypeface(Roboto_Medium);
+        mTextTitle.setTypeface(Roboto_Medium);
     }
 
     private void setupViewPager(ViewPager viewPager) {

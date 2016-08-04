@@ -2,29 +2,17 @@ package services;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
-
+import singletons.DatabaseHandlerSingleton;
 import singletons.NetworkManagerSingleton;
 
 public class SyncService extends Service {
 
-    private static NetworkManagerSingleton sNetworkManagerSingleton;
+    private NetworkManagerSingleton mNetworkManagerSingleton;
+    private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
     private Handler mUserSyncHandler = new Handler();
     private String mClassName = getClass().toString();
     private int REFRESH_INTERVAL = 30 * 1000;
@@ -34,7 +22,6 @@ public class SyncService extends Service {
         return null;
     }
 
-    private final Handler userSyncHandler = new Handler();
 
     @Override
     public void onCreate() {
@@ -48,7 +35,8 @@ public class SyncService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        sNetworkManagerSingleton = NetworkManagerSingleton.getInstance(getApplicationContext());
+        mNetworkManagerSingleton = NetworkManagerSingleton.getInstance(getApplicationContext());
+        mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getApplicationContext());
         startUserSync();
         return Service.START_NOT_STICKY;
     }
@@ -61,17 +49,17 @@ public class SyncService extends Service {
     private Runnable mSyncUserRunnable = new Runnable() {
         @Override
         public void run() {
-            sNetworkManagerSingleton.putUserJsonRequest(new NetworkManagerSingleton.BooleanResponseListener() {
+            mNetworkManagerSingleton.putUserJsonRequest(mDatabaseHandlerSingleton.getLoggedUser(), new NetworkManagerSingleton.BooleanResponseListener() {
                 @Override
                 public void getResult(Boolean response, String message) {
-                    if(response) {
+                    if (response) {
                         Log.e(mClassName, "All data synced");
                     } else {
                         Log.e(mClassName, "Failed to sync data");
                     }
                 }
             });
-            userSyncHandler.postDelayed(this, REFRESH_INTERVAL);
+            mUserSyncHandler.postDelayed(this, REFRESH_INTERVAL);
         }
     };
 }

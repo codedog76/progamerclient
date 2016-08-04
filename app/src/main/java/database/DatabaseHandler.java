@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import models.Achievement;
 import models.Level;
@@ -104,6 +105,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String ACHIEVEMENT_TITLE = "achievement_title";
     private static final String ACHIEVEMENT_DESCRIPTION = "achievement_description";
     private static final String ACHIEVEMENT_TOTAL = "achievement_total";
+    private static final String ACHIEVEMENT_TARGET = "achievement_target";
     private static final String CREATE_TABLE_ACHIEVEMENT = "create table "
             + ACHIEVEMENT_TABLE
             + "("
@@ -111,7 +113,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + ACHIEVEMENT_DATABASE_ID + " integer not null, "
             + ACHIEVEMENT_TITLE + " text not null, "
             + ACHIEVEMENT_DESCRIPTION + " text not null, "
-            + ACHIEVEMENT_TOTAL + " integer not null"
+            + ACHIEVEMENT_TOTAL + " integer not null, "
+            + ACHIEVEMENT_TARGET + " text not null"
             + ");";
 
     //table userachievement
@@ -121,7 +124,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String USERACHIEVEMENT_USER_STUDENT_NUMBER_ID = "userachievement_user_student_number_id"; //fk
     private static final String USERACHIEVEMENT_ACHIEVEMENT_ID = "userachievement_achievement_id"; //fk
     private static final String USERACHIEVEMENT_PROGRESS = "userachievement_progress";
-    private static final String USERACHIEVEMENT_UPDATED = "level_updated";
+    private static final String USERACHIEVEMENT_NOTIFIED = "userachievement_notified";
+    private static final String USERACHIEVEMENT_COMPLETED = "userachievement_completed";
+    private static final String USERACHIEVEMENT_UPDATED = "userachievement_updated";
+    private static final String USERACHIEVEMENT_DATE_COMPLETED = "userachievement_date_completed";
     private static final String CREATE_TABLE_USERACHIEVEMENT = "create table "
             + USERACHIEVEMENT_TABLE
             + "("
@@ -130,7 +136,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + USERACHIEVEMENT_USER_STUDENT_NUMBER_ID + " text not null, "
             + USERACHIEVEMENT_ACHIEVEMENT_ID + " integer not null, "
             + USERACHIEVEMENT_PROGRESS + " integer not null, "
+            + USERACHIEVEMENT_NOTIFIED + " integer not null, "
+            + USERACHIEVEMENT_COMPLETED + " integer not null, "
             + USERACHIEVEMENT_UPDATED + " integer not null, "
+            + USERACHIEVEMENT_DATE_COMPLETED + " text not null, "
             + "foreign key (" + USERACHIEVEMENT_USER_STUDENT_NUMBER_ID + ") references " + USER_TABLE + "(" + USER_STUDENT_NUMBER_ID + "), "
             + "foreign key (" + USERACHIEVEMENT_ACHIEVEMENT_ID + ") references " + ACHIEVEMENT_TABLE + "(" + ACHIEVEMENT_ID + ")"
             + ");";
@@ -153,7 +162,134 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + USER_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + LEVEL_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + PUZZLE_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + ACHIEVEMENT_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + USERACHIEVEMENT_TABLE);
         onCreate(db);
+    }
+
+    //achievements
+    public void updateUserAchievement(String achievementTarget, User current_user, int amount) {
+        List<Integer> userAchievementIds = getAchievementIds(achievementTarget);
+        for (int userAchievementId : userAchievementIds) {
+            UserAchievement userAchievement = getUserAchievementProgress(current_user, userAchievementId);
+            if (userAchievement != null && amount > userAchievement.getUserachievement_progress()) {
+                if (amount > userAchievement.getAchievement_total()) {
+                    amount = userAchievement.getAchievement_total();
+                }
+                SQLiteDatabase db = this.getWritableDatabase();
+                String strSQL = "UPDATE userachievement SET userachievement_progress=" + amount + ", achievement_total=" + userAchievement.getAchievement_total()
+                        + ", userachievement_completed=" + userAchievement.getUserachievement_completed() + ", level_updated=1 WHERE " +
+                        "userachievement_user_student_number_id='" + current_user.getUser_student_number_id() + "' AND userachievement_achievement_id="
+                        + userAchievementId + ";";
+                db.execSQL(strSQL);
+                db.close();
+            }
+        }
+    }
+
+    public List<UserAchievement> getUserAchievementsUpdated(User current_user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT userachievement_database_id, userachievement_progress, userachievement_completed, userachievement_notified" +
+                " FROM " + USERACHIEVEMENT_TABLE + " WHERE userachievement_updated= ? AND " +
+                "userachievement_user_student_number_id= ?", new String[]{"1", current_user.getUser_student_number_id()});
+        ArrayList<UserAchievement> userAchievements = new ArrayList<>();
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                UserAchievement outgoing_userachievemet = new UserAchievement();
+                outgoing_userachievemet.setUserachievement_id(cursor.getInt(0));
+                outgoing_userachievemet.setUserachievement_progress(cursor.getInt(1));
+                outgoing_userachievemet.setUserachievement_completed(cursor.getInt(2));
+                outgoing_userachievemet.setUserachievement_notified(cursor.getInt(3));
+                userAchievements.add(outgoing_userachievemet);
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        return userAchievements;
+    }
+
+    public int updateUserAchievementsUpdated(UserAchievement userAchievement) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(USERACHIEVEMENT_DATE_COMPLETED, userAchievement.getUserachievement_date_completed());
+        values.put(USERACHIEVEMENT_UPDATED, 0);
+        int rowsAffected = db.update(USERACHIEVEMENT_TABLE, values, USERACHIEVEMENT_USER_STUDENT_NUMBER_ID + " = ? AND " + USERACHIEVEMENT_ACHIEVEMENT_ID + " = ?",
+                new String[]{userAchievement.getUser_student_number(), String.valueOf(userAchievement.getAchievement_id())});
+        db.close();
+        return rowsAffected;
+    }
+
+    public List<Integer> getAchievementIds(String achievementTarget) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT achievement_database_id FROM " + ACHIEVEMENT_TABLE + " WHERE achievement_target= ?", new String[]{achievementTarget});
+        List<Integer> achievementIds = new ArrayList<>();
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                achievementIds.add(cursor.getInt(0));
+                Log.e("cursor", cursor.getInt(0) + "");
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        return achievementIds;
+    }
+
+    public UserAchievement getUserAchievementProgress(User current_user, int achievement_id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT userachievement_progress, achievement_total FROM " + USERACHIEVEMENT_TABLE + " INNER JOIN " + ACHIEVEMENT_TABLE +
+                        " ON achievement_database_id=userachievement_achievement AND userachievement_user_student_number_id= ? AND userachievement_achievement_id= ? limit 1",
+                new String[]{current_user.getUser_student_number_id(), String.valueOf(achievement_id)});
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            UserAchievement userAchievement = new UserAchievement();
+            int userachievement_progress = cursor.getInt(0);
+            int userachievement_total = cursor.getInt(1);
+            userAchievement.setUserachievement_progress(userachievement_progress);
+            userAchievement.setAchievement_total(userachievement_total);
+            if (userachievement_progress == userachievement_total)
+                userAchievement.setUserachievement_completed(1);
+            else
+                userAchievement.setUserachievement_completed(0);
+            cursor.close();
+            return userAchievement;
+        } else {
+            return null;
+        }
+    }
+
+    public List<UserAchievement> getUserAchievementsNotifications(User current_user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT achievement_title, achievement_description, achievement_total, achievement_database_id, userachievement_progress" +
+                " FROM " + ACHIEVEMENT_TABLE + " INNER JOIN " + USERACHIEVEMENT_TABLE + " ON " +
+                "achievement_database_id=userachievement_achievement_id AND userachievement_notified=0 AND userachievement_completed=1" +
+                " AND userachievement_user_student_number_id= ?", new String[]{current_user.getUser_student_number_id()});
+        ArrayList<UserAchievement> userAchievementsList = new ArrayList<>();
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+                UserAchievement userAchievement = new UserAchievement();
+                userAchievement.setAchievement_title(cursor.getString(0));
+                userAchievement.setAchievement_description(cursor.getString(1));
+                userAchievement.setAchievement_total(cursor.getInt(2));
+                userAchievement.setUserachievement_id(cursor.getInt(3));
+                userAchievement.setUserachievement_progress(cursor.getInt(4));
+                userAchievementsList.add(userAchievement);
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+        return userAchievementsList;
+    }
+
+    public int setUserAchievementNotified(User current_user, int achievement_id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(USERACHIEVEMENT_NOTIFIED, 1);
+        values.put(USERACHIEVEMENT_UPDATED, 1);
+        int rowsAffected = db.update(USERACHIEVEMENT_TABLE, values, USERACHIEVEMENT_ACHIEVEMENT_ID + " = ? AND " + USERACHIEVEMENT_USER_STUDENT_NUMBER_ID + " = ?",
+                new String[]{String.valueOf(achievement_id), current_user.getUser_student_number_id()});
+        Log.e("rowaffected", rowsAffected + "");
+        db.close();
+        return rowsAffected;
     }
 
     public long insertUser(User new_user) {
@@ -210,7 +346,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(ACHIEVEMENT_TITLE, achievement.getAchievement_title());
         values.put(ACHIEVEMENT_DESCRIPTION, achievement.getAchievement_description());
         values.put(ACHIEVEMENT_TOTAL, achievement.getAchievement_total());
-        ;
+        values.put(ACHIEVEMENT_TARGET, achievement.getAchievement_target());
         long achievement_id = db.insertWithOnConflict(ACHIEVEMENT_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
         return achievement_id;
@@ -223,7 +359,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(USERACHIEVEMENT_USER_STUDENT_NUMBER_ID, userAchievement.getUser_student_number());
         values.put(USERACHIEVEMENT_ACHIEVEMENT_ID, userAchievement.getAchievement_id());
         values.put(USERACHIEVEMENT_PROGRESS, userAchievement.getUserachievement_progress());
+        values.put(USERACHIEVEMENT_NOTIFIED, userAchievement.getUserachievement_notified());
+        values.put(USERACHIEVEMENT_COMPLETED, userAchievement.getUserachievement_completed());
         values.put(USERACHIEVEMENT_UPDATED, userAchievement.getUserachievement_updated());
+        values.put(USERACHIEVEMENT_DATE_COMPLETED, userAchievement.getUserachievement_date_completed());
         long achievement_id = db.insertWithOnConflict(USERACHIEVEMENT_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
         return achievement_id;
@@ -265,8 +404,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public ArrayList<UserAchievement> getLoggedUserAchievements(User current_user) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT userachievement_achievement_id, achievement_title, achievement_description, achievement_total, userachievement_progress, level_updated" +
-                " FROM " + USERACHIEVEMENT_TABLE + " INNER JOIN " + ACHIEVEMENT_TABLE +" ON userachievement_achievement_id=achievement_database_id AND userachievement_user_student_number_id= ?", new String[]{current_user.getUser_student_number_id()});
+        Cursor cursor = db.rawQuery("SELECT userachievement_achievement_id, achievement_title, achievement_description, achievement_total, userachievement_progress, " +
+                "userachievement_completed, userachievement_date_completed, userachievement_updated, achievement_target FROM " + USERACHIEVEMENT_TABLE + " INNER JOIN " + ACHIEVEMENT_TABLE +
+                " ON userachievement_achievement_id=achievement_database_id AND userachievement_user_student_number_id= ?", new String[]{current_user.getUser_student_number_id()});
         ArrayList<UserAchievement> userachievement_list = new ArrayList<>();
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
@@ -276,7 +416,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 current_userachievement.setAchievement_description(cursor.getString(2));
                 current_userachievement.setAchievement_total(cursor.getInt(3));
                 current_userachievement.setUserachievement_progress(cursor.getInt(4));
-                current_userachievement.setUserachievement_updated(cursor.getInt(5));
+                current_userachievement.setUserachievement_completed(cursor.getInt(5));
+                current_userachievement.setUserachievement_date_completed(cursor.getString(6));
+                current_userachievement.setUserachievement_updated(cursor.getInt(7));
+                current_userachievement.setAchievement_target(cursor.getString(8));
                 userachievement_list.add(current_userachievement);
                 cursor.moveToNext();
             }

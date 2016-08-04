@@ -9,6 +9,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,8 +19,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.progamer.R;
 import com.xwray.passwordview.PasswordView;
+
 import activities.MainActivity;
 import models.User;
 import singletons.DatabaseHandlerSingleton;
@@ -27,14 +30,15 @@ import singletons.NetworkManagerSingleton;
 
 public class LoginFragment extends Fragment {
 
-    private EditText loginStudentNumberText;
-    private PasswordView loginPasswordText;
-    private ProgressDialog progressDialog;
-    private Button loginButton;
-    private NetworkManagerSingleton networkManagerSingleton;
-    private DatabaseHandlerSingleton databaseHandlerSingleton;
-    private TextInputLayout loginStudentNumberTextInputLayout, loginPasswordTextInputLayout;
-    private boolean validStudentNumber, validPassword;
+    private EditText mEditStudentNumber;
+    private PasswordView mPasswordView;
+    private ProgressDialog mProgressDialog;
+    private Button mButtonLogin;
+    private NetworkManagerSingleton mNetworkManagerSingleton;
+    private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
+    private TextInputLayout mTextInputStudentNumber, mTextInputPassword;
+    private boolean mIsValidStudentNumber, mIsValidPassword;
+    private String mClassName = getClass().toString();
 
     public LoginFragment() {
         // Required empty public constructor
@@ -55,38 +59,44 @@ public class LoginFragment extends Fragment {
         assignProgressDialog();
     }
 
-    public void assignSingletons() {
-        networkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
-        databaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getActivity());
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mProgressDialog.dismiss();
+    }
+
+    private void assignSingletons() {
+        mNetworkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
+        mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getActivity());
     }
 
     private void assignProgressDialog() {
-        progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setMessage("Loading..");
-        progressDialog.setCancelable(false);
-        progressDialog.setCanceledOnTouchOutside(false);
+        mProgressDialog = new ProgressDialog(getActivity());
+        mProgressDialog.setMessage("Loading..");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setCanceledOnTouchOutside(false);
     }
 
     private void assignViews(View view) {
-        loginStudentNumberText = (EditText) view.findViewById(R.id.loginStudentNumberText);
-        loginPasswordText = (PasswordView) view.findViewById(R.id.loginPasswordText);
-        loginButton = (Button) view.findViewById(R.id.loginButton);
-        loginStudentNumberTextInputLayout = (TextInputLayout) view.findViewById(R.id.loginStudentNumberTextInputLayout);
-        loginPasswordTextInputLayout = (TextInputLayout) view.findViewById(R.id.loginPasswordTextInputLayout);
+        mEditStudentNumber = (EditText) view.findViewById(R.id.edit_student_number);
+        mPasswordView = (PasswordView) view.findViewById(R.id.password_view);
+        mButtonLogin = (Button) view.findViewById(R.id.button_login);
+        mTextInputStudentNumber = (TextInputLayout) view.findViewById(R.id.text_input_student_number);
+        mTextInputPassword = (TextInputLayout) view.findViewById(R.id.text_input_password);
     }
 
     private void assignFonts() {
         Typeface Roboto_Medium = Typeface.createFromAsset(getContext().getAssets(), "Roboto-Medium.ttf");
         Typeface Roboto_Regular = Typeface.createFromAsset(getContext().getAssets(), "Roboto-Regular.ttf");
-        loginStudentNumberText.setTypeface(Roboto_Regular);
-        loginPasswordText.setTypeface(Roboto_Regular);
-        loginStudentNumberTextInputLayout.setTypeface(Roboto_Regular);
-        loginPasswordTextInputLayout.setTypeface(Roboto_Regular);
-        loginButton.setTypeface(Roboto_Medium);
+        mEditStudentNumber.setTypeface(Roboto_Regular);
+        mPasswordView.setTypeface(Roboto_Regular);
+        mTextInputStudentNumber.setTypeface(Roboto_Regular);
+        mTextInputPassword.setTypeface(Roboto_Regular);
+        mButtonLogin.setTypeface(Roboto_Medium);
     }
 
     private void assignListeners() {
-        loginPasswordText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -95,13 +105,13 @@ public class LoginFragment extends Fragment {
                 return false;
             }
         });
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        mButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 doLogin();
             }
         });
-        loginStudentNumberText.addTextChangedListener(new TextWatcher() {
+        mEditStudentNumber.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -110,13 +120,13 @@ public class LoginFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() > 0) {
-                    loginStudentNumberTextInputLayout.setErrorEnabled(false);
-                    loginStudentNumberTextInputLayout.setError(null);
-                    validStudentNumber = true;
+                    mTextInputStudentNumber.setErrorEnabled(false);
+                    mTextInputStudentNumber.setError(null);
+                    mIsValidStudentNumber = true;
                 } else {
-                    loginStudentNumberTextInputLayout.setErrorEnabled(true);
-                    loginStudentNumberTextInputLayout.setError("Student Number is required");
-                    validStudentNumber = false;
+                    mTextInputPassword.setErrorEnabled(true);
+                    mTextInputPassword.setError("Student Number is required");
+                    mIsValidStudentNumber = false;
                 }
             }
 
@@ -125,7 +135,7 @@ public class LoginFragment extends Fragment {
 
             }
         });
-        loginPasswordText.addTextChangedListener(new TextWatcher() {
+        mPasswordView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -134,13 +144,13 @@ public class LoginFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() > 0) {
-                    loginPasswordTextInputLayout.setErrorEnabled(false);
-                    loginPasswordTextInputLayout.setError(null);
-                    validPassword = true;
+                    mTextInputPassword.setErrorEnabled(false);
+                    mTextInputPassword.setError(null);
+                    mIsValidPassword = true;
                 } else {
-                    loginPasswordTextInputLayout.setErrorEnabled(true);
-                    loginPasswordTextInputLayout.setError("Password is required");
-                    validPassword = false;
+                    mTextInputPassword.setErrorEnabled(true);
+                    mTextInputPassword.setError("Password is required");
+                    mIsValidPassword = false;
                 }
             }
 
@@ -149,35 +159,32 @@ public class LoginFragment extends Fragment {
 
             }
         });
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        progressDialog.dismiss();
     }
 
     private void doLogin() {
         if (validInput()) {
-            progressDialog.show();
+            mProgressDialog.show();
             User user = new User();
-            user.setUser_student_number_id(loginStudentNumberText.getText().toString());
-            user.setUser_password(loginPasswordText.getText().toString());
-            networkManagerSingleton.getLoginUserJsonRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
+            user.setUser_student_number_id(mEditStudentNumber.getText().toString());
+            user.setUser_password(mPasswordView.getText().toString());
+            mNetworkManagerSingleton.getLoginUserJsonRequest(user, new NetworkManagerSingleton.BooleanResponseListener() {
                 @Override
                 public void getResult(Boolean response, String message) {
                     if (response) {
-                        if (databaseHandlerSingleton.loginUser(loginStudentNumberText.getText().toString())) {
+                        if (mDatabaseHandlerSingleton.loginUser(mEditStudentNumber.getText().toString())) {
                             Intent intent = new Intent(getContext(), MainActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
+                            getActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                         } else {
-                            progressDialog.hide();
+                            mProgressDialog.hide();
+                            Log.e(mClassName, "Failed to log in the user in the local database");
                             Toast.makeText(getContext(), "Failed to log in the user in the local database", Toast.LENGTH_SHORT).show();
                         }
 
                     } else {
-                        progressDialog.hide();
+                        mProgressDialog.hide();
+                        Log.e(mClassName, message);
                         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -186,16 +193,16 @@ public class LoginFragment extends Fragment {
     }
 
     private boolean validInput() {
-        if (loginStudentNumberText.getText().length() == 0) {
-            loginStudentNumberTextInputLayout.setErrorEnabled(true);
-            loginStudentNumberTextInputLayout.setError("Student Number is required");
-            validStudentNumber = false;
+        if (mEditStudentNumber.getText().length() == 0) {
+            mTextInputStudentNumber.setErrorEnabled(true);
+            mTextInputStudentNumber.setError("Student Number is required");
+            mIsValidStudentNumber = false;
         }
-        if (loginPasswordText.getText().length() == 0) {
-            loginPasswordTextInputLayout.setErrorEnabled(true);
-            loginPasswordTextInputLayout.setError("Password is required");
-            validPassword = false;
+        if (mPasswordView.getText().length() == 0) {
+            mTextInputPassword.setErrorEnabled(true);
+            mTextInputPassword.setError("Password is required");
+            mIsValidPassword = false;
         }
-        return validStudentNumber && validPassword;
+        return mIsValidStudentNumber && mIsValidPassword;
     }
 }

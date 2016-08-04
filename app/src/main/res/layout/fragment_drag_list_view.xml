@@ -6,7 +6,7 @@
     tools:context="fragments.puzzles.DragListViewFragment">
 
     <com.woxthebox.draglistview.DragListView
-        android:id="@+id/dragListView"
+        android:id="@+id/drag_list_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

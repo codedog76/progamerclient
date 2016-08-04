@@ -26,11 +26,11 @@ import java.util.ArrayList;
  */
 public class PerformanceFragment extends Fragment {
 
+    private LineChart mChart;
 
     public PerformanceFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -38,8 +38,6 @@ public class PerformanceFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_performance, container, false);
     }
-
-    private LineChart mChart;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {

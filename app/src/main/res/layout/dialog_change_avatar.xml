@@ -13,20 +13,20 @@
         android:orientation="vertical">
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/avatarDialogCircleImageView"
+            android:id="@+id/circle_image_avatar_dialog"
             android:layout_width="100dp"
-            android:layout_marginTop="20dp"
             android:layout_height="100dp"
-            android:src="@drawable/avatar_0"
             android:layout_gravity="center"
-            app:civ_border_width="0dp"
-            app:civ_border_color="@color/accent"/>
+            android:layout_marginTop="20dp"
+            android:src="@drawable/avatar_0"
+            app:civ_border_color="@color/accent"
+            app:civ_border_width="0dp" />
 
         <TextView
-            android:layout_gravity="center_horizontal"
-            android:id="@+id/avatarDialogTitleTextView"
+            android:id="@+id/text_avatar_dialog_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_marginBottom="20dp"
             android:layout_marginEnd="24dp"
             android:layout_marginLeft="24dp"
@@ -38,14 +38,14 @@
             android:textSize="20sp" />
 
         <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/avatarGridView"
+            android:id="@+id/grid_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/primary_background"
             android:gravity="center"
             android:horizontalSpacing="10dp"
             android:numColumns="3"
             android:stretchMode="columnWidth"
-            android:background="@color/primary_background"
             android:verticalSpacing="10dp" />
     </LinearLayout>
 
@@ -57,7 +57,7 @@
         android:gravity="end|center_vertical">
 
         <Button
-            android:id="@+id/avatarDialogCancelButton"
+            android:id="@+id/button_avatar_dialog_cancel"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="36dp"

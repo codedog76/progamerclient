@@ -19,12 +19,13 @@ import singletons.SettingsSingleton;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private TextView settingLaunchTextView1, settingLaunchTextView2, settingLaunchTextView3, settingLaunchTextView4, settingLaunchTextView5,
-            settingLaunchTextView6, settingLaunchTextView7;
-    private Switch settingsLaunchActiveSwitch, settingsSyncWifiSwitch;
-    private Spinner settingsLaunchDurationSpinner;
-    private Toolbar toolbar;
-    private SettingsSingleton settingsSingleton;
+    private TextView mTextLaunchScreenTitle, mTextLaunchScreenActive, mTextLaunchScreenActiveDescription,
+            mTextLaunchScreenTime, mTextLaunchScreenTimeDescription, mTextDataUsageTitle, mTextSyncOverWifi;
+    private Switch mSwitchLaunchScreenActive, mSwitchSyncOverWifi;
+    private Spinner mSpinnerLaunchScreenTime;
+    private Toolbar mToolbar;
+    private SettingsSingleton mSettingsSingleton;
+    private String[] mLaunchScreenDurations = new String[] {"1 Second", "2 Seconds", "3 Seconds"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,85 +37,6 @@ public class SettingsActivity extends AppCompatActivity {
         assignFonts();
         assignListeners();
         setSettings();
-    }
-
-    private void setSettings() {
-        settingsLaunchActiveSwitch.setChecked(settingsSingleton.getLaunchScreenActive());
-        settingLaunchTextView4.setEnabled(settingsLaunchActiveSwitch.isChecked());
-        settingLaunchTextView5.setEnabled(settingsLaunchActiveSwitch.isChecked());
-        settingsLaunchDurationSpinner.setEnabled(settingsLaunchActiveSwitch.isChecked());
-        settingsLaunchDurationSpinner.setSelection((settingsSingleton.getLaunchScreenTime() / 1000) - 1);
-        settingsSyncWifiSwitch.setChecked(settingsSingleton.getSyncWifiOnly());
-    }
-
-    private void assignSingletons() {
-        settingsSingleton = SettingsSingleton.getInstance(this);
-    }
-
-    private void assignListeners() {
-        settingsLaunchActiveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                settingLaunchTextView4.setEnabled(isChecked);
-                settingLaunchTextView5.setEnabled(isChecked);
-                settingsLaunchDurationSpinner.setEnabled(isChecked);
-                settingsSingleton.setLaunchScreenActive(isChecked);
-
-            }
-        });
-        settingsLaunchDurationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                settingsSingleton.setLaunchScreenTime((position + 1) * 1000);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        settingsSyncWifiSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                settingsSingleton.setSyncWifiOnly(isChecked);
-            }
-        });
-    }
-
-    private void assignActionBar() {
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    private void assignViews() {
-        toolbar = (Toolbar) findViewById(R.id.app_actionbar);
-        settingLaunchTextView1 = (TextView) findViewById(R.id.settingLaunchTextView1);
-        settingLaunchTextView2 = (TextView) findViewById(R.id.settingLaunchTextView2);
-        settingLaunchTextView3 = (TextView) findViewById(R.id.settingLaunchTextView3);
-        settingLaunchTextView4 = (TextView) findViewById(R.id.settingLaunchTextView4);
-        settingLaunchTextView5 = (TextView) findViewById(R.id.settingLaunchTextView5);
-        settingLaunchTextView6 = (TextView) findViewById(R.id.settingLaunchTextView6);
-        settingLaunchTextView7 = (TextView) findViewById(R.id.settingLaunchTextView7);
-        settingsLaunchActiveSwitch = (Switch) findViewById(R.id.settingsLaunchActiveSwitch);
-        settingsSyncWifiSwitch = (Switch) findViewById(R.id.settingsSyncWifiSwitch);
-        String[] launchScreenDurations = {"1 Second", "2 Seconds", "3 Seconds"};
-        settingsLaunchDurationSpinner = (Spinner) findViewById(R.id.settingsLaunchDurationSpinner);
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, launchScreenDurations);
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        settingsLaunchDurationSpinner.setAdapter(spinnerArrayAdapter);
-    }
-
-    private void assignFonts() {
-        Typeface Roboto_Medium = Typeface.createFromAsset(getAssets(), "Roboto-Medium.ttf");
-        Typeface Roboto_Regular = Typeface.createFromAsset(getAssets(), "Roboto-Regular.ttf");
-        settingLaunchTextView1.setTypeface(Roboto_Regular);
-        settingLaunchTextView2.setTypeface(Roboto_Regular, Typeface.BOLD);
-        settingLaunchTextView3.setTypeface(Roboto_Regular);
-        settingLaunchTextView4.setTypeface(Roboto_Regular, Typeface.BOLD);
-        settingLaunchTextView5.setTypeface(Roboto_Regular);
-        settingLaunchTextView6.setTypeface(Roboto_Regular);
-        settingLaunchTextView7.setTypeface(Roboto_Regular, Typeface.BOLD);
     }
 
     @Override
@@ -133,5 +55,85 @@ public class SettingsActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void setSettings() {
+        mSwitchLaunchScreenActive.setChecked(mSettingsSingleton.getLaunchScreenActive());
+        mTextLaunchScreenTime.setEnabled(mSwitchLaunchScreenActive.isChecked());
+        mTextLaunchScreenTimeDescription.setEnabled(mSwitchLaunchScreenActive.isChecked());
+        mSpinnerLaunchScreenTime.setEnabled(mSwitchLaunchScreenActive.isChecked());
+        mSpinnerLaunchScreenTime.setSelection((mSettingsSingleton.getLaunchScreenTime() / 1000) - 1);
+        mSwitchSyncOverWifi.setChecked(mSettingsSingleton.getSyncWifiOnly());
+    }
+
+    private void assignSingletons() {
+        mSettingsSingleton = SettingsSingleton.getInstance(this);
+    }
+
+    private void assignListeners() {
+        mSwitchLaunchScreenActive.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mTextLaunchScreenTime.setEnabled(isChecked);
+                mTextLaunchScreenTimeDescription.setEnabled(isChecked);
+                mSpinnerLaunchScreenTime.setEnabled(isChecked);
+                mSettingsSingleton.setLaunchScreenActive(isChecked);
+
+            }
+        });
+        mSpinnerLaunchScreenTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mSettingsSingleton.setLaunchScreenTime((position + 1) * 1000);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        mSwitchSyncOverWifi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mSettingsSingleton.setSyncWifiOnly(isChecked);
+            }
+        });
+    }
+
+    private void assignActionBar() {
+        setSupportActionBar(mToolbar);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void assignViews() {
+        mToolbar = (Toolbar) findViewById(R.id.app_actionbar);
+        mTextLaunchScreenTitle = (TextView) findViewById(R.id.text_launch_screen_title);
+        mTextLaunchScreenActive = (TextView) findViewById(R.id.text_launch_screen_active);
+        mTextLaunchScreenActiveDescription =
+                (TextView) findViewById(R.id.text_launch_screen_active_description);
+        mTextLaunchScreenTime = (TextView) findViewById(R.id.text_launch_screen_time);
+        mTextLaunchScreenTimeDescription = (TextView) findViewById(R.id.text_launch_screen_time_description);
+        mTextDataUsageTitle = (TextView) findViewById(R.id.text_data_usage_title);
+        mTextSyncOverWifi = (TextView) findViewById(R.id.text_sync_over_wifi);
+        mSwitchLaunchScreenActive = (Switch) findViewById(R.id.switch_launch_screen_active);
+        mSpinnerLaunchScreenTime = (Spinner) findViewById(R.id.spinner_launch_screen_time);
+        mSwitchSyncOverWifi = (Switch) findViewById(R.id.switch_sync_over_wifi);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_item,
+                mLaunchScreenDurations);
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinnerLaunchScreenTime.setAdapter(spinnerArrayAdapter);
+    }
+
+    private void assignFonts() {
+        Typeface Roboto_Regular = Typeface.createFromAsset(getAssets(), "Roboto-Regular.ttf");
+        mTextLaunchScreenTitle.setTypeface(Roboto_Regular);
+        mTextLaunchScreenActive.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextLaunchScreenActiveDescription.setTypeface(Roboto_Regular);
+        mTextLaunchScreenTime.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextLaunchScreenTimeDescription.setTypeface(Roboto_Regular);
+        mTextDataUsageTitle.setTypeface(Roboto_Regular);
+        mTextSyncOverWifi.setTypeface(Roboto_Regular, Typeface.BOLD);
     }
 }

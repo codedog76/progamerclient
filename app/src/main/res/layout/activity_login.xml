@@ -34,7 +34,7 @@
                 app:tabTextColor="@color/white" />
 
             <TextView
-                android:id="@+id/logoTextView"
+                android:id="@+id/text_title"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 android:layout_marginBottom="48dp"

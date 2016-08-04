@@ -1,6 +1,5 @@
 package fragments;
 
-
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -27,7 +26,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import models.User;
 import singletons.DatabaseHandlerSingleton;
 
-public class LeaderboardTimeFragment extends Fragment implements LeaderboardAdapter.ClickListener {
+public class LeaderboardScoreFragment extends Fragment implements LeaderboardAdapter.ClickListener {
 
     private RecyclerView mRecyclerView;
     private ArrayList<User> mUserList;
@@ -43,13 +42,13 @@ public class LeaderboardTimeFragment extends Fragment implements LeaderboardAdap
     private int mCurrentUserPos;
     private User mCurrentUser;
 
-    public LeaderboardTimeFragment() {
+    public LeaderboardScoreFragment() {
         // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_leaderboard_time, container, false);
+        return inflater.inflate(R.layout.fragment_leaderboard_score, container, false);
     }
 
     @Override
@@ -59,7 +58,6 @@ public class LeaderboardTimeFragment extends Fragment implements LeaderboardAdap
         assignFonts();
         assignAdapter();
         assignListeners();
-        assignSingletons();
         loadData();
     }
 
@@ -194,7 +192,7 @@ public class LeaderboardTimeFragment extends Fragment implements LeaderboardAdap
                 mInterfaceListener.startRefreshData();
             }
         });
-        ((LeaderboardFragment) getParentFragment()).setListener(new LeaderboardFragment.TimeFragmentInterface() {
+        ((LeaderboardFragment) getParentFragment()).setListener(new LeaderboardFragment.ScoreFragmentInterface() {
             @Override
             public void stopRefreshing() {
                 mSwipeRefreshLayout.setRefreshing(false);
@@ -226,10 +224,10 @@ public class LeaderboardTimeFragment extends Fragment implements LeaderboardAdap
         Collections.sort(list, new Comparator<User>() {
             @Override
             public int compare(User lhs, User rhs) {
-                if (lhs.getUser_overall_time() > rhs.getUser_overall_time())
-                    return 1;
-                if (lhs.getUser_overall_time() < rhs.getUser_overall_time())
+                if (lhs.getUser_overall_score() > rhs.getUser_overall_score())
                     return -1;
+                if (lhs.getUser_overall_score() < rhs.getUser_overall_score())
+                    return 1;
                 return 0;
             }
         });

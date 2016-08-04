@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +28,7 @@ import puzzle.PuzzleCodeBuilder;
 public class SingleChoiceListFragment extends Fragment {
 
     private String mClassName = getClass().toString();
-    private ListView mSingleSelectionListView;
+    private ListView mListView;
     private ArrayAdapter<String> mArrayAdapter;
     private PuzzleActivity mParentPuzzleActivity;
     private PuzzleCodeBuilder mCurrentPuzzleCodeBuilder;
@@ -62,8 +63,8 @@ public class SingleChoiceListFragment extends Fragment {
                     toDisplayList.add(pair.first);
             }
             mArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_checkbox, toDisplayList);
-            mSingleSelectionListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            mSingleSelectionListView.setAdapter(mArrayAdapter);
+            mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            mListView.setAdapter(mArrayAdapter);
         } else {
             mParentPuzzleActivity.finish();
         }
@@ -72,29 +73,34 @@ public class SingleChoiceListFragment extends Fragment {
     public Boolean checkIfCorrect() {
         if (mCurrentPuzzleCodeBuilder.getPuzzleExpectedOutputType().equals("<code>")) {
             String checkedItem = "";
-            SparseBooleanArray checked = mSingleSelectionListView.getCheckedItemPositions();
+            SparseBooleanArray checked = mListView.getCheckedItemPositions();
+
             for (int i = 0; i < checked.size(); i++) {
                 if (checked.valueAt(i)) {
-                    checkedItem = mSingleSelectionListView.getItemAtPosition(checked.keyAt(i)).toString();
+
+                    //checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
                 }
             }
+            if(checkedItem.equals("")) return false;
             List<Object> expectedAnswer = mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer();
             return checkedItem.equals(expectedAnswer.get(0).toString());
         } else {
             List<String> codeToRun = new ArrayList<>();
             String checkedItem = "";
-            SparseBooleanArray checked = mSingleSelectionListView.getCheckedItemPositions();
+            SparseBooleanArray checked = mListView.getCheckedItemPositions();
             for (int i = 0; i < checked.size(); i++) {
                 if (checked.valueAt(i)) {
-                    checkedItem = mSingleSelectionListView.getItemAtPosition(checked.keyAt(i)).toString();
+                    checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
                 }
             }
+            if(checkedItem.equals("")) return false;
+            Log.e(mClassName, checkedItem);
             String[] splited = checkedItem.split("\\s+");
             if (mCurrentPuzzleCodeBuilder.getProcessCodeSelected()) {
                 for (Pair<String, String> pair : mCodePairList) {
                     if (pair.first.equals(checkedItem) || pair.first.equals("")) {
-                        if(pair.second.contains("Console.WriteLine")) {
-                            codeToRun.add("Console.WriteLine("+splited[1]+");");
+                        if (pair.second.contains("Console.WriteLine")) {
+                            codeToRun.add("Console.WriteLine(" + splited[1] + ");");
                         } else {
                             codeToRun.add(pair.second);
                         }
@@ -123,7 +129,7 @@ public class SingleChoiceListFragment extends Fragment {
     }
 
     private void assignViews(View view) {
-        mSingleSelectionListView = (ListView) view.findViewById(R.id.singleSelectionListView);
+        mListView = (ListView) view.findViewById(R.id.list_view);
     }
 
 }

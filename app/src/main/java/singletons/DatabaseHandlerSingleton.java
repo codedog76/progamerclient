@@ -1,9 +1,9 @@
 package singletons;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import database.DatabaseHandler;
 import models.Achievement;
@@ -14,15 +14,15 @@ import models.UserAchievement;
 
 public class DatabaseHandlerSingleton {
 
-    private static DatabaseHandlerSingleton sInstance;
+    private static DatabaseHandlerSingleton sDatabaseHandlerSingletonInstance;
     private DatabaseHandler mDatabaseHandler;
     private String mClassName = getClass().toString();
-    private String user_student_number;
+    private String mUserStudentNumber;
 
     public static DatabaseHandlerSingleton getInstance(Context mContext) {
-        if (sInstance == null)
-            sInstance = new DatabaseHandlerSingleton(mContext);
-        return sInstance;
+        if (sDatabaseHandlerSingletonInstance == null)
+            sDatabaseHandlerSingletonInstance = new DatabaseHandlerSingleton(mContext);
+        return sDatabaseHandlerSingletonInstance;
     }
 
     private DatabaseHandlerSingleton(Context mContext) {
@@ -81,15 +81,15 @@ public class DatabaseHandlerSingleton {
     }
 
     public String getLoggedUserStudentNumber() {
-        if (user_student_number == null) {
-            user_student_number = getLoggedUser().getUser_student_number_id();
+        if (mUserStudentNumber == null) {
+            mUserStudentNumber = getLoggedUser().getUser_student_number_id();
         }
-        return user_student_number;
+        return mUserStudentNumber;
     }
 
     public boolean logoutUser() {
         if (getDatabaseHandler().logoutUser(getLoggedUser())) {
-            sInstance = null;
+            sDatabaseHandlerSingletonInstance = null;
             return true;
         } else {
             return false;
@@ -147,5 +147,27 @@ public class DatabaseHandlerSingleton {
 
     public int resetUserUpdated() {
         return getDatabaseHandler().resetUserUpdated(getLoggedUser());
+    }
+
+    //achievements
+
+    public void updateAchievement(String achievementTarget, int amount) {
+        getDatabaseHandler().updateUserAchievement(achievementTarget, getLoggedUser(), amount);
+    }
+
+    public List<UserAchievement> getUserAchievementsNotifications() {
+        return getDatabaseHandler().getUserAchievementsNotifications(getLoggedUser());
+    }
+
+    public int setUserAchievementNotified(int achievement_id) {
+        return getDatabaseHandler().setUserAchievementNotified(getLoggedUser(), achievement_id);
+    }
+
+    public List<UserAchievement> getUserAchievementsUpdated() {
+        return getDatabaseHandler().getUserAchievementsUpdated(getLoggedUser());
+    }
+
+    public int updateUserAchievementsUpdated(UserAchievement userAchievement) {
+        return getDatabaseHandler().updateUserAchievementsUpdated(userAchievement);
     }
 }

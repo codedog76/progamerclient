@@ -1,5 +1,6 @@
 package activities;
 
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -7,7 +8,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -32,15 +32,16 @@ import singletons.NetworkManagerSingleton;
 
 public class UserProfileActivity extends AppCompatActivity {
 
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
-    private Toolbar toolbar;
-    private TextView userProfileStudentNameTextView, userProfileStudentNumberTextView, userProfileOverallRank, userProfileAttemptsRank, userProfileTimeRank;
-    private LinearLayout activityUserProfileTopContainer;
-    private ProgressBar activityUserProfileProgressBar;
-    private CircleImageView leaderboardCircleImageView;
-    private DatabaseHandlerSingleton databaseHandlerSingleton;
-    private NetworkManagerSingleton networkManagerSingleton;
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
+    private Toolbar mToolbar;
+    private TextView mTextNickname, mTextStudentNumber, mTextTotalScore, mTextTotalAttempts,
+            mTextTotalTime;
+    private LinearLayout mLinearTopContainer;
+    private ProgressBar mProgressBar;
+    private CircleImageView mCircleImageAvatar;
+    private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
+    private NetworkManagerSingleton mNetworkManagerSingleton;
     private String mClassName = getClass().toString();
 
     @Override
@@ -54,77 +55,90 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     public void assignSingletons() {
-        databaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
-        networkManagerSingleton = NetworkManagerSingleton.getInstance(this);
+        mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
+        mNetworkManagerSingleton = NetworkManagerSingleton.getInstance(this);
     }
 
     private void assignActionBar() {
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        setSupportActionBar(mToolbar);
+        if (getSupportActionBar() != null) getSupportActionBar().setHomeButtonEnabled(true);
+        else Log.e(mClassName, "getSupportActionBar null");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
     }
 
     private void assignViews() {
-        viewPager = (ViewPager) findViewById(R.id.userProfileViewPager);
-        setupViewPager(viewPager);
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        activityUserProfileProgressBar = (ProgressBar) findViewById(R.id.activityUserProfileProgressBar);
-        activityUserProfileTopContainer = (LinearLayout) findViewById(R.id.activityUserProfileTopContainer);
-        userProfileStudentNameTextView = (TextView) findViewById(R.id.userProfileStudentNameTextView);
-        userProfileStudentNumberTextView = (TextView) findViewById(R.id.userProfileStudentNumberTextView);
-        userProfileOverallRank = (TextView) findViewById(R.id.userProfileOverallRank);
-        userProfileAttemptsRank = (TextView) findViewById(R.id.userProfileAttemptsRank);
-        userProfileTimeRank = (TextView) findViewById(R.id.userProfileTimeRank);
-        leaderboardCircleImageView = (CircleImageView) findViewById(R.id.leaderboardCircleImageView);
+        mViewPager = (ViewPager) findViewById(R.id.userProfileViewPager);
+        setupViewPager(mViewPager);
+        mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        if (mTabLayout != null) mTabLayout.setupWithViewPager(mViewPager);
+        else Log.e(mClassName, "mTabLayout null");
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        mLinearTopContainer = (LinearLayout) findViewById(R.id.linear_top_container);
+        mTextNickname = (TextView) findViewById(R.id.text_nickname);
+        mTextStudentNumber = (TextView) findViewById(R.id.text_student_number);
+        mTextTotalScore = (TextView) findViewById(R.id.text_total_score);
+        mTextTotalAttempts = (TextView) findViewById(R.id.text_total_attempts);
+        mTextTotalTime = (TextView) findViewById(R.id.text_total_time);
+        mCircleImageAvatar = (CircleImageView) findViewById(R.id.circle_image_avatar);
     }
 
     private void getBundle() {
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            activityUserProfileTopContainer.setVisibility(View.INVISIBLE);
-            activityUserProfileProgressBar.setVisibility(View.VISIBLE);
-            if (bundle.getBoolean("is_logged_user", false)) {
-                userProfileStudentNameTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_nickname());
-                userProfileStudentNumberTextView.setText(databaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
-                userProfileOverallRank.setText(String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_overall_score_rank()));
-                userProfileAttemptsRank.setText(String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_overall_attempts_rank()));
-                userProfileTimeRank.setText(String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_overall_time_rank()));
-                int id = getResources().getIdentifier("avatar_" + String.valueOf(databaseHandlerSingleton.getLoggedUser().getUser_avatar()), "drawable", getPackageName());
-                leaderboardCircleImageView.setImageDrawable(ContextCompat.getDrawable(this, id));
-                activityUserProfileProgressBar.setVisibility(View.GONE);
-                activityUserProfileTopContainer.setVisibility(View.VISIBLE);
-            } else {
-                User selected_user = (User)bundle.getSerializable("selected_user");
-                if (selected_user != null) {
-                    networkManagerSingleton.getUserJsonRequest(selected_user, new NetworkManagerSingleton.ObjectResponseListener<User>() {
-                        @Override
-                        public void getResult(User object, Boolean response, String message) {
-                            if (response) {
-                                userProfileStudentNameTextView.setText(object.getUser_nickname());
-                                userProfileStudentNumberTextView.setText(object.getUser_student_number_id());
-                                userProfileOverallRank.setText(String.valueOf(object.getUser_overall_score_rank()));
-                                userProfileAttemptsRank.setText(String.valueOf(object.getUser_overall_attempts_rank()));
-                                userProfileTimeRank.setText(String.valueOf(object.getUser_overall_time_rank()));
-                                int id = getResources().getIdentifier("avatar_" + String.valueOf(object.getUser_avatar()), "drawable", getPackageName());
-                                leaderboardCircleImageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), id));
-                                activityUserProfileProgressBar.setVisibility(View.GONE);
-                                activityUserProfileTopContainer.setVisibility(View.VISIBLE);
-                            } else {
-                                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-                                finish();
-                                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                            }
-                        }
-                    });
-
-                } else {
-                    finish();
-                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+            mLinearTopContainer.setVisibility(View.INVISIBLE);
+            mProgressBar.setVisibility(View.VISIBLE);
+            String user_student_number = bundle.getString("user_student_number", null);
+            if (user_student_number != null && mDatabaseHandlerSingleton.getLoggedUserStudentNumber()
+                    .equals(user_student_number)) {
+                User currentUser = mDatabaseHandlerSingleton.getLoggedUser();
+                mTextNickname.setText(currentUser.getUser_nickname());
+                mTextStudentNumber.setText(currentUser.getUser_student_number_id());
+                mTextTotalScore.setText(String.valueOf(currentUser.getUser_overall_score_rank()));
+                mTextTotalAttempts.setText(String.valueOf(currentUser.getUser_overall_attempts_rank()));
+                mTextTotalTime.setText(String.valueOf(currentUser.getUser_overall_time_rank()));
+                int id = getResources().getIdentifier("avatar_" + String.valueOf(currentUser.getUser_avatar()),
+                        "drawable", getPackageName());
+                mCircleImageAvatar.setImageDrawable(ContextCompat.getDrawable(this, id));
+                mProgressBar.setVisibility(View.GONE);
+                mLinearTopContainer.setVisibility(View.VISIBLE);
+                String achievement = bundle.getString("achievement", null);
+                if (achievement != null && achievement.equals("achievement")) {
+                    TabLayout.Tab tab = mTabLayout.getTabAt(2);
+                    if (tab != null)
+                        tab.select();
                 }
+            } else {
+                User user = new User();
+                user.setUser_student_number_id(user_student_number);
+                mNetworkManagerSingleton.getUserJsonRequest(user, new NetworkManagerSingleton.ObjectResponseListener<User>() {
+                    @Override
+                    public void getResult(User object, Boolean response, String message) {
+                        if (response) {
+                            mTextNickname.setText(object.getUser_nickname());
+                            mTextStudentNumber.setText(object.getUser_student_number_id());
+                            mTextTotalScore.setText(String.valueOf(object.getUser_overall_score_rank()));
+                            mTextTotalAttempts.setText(String.valueOf(object.getUser_overall_attempts_rank()));
+                            mTextTotalTime.setText(String.valueOf(object.getUser_overall_time_rank()));
+                            int id = getResources().getIdentifier("avatar_" + String.valueOf(object.getUser_avatar()),
+                                    "drawable", getPackageName());
+                            mCircleImageAvatar.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), id));
+                            mProgressBar.setVisibility(View.GONE);
+                            mLinearTopContainer.setVisibility(View.VISIBLE);
+                        } else {
+                            Log.e(mClassName, message);
+                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                            finish();
+                            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        }
+                    }
+                });
             }
+        } else {
+            Log.e(mClassName, "Bundle null");
+            finish();
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         }
     }
 

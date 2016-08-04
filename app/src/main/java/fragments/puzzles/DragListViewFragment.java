@@ -101,7 +101,7 @@ public class DragListViewFragment extends Fragment {
     }
 
     private void assignViews(View view) {
-        mDragListView = (DragListView) view.findViewById(R.id.dragListView);
+        mDragListView = (DragListView) view.findViewById(R.id.drag_list_view);
     }
 
     private static class MyDragItem extends DragItem {
