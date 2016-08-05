@@ -1,6 +1,7 @@
 package singletons;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,18 +28,24 @@ public class AchievementHandlerSingleton {
     }
 
     public void levelWasComplete(Level current_level) {
-        levelComplete(current_level);
+        Log.e("score", current_level.getLevel_score()+"");
+        Log.e("attempts", current_level.getLevel_attempts()+"");
+        Log.e("time", current_level.getLevel_time()+"");
         levelScore(current_level);
         levelAttempts(current_level);
         levelTime(current_level);
+    }
+
+    public void puzzleWasComplete(Level current_level) {
+        puzzleComplete(current_level);
     }
 
     public List<UserAchievement> getUserAchievementsNotifications() {
         return mDatabaseHandlerSingleton.getUserAchievementsNotifications();
     }
 
-    private void levelComplete(Level current_level) {
-        String achievementTarget = "<level_id>" + current_level.getLevel_database_id() + "</level_id><complete>";
+    private void puzzleComplete(Level current_level) {
+        String achievementTarget = "<level_id>" + current_level.getLevel_database_id() + "</level_id><puzzle><complete>";
         mDatabaseHandlerSingleton.updateAchievement(achievementTarget, current_level.getLevel_puzzles_completed());
     }
 

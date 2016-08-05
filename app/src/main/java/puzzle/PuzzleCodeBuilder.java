@@ -2,7 +2,6 @@ package puzzle;
 
 import android.support.v4.util.Pair;
 import android.util.Log;
-import android.view.View;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -30,17 +29,13 @@ public class PuzzleCodeBuilder {
     private String[] mAssignmentOperators = new String[]{"=", "+=", "-=", "*=", "/=", "&=",};
     private List<String> mUnusedVariableNames = new ArrayList<>(Arrays.asList(mVariableNames));
     private List<String> mUsedVariableNames = new ArrayList<>();
-
     private List<String> mCSharpCodeToRun;
     private List<Object> mCSharpCodeToRunAnswer;
-
     private List<Pair<String, String>> mCSharpCodeToDisplayPuzzle;
     private String mCSharpCodeToDisplayExpectedOutput;
-
     private String mPuzzleFragmentType;
     private String mPuzzleExpectedOutputType;
-    private boolean mProcessCodeSelected;
-    private boolean mCodeCanRun;
+    private boolean mProcessCodeSelected, mIsValidCode = false;
 
     private JavaInterpreter mJavaInterpreter;
 
@@ -68,19 +63,30 @@ public class PuzzleCodeBuilder {
         return mProcessCodeSelected;
     }
 
+    public List<String> getCSharpCodeToRun() {
+        return mCSharpCodeToRun;
+    }
+
     public List<Object> getCSharpCodeToRunAnswer() {
         return mCSharpCodeToRunAnswer;
     }
 
+    public boolean getIsValidCode() {
+        return mIsValidCode;
+    }
+
     public void processCSharpCode(String cSharpCode) {
         List<String> cSharpCodeAfterComments = removeComments(cSharpCode);
+
         List<String> cSharpCodeAfterHeaderTags = processHeaderTags(cSharpCodeAfterComments);
+
         List<String> cSharpCodeAfterTags = processCodeTags(cSharpCodeAfterHeaderTags);
-        mCSharpCodeToRun = processTagsForRun(cSharpCodeAfterTags);
         mCSharpCodeToDisplayPuzzle = processTagsForDisplay(cSharpCodeAfterTags);
-        mJavaInterpreter.compileCSharpCode(mCSharpCodeToRun);
+
+        mCSharpCodeToRun = processTagsForRun(cSharpCodeAfterTags);
         mCSharpCodeToRunAnswer = mJavaInterpreter.compileCSharpCode(mCSharpCodeToRun);
-        processCodeToRunAnswer();
+
+        mIsValidCode = mJavaInterpreter.getIsValidCode();
         processCodeToDisplayExpectedOutput();
         processCodeToDisplayPuzzle();
     }
@@ -143,7 +149,9 @@ public class PuzzleCodeBuilder {
     //Returns a string list with header string object removed
     private List<String> processHeaderTags(List<String> cSharpCodeList) {
         String header = cSharpCodeList.get(0);
-        if (header.contains("<single>") || header.contains("<multiple>") || header.contains("<rearrange>") || header.contains("<truefalse>") || header.contains("<result>") || header.contains("<code>")) {
+        if (header.contains("<single>") || header.contains("<multiple>") || header.contains("<rearrange>") ||
+                header.contains("<truefalse>") || header.contains("<result>") || header.contains("<code>")) {
+
             if (header.contains("<single>")) {
                 mPuzzleFragmentType = "<single>";
                 mProcessCodeSelected = !header.contains("<exclude>");
@@ -210,6 +218,7 @@ public class PuzzleCodeBuilder {
 
             cSharpCodeLine = checkForFixedValues(cSharpCodeLine);
             cSharpCodeLine = checkForRandomValues(cSharpCodeLine);
+            cSharpCodeLine = checkForIncorrectValues(cSharpCodeLine);
             cSharpCodeAfterTags.add(cSharpCodeLine);
         }
         return cSharpCodeAfterTags;
@@ -219,10 +228,13 @@ public class PuzzleCodeBuilder {
         List<Pair<String, String>> cSharpCodeAfterHideTags = new ArrayList<>();
         for (int x = 0; x < cSharpCodeList.size(); x++) {
             String cSharpCodeLineDisplay = cSharpCodeList.get(x);
-            cSharpCodeLineDisplay = checkForIncorrectValues(cSharpCodeLineDisplay);
             String cSharpCodeLineCode = cSharpCodeList.get(x);
             cSharpCodeLineCode = cSharpCodeLineCode.replaceAll("<hide>", "");
             cSharpCodeLineCode = cSharpCodeLineCode.replaceAll("</hide>", "");
+            cSharpCodeLineDisplay = cSharpCodeLineDisplay.replaceAll("<!run>", "");
+            cSharpCodeLineDisplay = cSharpCodeLineDisplay.replaceAll("</!run>", "");
+            cSharpCodeLineCode = cSharpCodeLineCode.replaceAll("<!run>", "");
+            cSharpCodeLineCode = cSharpCodeLineCode.replaceAll("</!run>", "");
             cSharpCodeLineDisplay = cSharpCodeLineDisplay.replaceAll("(?s)<hide>.*?</hide>", "");
             cSharpCodeAfterHideTags.add(new Pair<>(cSharpCodeLineDisplay, cSharpCodeLineCode));
         }
@@ -230,58 +242,64 @@ public class PuzzleCodeBuilder {
     }
 
     private List<String> processTagsForRun(List<String> cSharpCodeList) {
-        List<String> cSharpCodeAfterHideTags = new ArrayList<>();
+        List<String> cSharpCodeAfterTagsForRun = new ArrayList<>();
         for (int x = 0; x < cSharpCodeList.size(); x++) {
             String cSharpCodeLine = cSharpCodeList.get(x);
             cSharpCodeLine = cSharpCodeLine.replaceAll("<hide>", "");
             cSharpCodeLine = cSharpCodeLine.replaceAll("</hide>", "");
-            if (!cSharpCodeLine.contains("<rwv>") && !cSharpCodeLine.contains("<wv>") && !cSharpCodeLine.contains("</wv>"))
-                cSharpCodeAfterHideTags.add(cSharpCodeLine);
+            if (!cSharpCodeLine.contains("<!run>") && !cSharpCodeLine.contains("</!run>"))
+                cSharpCodeAfterTagsForRun.add(cSharpCodeLine);
         }
-        return cSharpCodeAfterHideTags;
-    }
-
-    private void processCodeToRunAnswer() {
-        if (mPuzzleFragmentType.equals("<truefalse>")) {
-            if (mCSharpCodeToRunAnswer != null) {
-                mCSharpCodeToRunAnswer = new ArrayList<>();
-                mCSharpCodeToRunAnswer.add("True");
-            } else {
-                mCSharpCodeToRunAnswer = new ArrayList<>();
-                mCSharpCodeToRunAnswer.add("False");
-            }
-        }
+        return cSharpCodeAfterTagsForRun;
     }
 
     private void processCodeToDisplayExpectedOutput() {
         mCSharpCodeToDisplayExpectedOutput = "";
+        Log.e("case", mPuzzleExpectedOutputType);
         switch (mPuzzleExpectedOutputType) {
             case "<none>":
                 mCSharpCodeToDisplayExpectedOutput = "";
                 break;
             case "<code>":
+                List<String> toDisplay1 = new ArrayList<>();
                 for (Pair<String, String> output : mCSharpCodeToDisplayPuzzle) {
                     String expected_output_line = output.first;
-                    if (!expected_output_line.equals(""))
-                        if (mCSharpCodeToRunAnswer.indexOf(output) == mCSharpCodeToRunAnswer.size() - 1)
-                            mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line;
-                        else
-                            mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line + "\n";
+                    if(!expected_output_line.equals("")) {
+                        toDisplay1.add(expected_output_line);
+                    }
+                }
+                for (String expected_output_line : toDisplay1) {
+                    if (toDisplay1.indexOf(expected_output_line) == toDisplay1.size() - 1)
+                        mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line;
+                    else
+                        mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line + "\n";
                 }
                 break;
             case "<result>":
+                List<String> toDisplay2 = new ArrayList<>();
                 for (Object output : mCSharpCodeToRunAnswer) {
                     String expected_output_line = output.toString();
-                    if (mCSharpCodeToRunAnswer.indexOf(output) == mCSharpCodeToRunAnswer.size() - 1)
+                    if(!expected_output_line.equals("")) {
+                        toDisplay2.add(expected_output_line);
+                    }
+                }
+                for (String expected_output_line : toDisplay2) {
+                    if (toDisplay2.indexOf(expected_output_line) == toDisplay2.size() - 1)
                         mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line;
                     else
                         mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line + "\n";
                 }
                 break;
             default:
+                List<String> toDisplay3 = new ArrayList<>();
                 for (Object output : mCSharpCodeToRunAnswer) {
                     String expected_output_line = output.toString();
-                    if (mCSharpCodeToRunAnswer.indexOf(output) == mCSharpCodeToRunAnswer.size() - 1)
+                    if(!expected_output_line.equals("")) {
+                        toDisplay3.add(expected_output_line);
+                    }
+                }
+                for (String expected_output_line : toDisplay3) {
+                    if (toDisplay3.indexOf(expected_output_line) == toDisplay3.size() - 1)
                         mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line;
                     else
                         mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line + "\n";
@@ -483,7 +501,7 @@ public class PuzzleCodeBuilder {
         if (cSharpCodeLine.contains("String"))
             cSharpCodeLine = cSharpCodeLine.replaceAll("<rwv>", generateRandomBoolean());
         if (cSharpCodeLine.contains("char"))
-            cSharpCodeLine = cSharpCodeLine.replaceAll("<rwv>", generateRandomDouble());
+            cSharpCodeLine = cSharpCodeLine.replaceAll("<rwv>", generateRandomBoolean());
         if (cSharpCodeLine.contains("Boolean"))
             cSharpCodeLine = cSharpCodeLine.replaceAll("<rwv>", generateRandomInteger());
         return cSharpCodeLine;

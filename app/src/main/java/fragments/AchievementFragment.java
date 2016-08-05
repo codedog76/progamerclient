@@ -30,10 +30,11 @@ public class AchievementFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private ArrayList<UserAchievement> mAchievementList;
+    private ArrayList<UserAchievement> mConstantAchievementList;
     private AchievementAdapter mAchievementAdapter;
     private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
     private String[] mAchievementListSort = new String[]{"Sort by date completed", "Sort by title", "Sort by completed"};
-    private String[] mAchievementListFilter = new String[]{"All", "Completed", "Incomplete"};
+    private String[] mAchievementListFilter = new String[]{"All", "Complete", "Incomplete"};
     private Spinner mSpinnerAchievementSort, mSpinnerAchievementFilter;
 
     public AchievementFragment() {
@@ -49,13 +50,14 @@ public class AchievementFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         assignSingletons();
+        mConstantAchievementList = new ArrayList<>(mDatabaseHandlerSingleton.getLoggedUserAchievements());
         assignViews(view);
         assignListeners();
-        addList(mDatabaseHandlerSingleton.getLoggedUserAchievements());
+        addList(mConstantAchievementList);
     }
 
-    public void sortListDate(List<UserAchievement> list) { //Todo: deprecated
-        Collections.sort(list, new Comparator<UserAchievement>() {
+    public void sortListDate() {
+        Collections.sort(mAchievementList, new Comparator<UserAchievement>() {
             @Override
             public int compare(UserAchievement obj1, UserAchievement obj2) {
 
@@ -73,30 +75,28 @@ public class AchievementFragment extends Fragment {
         });
     }
 
-    public void sortListTitle(List<UserAchievement> list) { //Todo: deprecated
-        Collections.sort(list, new Comparator<UserAchievement>() {
+    public void sortListTitle() {
+        Collections.sort(mAchievementList, new Comparator<UserAchievement>() {
             @Override
             public int compare(UserAchievement obj1, UserAchievement obj2) {
-
+                if (obj1.getAchievement_title().equals(obj2.getAchievement_title())) {
+                    return 0;
+                }
                 if (obj1.getAchievement_title() == null) {
                     return -1;
                 }
                 if (obj2.getAchievement_title() == null) {
                     return 1;
                 }
-                if (obj1.getAchievement_title().equals(obj2.getAchievement_title())) {
-                    return 0;
-                }
                 return obj1.getAchievement_title().compareTo(obj2.getAchievement_title());
             }
         });
     }
 
-    public void sortListComplete(List<UserAchievement> list) { //Todo: deprecated
-        Collections.sort(list, new Comparator<UserAchievement>() {
+    public void sortListComplete() {
+        Collections.sort(mAchievementList, new Comparator<UserAchievement>() {
             @Override
             public int compare(UserAchievement obj1, UserAchievement obj2) {
-
                 if (obj1.getUserachievement_completed() > obj2.getUserachievement_completed())
                     return -1;
                 if (obj1.getUserachievement_completed() < obj2.getUserachievement_completed())
@@ -107,23 +107,52 @@ public class AchievementFragment extends Fragment {
         });
     }
 
+    private String mCurrentSort = mAchievementListSort[0];
+
+    private void sortList(String toSortBy) {
+        mCurrentSort = toSortBy;
+        if (toSortBy.equals("Sort by date completed")) {
+            sortListDate();
+            addList(mAchievementList);
+        }
+        if (toSortBy.equals("Sort by title")) {
+            sortListTitle();
+            addList(mAchievementList);
+        }
+        if (toSortBy.equals("Sort by completed")) {
+            sortListComplete();
+            addList(mAchievementList);
+        }
+    }
+
     private void assignListeners() {
         mSpinnerAchievementSort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String sortSelected = mAchievementListSort[position];
-                ArrayList<UserAchievement> userAchievementList = new ArrayList<>(mAchievementList);
-                if(sortSelected.equals("Sort by date")) {
-                    sortListDate(userAchievementList);
-                    addList(userAchievementList);
+                sortList(sortSelected);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        mSpinnerAchievementFilter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String filterSelected = mAchievementListFilter[position];
+                if (filterSelected.equals("All")) {
+                    sortList(mCurrentSort);
+                    addList(mConstantAchievementList);
                 }
-                if(sortSelected.equals("Sort by title")) {
-                    sortListTitle(userAchievementList);
-                    addList(userAchievementList);
+                if (filterSelected.equals("Complete")) {
+                    filterListComplete();
+                    addList(mAchievementList);
                 }
-                if(sortSelected.equals("Sort by complete")) {
-                    sortListComplete(userAchievementList);
-                    addList(userAchievementList);
+                if (filterSelected.equals("Incomplete")) {
+                    filterListIncomplete();
+                    addList(mAchievementList);
                 }
             }
 
@@ -132,6 +161,28 @@ public class AchievementFragment extends Fragment {
 
             }
         });
+    }
+
+    private void filterListComplete() {
+        List<UserAchievement> tempToReplace = new ArrayList<>();
+        for (UserAchievement userAchievement : mConstantAchievementList) {
+            if (userAchievement.getUserachievement_completed() == 1) {
+                tempToReplace.add(userAchievement);
+            }
+        }
+        mAchievementList = new ArrayList<>(tempToReplace);
+        sortList(mCurrentSort);
+    }
+
+    private void filterListIncomplete() {
+        List<UserAchievement> tempToReplace = new ArrayList<>();
+        for (UserAchievement userAchievement : mConstantAchievementList) {
+            if (userAchievement.getUserachievement_completed() != 1) {
+                tempToReplace.add(userAchievement);
+            }
+        }
+        mAchievementList = new ArrayList<>(tempToReplace);
+        sortList(mCurrentSort);
     }
 
     private void assignViews(View view) {
@@ -144,19 +195,19 @@ public class AchievementFragment extends Fragment {
         mAchievementAdapter = new AchievementAdapter(getActivity());
         mRecyclerView.setAdapter(mAchievementAdapter);
 
-        assignSortSpinnerView(view);
-        assignFilerSpinnerView(view);
+        assignSortSpinnerView();
+        assignFilerSpinnerView();
     }
 
-    private void assignFilerSpinnerView(View view) {
+    private void assignFilerSpinnerView() {
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_item,
                 mAchievementListFilter);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinnerAchievementFilter.setAdapter(spinnerArrayAdapter);
-        mSpinnerAchievementFilter.setSelection(0);
+        mSpinnerAchievementFilter.setSelection(1);
     }
 
-    private void assignSortSpinnerView(View view) {
+    private void assignSortSpinnerView() {
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_item,
                 mAchievementListSort);
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

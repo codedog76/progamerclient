@@ -24,6 +24,7 @@ import java.util.List;
 
 import activities.UserProfileActivity;
 import models.User;
+import singletons.DatabaseHandlerSingleton;
 import singletons.NetworkManagerSingleton;
 
 
@@ -42,6 +43,7 @@ public class LeaderboardFragment extends Fragment implements LeaderboardScoreFra
     private LinearLayout mLinearProgressBar, mLinearTryAgain;
     private ViewPagerAdapter mViewPagerAdapter;
     private NetworkManagerSingleton mNetworkManagerSingleton;
+    private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
     private ScoreFragmentInterface mScoreFragmentInterface;
     private AttemptsFragmentInterface mAttemptsFragmentInterface;
     private TimeFragmentInterface mTimeFragmentInterface;
@@ -90,10 +92,11 @@ public class LeaderboardFragment extends Fragment implements LeaderboardScoreFra
         mRelativeLayout.setVisibility(View.VISIBLE);
         mLinearProgressBar.setVisibility(View.VISIBLE);
         mLinearTryAgain.setVisibility(View.GONE);
-        mNetworkManagerSingleton.putUserLevelsJSONRequest(new NetworkManagerSingleton.BooleanResponseListener() {
+
+        mNetworkManagerSingleton.putUserJsonRequest(mDatabaseHandlerSingleton.getLoggedUser(), new NetworkManagerSingleton.BooleanResponseListener() {
             @Override
             public void getResult(Boolean response, String message) {
-                if (response) {
+                if(response) {
                     mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
                         @Override
                         public void getResult(ArrayList<User> object, Boolean response, String message) {
@@ -116,7 +119,6 @@ public class LeaderboardFragment extends Fragment implements LeaderboardScoreFra
                 }
             }
         });
-
     }
 
     private void refreshData() {
@@ -142,6 +144,7 @@ public class LeaderboardFragment extends Fragment implements LeaderboardScoreFra
 
     private void assignSingletons() {
         mNetworkManagerSingleton = NetworkManagerSingleton.getInstance(getActivity());
+        mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(getActivity());
     }
 
     private void assignViews(View view) {

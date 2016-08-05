@@ -735,13 +735,14 @@ public class NetworkManagerSingleton {
         try {
             JSONArray outgoing_userachievements = new JSONArray();
             for (UserAchievement current_userachievement : current_userachievements) {
+                Log.e(mClassName, "userachievement_progress: " + current_userachievement.getUserachievement_progress());
+                Log.e(mClassName, "userachievement_progress: " + current_userachievement.getUserachievement_completed());
+                Log.e(mClassName, "userachievement_notified: " + current_userachievement.getUserachievement_notified());
                 JSONObject outgoing_userachievement = new JSONObject();
                 outgoing_userachievement.put("userachievement_id", current_userachievement.getUserachievement_id());
-                Log.e("achId", current_userachievement.getUserachievement_id() + "");
                 outgoing_userachievement.put("userachievement_progress", current_userachievement.getUserachievement_progress());
                 outgoing_userachievement.put("userachievement_completed", current_userachievement.getUserachievement_completed());
                 outgoing_userachievement.put("userachievement_notified", current_userachievement.getUserachievement_notified());
-                Log.e("notified", current_userachievement.getUserachievement_notified() + "");
                 outgoing_userachievements.put(outgoing_userachievement);
             }
             jsonObject.put("userachievement_list", outgoing_userachievements);
@@ -762,11 +763,6 @@ public class NetworkManagerSingleton {
                                     UserAchievement userAchievement = new UserAchievement();
                                     //pk auto increment
                                     userAchievement.setUserachievement_database_id(jsonObject.getInt("userachievement_id")); //fk
-                                    userAchievement.setUser_student_number(jsonObject.getString("user_student_number")); //database pk
-                                    userAchievement.setAchievement_id(jsonObject.getInt("achievement_id"));
-                                    userAchievement.setUserachievement_progress(jsonObject.getInt("userachievement_progress"));
-                                    userAchievement.setUserachievement_completed(jsonObject.getInt("userachievement_completed"));
-                                    userAchievement.setUserachievement_notified(jsonObject.getInt("userachievement_notified"));
                                     userAchievement.setUserachievement_date_completed(jsonObject.getString("userachievement_date_completed"));
                                     userAchievement.setUserachievement_updated(0);
                                     mDatabaseHandlerSingleton.updateUserAchievementsUpdated(userAchievement);

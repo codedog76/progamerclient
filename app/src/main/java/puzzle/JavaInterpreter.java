@@ -2,28 +2,26 @@ package puzzle;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import bsh.EvalError;
 import bsh.Interpreter;
-import singletons.NetworkManagerSingleton;
 
 public class JavaInterpreter {
 
     private String mClassName = getClass().toString();
+    private boolean mIsValidCode = false;
 
     public JavaInterpreter() {
     }
 
+    public boolean getIsValidCode() {
+        return mIsValidCode;
+    }
+
     public List<Object> compileCSharpCode(List<String> cSharpCode) {
+        List<Object> compiledCodeList = new ArrayList<>();
         String javaCodePrefix = "import java.util.List; import java.util.ArrayList; List CW = new ArrayList(); List CR = new ArrayList();";
         String javaCodeSuffix = "result = CR;";
         for (String cSharpLine : cSharpCode) {
@@ -40,12 +38,25 @@ public class JavaInterpreter {
         String javaCode = javaCodePrefix + javaCodeSuffix;
         try {
             Interpreter interpreter = new Interpreter();
-            Log.e("javaCode", javaCode);
+            Log.e(mClassName, javaCode);
             interpreter.eval(javaCode);
-            return (List) interpreter.get("result");
+            compiledCodeList = (List) interpreter.get("result");
+            mIsValidCode = true;
         } catch (EvalError evalError) {
             Log.e(mClassName, evalError.getMessage());
+            compiledCodeList.add(evaluateEvalError(evalError.getMessage()));
+            mIsValidCode = false;
         }
-        return null;
+        return compiledCodeList;
+    }
+
+    private String evaluateEvalError(String evalError) {
+        String[] splitError = evalError.split(". . . '' :");
+        if (splitError.length == 0)
+            return evalError;
+        if (splitError[1].equals(" Typed variable declaration")) {
+            return "Invalid primitive assignment";
+        }
+        return splitError[1];
     }
 }

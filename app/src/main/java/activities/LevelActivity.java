@@ -84,11 +84,12 @@ public class LevelActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         mCurrentLevel = mDatabaseHandlerSingleton.getLevel(mLevelId);
+        fetchMyScoreData();
         loadData();
         AchievementHandlerSingleton achievementHandlerSingleton = AchievementHandlerSingleton.getInstance(this);
         mUserAchievementList = achievementHandlerSingleton.getUserAchievementsNotifications();
         if (mUserAchievementList.size() > 0) {
-            mAchievementHandler.postDelayed(mAchievementRunnable, 1000);
+            mAchievementHandler.postDelayed(mAchievementRunnable, 500);
         }
     }
 

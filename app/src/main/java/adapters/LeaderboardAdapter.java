@@ -63,7 +63,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
             holder.mCircleImageAvatar.setBorderColor(ContextCompat.getColor(mContext, R.color.grey_50));
         }
         holder.mTextNickname.setText(current_user.getUser_nickname());
-        if (mLeaderboardType.equals("overall")) {
+        if (mLeaderboardType.equals("score")) {
             holder.mTextScore.setText(String.valueOf(current_user.getUser_overall_score()));
         }
         if (mLeaderboardType.equals("attempts")) {

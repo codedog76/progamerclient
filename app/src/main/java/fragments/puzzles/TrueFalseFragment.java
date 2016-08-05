@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import activities.PuzzleActivity;
+import puzzle.JavaInterpreter;
 import puzzle.PuzzleCodeBuilder;
 
 public class TrueFalseFragment extends Fragment {
@@ -53,6 +54,7 @@ public class TrueFalseFragment extends Fragment {
         List<String> toDisplayList = new ArrayList<>();
         toDisplayList.add("True");
         toDisplayList.add("False");
+        mCodePairList = mCurrentPuzzleCodeBuilder.getCSharpCodeToDisplayPuzzle();
         mArrayAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_checkbox, toDisplayList);
         mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         mListView.setAdapter(mArrayAdapter);
@@ -66,9 +68,21 @@ public class TrueFalseFragment extends Fragment {
                 checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
             }
         }
-        String expectedAnswer = mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer().get(0).toString();
-        Log.e("expectedAnswer", expectedAnswer);
-        return expectedAnswer.equals(checkedItem);
+
+        List<String> codeToRun = new ArrayList<>();
+        for (Pair<String, String> pair : mCodePairList) {
+            codeToRun.add(pair.second);
+        }
+
+        mParentPuzzleActivity.setPuzzleCode(mCurrentPuzzleCodeBuilder.getCSharpCodeToRun());
+        mParentPuzzleActivity.setPuzzleCodeResult(mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer());
+        mParentPuzzleActivity.setCompiledCode(codeToRun);
+        List<Object> expectedAnswer = new ArrayList<>();
+        expectedAnswer.add(mCurrentPuzzleCodeBuilder.getIsValidCode());
+        JavaInterpreter javaInterpreter = new JavaInterpreter();
+        List<Object> compiledAnswer = javaInterpreter.compileCSharpCode(codeToRun);
+        mParentPuzzleActivity.setCompiledResult(compiledAnswer);
+        return Boolean.valueOf(checkedItem) == mCurrentPuzzleCodeBuilder.getIsValidCode();
     }
 
     private void assignViews(View view) {

@@ -172,17 +172,26 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         List<Integer> userAchievementIds = getAchievementIds(achievementTarget);
         for (int userAchievementId : userAchievementIds) {
             UserAchievement userAchievement = getUserAchievementProgress(current_user, userAchievementId);
-            if (userAchievement != null && amount > userAchievement.getUserachievement_progress()) {
-                if (amount > userAchievement.getAchievement_total()) {
-                    amount = userAchievement.getAchievement_total();
+            if (userAchievement != null && userAchievement.getUserachievement_completed() != 1) {
+                if (amount > userAchievement.getUserachievement_progress()) {
+                    if (amount >= userAchievement.getAchievement_total()) {
+                        userAchievement.setUserachievement_completed(1);
+                        userAchievement.setUserachievement_notified(0);
+                        amount = userAchievement.getAchievement_total();
+                    }
+                    SQLiteDatabase db = this.getWritableDatabase();
+                    String strSQL = "UPDATE userachievement SET "
+                            + "userachievement_progress=" + amount + ", "
+                            + "userachievement_completed=" + userAchievement.getUserachievement_completed() + ", "
+                            + "userachievement_updated=1, "
+                            + "userachievement_notified=" + userAchievement.getUserachievement_notified()
+                            + " WHERE "
+                            + "userachievement_user_student_number_id='" + current_user.getUser_student_number_id() + "'"
+                            + " AND "
+                            + "userachievement_achievement_id=" + userAchievementId + ";";
+                    db.execSQL(strSQL);
+                    db.close();
                 }
-                SQLiteDatabase db = this.getWritableDatabase();
-                String strSQL = "UPDATE userachievement SET userachievement_progress=" + amount + ", achievement_total=" + userAchievement.getAchievement_total()
-                        + ", userachievement_completed=" + userAchievement.getUserachievement_completed() + ", level_updated=1 WHERE " +
-                        "userachievement_user_student_number_id='" + current_user.getUser_student_number_id() + "' AND userachievement_achievement_id="
-                        + userAchievementId + ";";
-                db.execSQL(strSQL);
-                db.close();
             }
         }
     }
@@ -212,7 +221,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(USERACHIEVEMENT_DATE_COMPLETED, userAchievement.getUserachievement_date_completed());
-        values.put(USERACHIEVEMENT_UPDATED, 0);
+        values.put(USERACHIEVEMENT_UPDATED, userAchievement.getUserachievement_updated());
         int rowsAffected = db.update(USERACHIEVEMENT_TABLE, values, USERACHIEVEMENT_USER_STUDENT_NUMBER_ID + " = ? AND " + USERACHIEVEMENT_ACHIEVEMENT_ID + " = ?",
                 new String[]{userAchievement.getUser_student_number(), String.valueOf(userAchievement.getAchievement_id())});
         db.close();
@@ -226,7 +235,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
                 achievementIds.add(cursor.getInt(0));
-                Log.e("cursor", cursor.getInt(0) + "");
                 cursor.moveToNext();
             }
         }
@@ -236,20 +244,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public UserAchievement getUserAchievementProgress(User current_user, int achievement_id) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT userachievement_progress, achievement_total FROM " + USERACHIEVEMENT_TABLE + " INNER JOIN " + ACHIEVEMENT_TABLE +
-                        " ON achievement_database_id=userachievement_achievement AND userachievement_user_student_number_id= ? AND userachievement_achievement_id= ? limit 1",
+        Cursor cursor = db.rawQuery("SELECT userachievement_progress, achievement_total, userachievement_completed FROM " + USERACHIEVEMENT_TABLE + " INNER JOIN " + ACHIEVEMENT_TABLE +
+                        " ON achievement_database_id=userachievement_achievement_id AND userachievement_user_student_number_id= ? AND userachievement_achievement_id= ? limit 1",
                 new String[]{current_user.getUser_student_number_id(), String.valueOf(achievement_id)});
         if (cursor != null && cursor.getCount() > 0) {
             cursor.moveToFirst();
             UserAchievement userAchievement = new UserAchievement();
-            int userachievement_progress = cursor.getInt(0);
-            int userachievement_total = cursor.getInt(1);
-            userAchievement.setUserachievement_progress(userachievement_progress);
-            userAchievement.setAchievement_total(userachievement_total);
-            if (userachievement_progress == userachievement_total)
-                userAchievement.setUserachievement_completed(1);
-            else
-                userAchievement.setUserachievement_completed(0);
+            userAchievement.setUserachievement_progress(cursor.getInt(0));
+            userAchievement.setAchievement_total(cursor.getInt(1));
+            userAchievement.setUserachievement_completed(cursor.getInt(2));
             cursor.close();
             return userAchievement;
         } else {

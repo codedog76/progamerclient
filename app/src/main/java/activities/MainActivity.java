@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         });
     }
 
-    private void showLogoutDialog() {
+    public void showLogoutDialog() {
         new AlertDialog.Builder(this)
                 .setMessage("Are you sure you want to log out?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {

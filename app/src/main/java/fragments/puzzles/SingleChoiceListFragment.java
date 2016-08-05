@@ -72,6 +72,7 @@ public class SingleChoiceListFragment extends Fragment {
 
     public Boolean checkIfCorrect() {
         if (mCurrentPuzzleCodeBuilder.getPuzzleExpectedOutputType().equals("<code>")) {
+            Log.e(mClassName, "this1");
             String checkedItem = "";
             SparseBooleanArray checked = mListView.getCheckedItemPositions();
 
@@ -85,6 +86,7 @@ public class SingleChoiceListFragment extends Fragment {
             List<Object> expectedAnswer = mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer();
             return checkedItem.equals(expectedAnswer.get(0).toString());
         } else {
+            Log.e(mClassName, "this2");
             List<String> codeToRun = new ArrayList<>();
             String checkedItem = "";
             SparseBooleanArray checked = mListView.getCheckedItemPositions();
@@ -95,6 +97,7 @@ public class SingleChoiceListFragment extends Fragment {
             }
             if(checkedItem.equals("")) return false;
             Log.e(mClassName, checkedItem);
+
             String[] splited = checkedItem.split("\\s+");
             if (mCurrentPuzzleCodeBuilder.getProcessCodeSelected()) {
                 for (Pair<String, String> pair : mCodePairList) {
@@ -113,8 +116,12 @@ public class SingleChoiceListFragment extends Fragment {
                     }
                 }
             }
+            mParentPuzzleActivity.setPuzzleCode(mCurrentPuzzleCodeBuilder.getCSharpCodeToRun());
+            mParentPuzzleActivity.setPuzzleCodeResult(mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer());
+            mParentPuzzleActivity.setCompiledCode(codeToRun);
             JavaInterpreter javaInterpreter = new JavaInterpreter();
             List<Object> compiledAnswer = javaInterpreter.compileCSharpCode(codeToRun);
+            mParentPuzzleActivity.setCompiledResult(compiledAnswer);
             if (compiledAnswer == null || compiledAnswer.size() == 0) {
                 return false;
             }
@@ -124,6 +131,7 @@ public class SingleChoiceListFragment extends Fragment {
                     return false;
                 }
             }
+
             return true;
         }
     }

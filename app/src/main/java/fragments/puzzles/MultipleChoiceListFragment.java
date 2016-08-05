@@ -95,6 +95,7 @@ public class MultipleChoiceListFragment extends Fragment {
                 }
             }
         }
+        mParentPuzzleActivity.setCompiledCode(codeToRun);
         JavaInterpreter javaInterpreter = new JavaInterpreter();
         List<Object> compiledAnswer = javaInterpreter.compileCSharpCode(codeToRun);
         if (compiledAnswer == null || compiledAnswer.size() == 0) {

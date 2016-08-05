@@ -86,6 +86,7 @@ public class DragListViewFragment extends Fragment {
         for (Pair<Long, String> cSharpLine : adapterList) {
             codeToRun.add(cSharpLine.second); //todo: find all in correct list
         }
+        mParentPuzzleActivity.setCompiledCode(codeToRun);
         JavaInterpreter javaInterpreter = new JavaInterpreter();
         List<Object> compiledAnswer = javaInterpreter.compileCSharpCode(codeToRun);
         if (compiledAnswer == null || compiledAnswer.size() == 0) {

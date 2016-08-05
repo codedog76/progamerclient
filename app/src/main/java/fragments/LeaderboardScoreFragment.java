@@ -74,9 +74,9 @@ public class LeaderboardScoreFragment extends Fragment implements LeaderboardAda
         addList(((LeaderboardFragment) getParentFragment()).getLeaderboardList());
         if (mLeaderboardAdapter.getItemCount() > 1) {
             mTextTopNickname.setText(mCurrentUser.getUser_nickname());
-            mTextTopScore.setText(String.valueOf(mCurrentUser.getUser_overall_attempts()));
+            mTextTopScore.setText(String.valueOf(mCurrentUser.getUser_overall_score()));
             mTextBottomNickname.setText(mCurrentUser.getUser_nickname());
-            mTextBottomScore.setText(String.valueOf(mCurrentUser.getUser_overall_attempts()));
+            mTextBottomScore.setText(String.valueOf(mCurrentUser.getUser_overall_score()));
             mTextTopRank.setText(getString(R.string.string_rank, mCurrentUserPos + 1));
             mTextBottomRank.setText(getString(R.string.string_rank, mCurrentUserPos + 1));
             int id = getContext().getResources().getIdentifier("avatar_" + String.valueOf(mCurrentUser.getUser_avatar()),
@@ -238,7 +238,7 @@ public class LeaderboardScoreFragment extends Fragment implements LeaderboardAda
             sortList(list);
             mUserList = new ArrayList<>();
             mUserList.addAll(list);
-            mLeaderboardAdapter.setUserList(mUserList, "attempts");
+            mLeaderboardAdapter.setUserList(mUserList, "score");
             mCurrentUserPos = findPosition();
         } else {
             mLeaderboardAdapter.clearUserList();
