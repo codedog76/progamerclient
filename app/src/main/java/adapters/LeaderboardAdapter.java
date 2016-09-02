@@ -64,13 +64,13 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         }
         holder.mTextNickname.setText(current_user.getUser_nickname());
         if (mLeaderboardType.equals("score")) {
-            holder.mTextScore.setText(String.valueOf(current_user.getUser_overall_score()));
+            holder.mTextScore.setText(String.valueOf(current_user.getUser_total_score()));
         }
         if (mLeaderboardType.equals("attempts")) {
-            holder.mTextScore.setText(String.valueOf(current_user.getUser_overall_attempts()));
+            holder.mTextScore.setText(String.valueOf(current_user.getUser_total_attempts()));
         }
         if (mLeaderboardType.equals("time")) {
-            holder.mTextScore.setText(String.valueOf(current_user.getUser_overall_time()));
+            holder.mTextScore.setText(String.valueOf(current_user.getUser_total_time()));
         }
         if (current_user.getUser_student_number_id().equals(DatabaseHandlerSingleton.getInstance(mContext)
                 .getLoggedUserStudentNumber())) {

@@ -72,8 +72,8 @@ public class DatabaseHandlerSingleton {
         return mDatabaseHandler.checkHasAchievements();
     }
 
-    public boolean checkHasLoggedUserAchievements() {
-        return mDatabaseHandler.checkHasLoggedUserAchievements();
+    public boolean checkHasLoggedUserAchievements(User user) {
+        return mDatabaseHandler.checkHasLoggedUserAchievements(user);
     }
 
     public boolean loginUser(String user_student_number) {
@@ -113,6 +113,10 @@ public class DatabaseHandlerSingleton {
 
     public ArrayList<Level> getLevels() {
         return getDatabaseHandler().getLevels(getLoggedUser());
+    }
+
+    public Boolean checkHasCompletedALevel() {
+        return getDatabaseHandler().checkHasCompletedALevel(getLoggedUser());
     }
 
     public ArrayList<UserAchievement> getLoggedUserAchievements() {

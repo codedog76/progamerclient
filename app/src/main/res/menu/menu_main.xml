@@ -1,0 +1,6 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context="activities.JobActivity">
+    <item android:id="@+id/item_download_student_data" android:title="Download Student Data"
+        android:icon="@drawable/ic_file_download_white_48dp" app:showAsAction="always" />
+</menu>

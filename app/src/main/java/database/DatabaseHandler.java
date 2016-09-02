@@ -29,6 +29,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String USER_TABLE = "user";
     private static final String USER_STUDENT_NUMBER_ID = "user_student_number_id";
     private static final String USER_NICKNAME = "user_nickname";
+    private static final String USER_TYPE = "user_type";
     private static final String USER_LOGGED_IN = "user_logged_in";
     private static final String USER_AVATAR = "user_avatar";
     private static final String USER_IS_PRIVATE = "user_is_private";
@@ -38,6 +39,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + "("
             + USER_STUDENT_NUMBER_ID + " text not null primary key, "
             + USER_NICKNAME + " text not null, "
+            + USER_TYPE + " text not null, "
             + USER_IS_PRIVATE + " integer not null, "
             + USER_AVATAR + " integer not null, "
             + USER_LOGGED_IN + " integer not null, "
@@ -300,6 +302,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(USER_STUDENT_NUMBER_ID, new_user.getUser_student_number_id());
         values.put(USER_NICKNAME, new_user.getUser_nickname());
+        values.put(USER_TYPE, new_user.getUser_type());
         values.put(USER_IS_PRIVATE, new_user.getUser_is_private());
         values.put(USER_AVATAR, new_user.getUser_avatar());
         values.put(USER_LOGGED_IN, new_user.getUser_logged_in());
@@ -433,7 +436,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public User getLoggedInUser() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT user_student_number_id, user_nickname, user_is_private, user_avatar, user_updated" +
+        Cursor cursor = db.rawQuery("SELECT user_student_number_id, user_nickname, user_is_private, user_avatar, user_updated, user_type" +
                 " FROM " + USER_TABLE + " WHERE user_logged_in= ? ", new String[]{"1"});
         if (cursor != null && cursor.getCount() > 0) {
             cursor.moveToFirst();
@@ -443,6 +446,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             user.setUser_is_private(cursor.getInt(2));
             user.setUser_avatar(cursor.getInt(3));
             user.setUser_updated(cursor.getInt(4));
+            user.setUser_type(cursor.getString(5));
             cursor.close();
             return user;
         } else {
@@ -479,6 +483,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
+    public boolean checkHasCompletedALevel(User current_user) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + LEVEL_TABLE + " WHERE level_user_student_number_id= ? AND level_completed=1 limit 1", new String[]{current_user.getUser_student_number_id()});
+        if (cursor != null && cursor.getCount() > 0) {
+            cursor.close();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public boolean checkHasAchievements() {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + ACHIEVEMENT_TABLE + " LIMIT 1", null);
@@ -490,9 +505,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    public boolean checkHasLoggedUserAchievements() {
+    public boolean checkHasLoggedUserAchievements(User current_user) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + USERACHIEVEMENT_TABLE + " LIMIT 1", null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + USERACHIEVEMENT_TABLE + " WHERE userachievement_user_student_number_id=? LIMIT 1", new String[]{current_user.getUser_student_number_id()});
         if (cursor != null && cursor.getCount() > 0) {
             cursor.close();
             return true;

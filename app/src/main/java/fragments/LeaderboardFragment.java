@@ -72,7 +72,7 @@ public class LeaderboardFragment extends Fragment implements LeaderboardScoreFra
     public void itemClicked(int position, String user_student_number) {
         Intent intent = new Intent(getContext(), UserProfileActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("selected_user", user_student_number);
+        bundle.putString("user_student_number", user_student_number);
         intent.putExtras(bundle);
         startActivity(intent);
     }
@@ -92,35 +92,62 @@ public class LeaderboardFragment extends Fragment implements LeaderboardScoreFra
         mRelativeLayout.setVisibility(View.VISIBLE);
         mLinearProgressBar.setVisibility(View.VISIBLE);
         mLinearTryAgain.setVisibility(View.GONE);
-
-        mNetworkManagerSingleton.putUserJsonRequest(mDatabaseHandlerSingleton.getLoggedUser(), new NetworkManagerSingleton.BooleanResponseListener() {
-            @Override
-            public void getResult(Boolean response, String message) {
-                if(response) {
-                    mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
-                        @Override
-                        public void getResult(ArrayList<User> object, Boolean response, String message) {
-                            if (response) {
-                                mLeaderboardList.clear();
-                                mLeaderboardList = object;
-                                assignViewPager();
-                                mRelativeLayout.setVisibility(View.GONE);
-                                mLinearProgressBar.setVisibility(View.GONE);
-                                mLinearTryAgain.setVisibility(View.GONE);
-                            } else {
-                                mLinearProgressBar.setVisibility(View.GONE);
-                                mLinearTryAgain.setVisibility(View.VISIBLE);
-                            }
-                        }
-                    });
-                } else {
-                    mLinearProgressBar.setVisibility(View.GONE);
-                    mLinearTryAgain.setVisibility(View.VISIBLE);
+        if (mDatabaseHandlerSingleton.getLoggedUser().getUser_type().equals("admin")) {
+            mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+                @Override
+                public void getResult(ArrayList<User> object, Boolean response, String message) {
+                    if (response) {
+                        mLeaderboardList.clear();
+                        mLeaderboardList = object;
+                        assignViewPager();
+                        mRelativeLayout.setVisibility(View.GONE);
+                        mLinearProgressBar.setVisibility(View.GONE);
+                        mLinearTryAgain.setVisibility(View.GONE);
+                    } else {
+                        mLinearProgressBar.setVisibility(View.GONE);
+                        mTextTryAgain.setText(getString(R.string.please_check_your_internet_connection_and_try_again));
+                        mLinearTryAgain.setVisibility(View.VISIBLE);
+                    }
                 }
+            });
+        } else {
+            if (!mDatabaseHandlerSingleton.checkHasCompletedALevel()) {
+                mLinearProgressBar.setVisibility(View.GONE);
+                mTextTryAgain.setText(getString(R.string.please_complete_a_level_to_view_other_users));
+                mLinearTryAgain.setVisibility(View.VISIBLE);
+            } else {
+                mNetworkManagerSingleton.putUserJsonRequest(new NetworkManagerSingleton.BooleanResponseListener() {
+                    @Override
+                    public void getResult(Boolean response, String message) {
+                        if (response) {
+                            mNetworkManagerSingleton.getLeaderboardJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+                                @Override
+                                public void getResult(ArrayList<User> object, Boolean response, String message) {
+                                    if (response) {
+                                        mLeaderboardList.clear();
+                                        mLeaderboardList = object;
+                                        assignViewPager();
+                                        mRelativeLayout.setVisibility(View.GONE);
+                                        mLinearProgressBar.setVisibility(View.GONE);
+                                        mLinearTryAgain.setVisibility(View.GONE);
+                                    } else {
+                                        mLinearProgressBar.setVisibility(View.GONE);
+                                        mTextTryAgain.setText(getString(R.string.please_check_your_internet_connection_and_try_again));
+                                        mLinearTryAgain.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            });
+                        } else {
+                            mLinearProgressBar.setVisibility(View.GONE);
+                            mLinearTryAgain.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
             }
-        });
+        }
     }
 
+    // Download leader-board data again. View remains the same unless new data is received.
     private void refreshData() {
         mScoreFragmentInterface.startRefreshing();
         mAttemptsFragmentInterface.startRefreshing();

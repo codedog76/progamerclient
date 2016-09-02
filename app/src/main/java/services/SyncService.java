@@ -49,7 +49,7 @@ public class SyncService extends Service {
     private Runnable mSyncUserRunnable = new Runnable() {
         @Override
         public void run() {
-            mNetworkManagerSingleton.putUserJsonRequest(mDatabaseHandlerSingleton.getLoggedUser(), new NetworkManagerSingleton.BooleanResponseListener() {
+            mNetworkManagerSingleton.putUserJsonRequest(new NetworkManagerSingleton.BooleanResponseListener() {
                 @Override
                 public void getResult(Boolean response, String message) {
                     if (response) {

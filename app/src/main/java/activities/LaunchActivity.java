@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.example.progamer.R;
 
+import models.User;
 import singletons.DatabaseHandlerSingleton;
 import singletons.SettingsSingleton;
 
@@ -36,13 +37,13 @@ public class LaunchActivity extends AppCompatActivity {
         doLaunchScreen();
     }
 
-    //Assigns all required singleton classes
+    // Assigns all required singleton classes
     public void assignSingletons() {
         mSettingsSingleton = SettingsSingleton.getInstance(this);
         mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
     }
 
-    //Checks settings preferences singleton for how the launch screen should behave
+    // Checks settings preferences singleton for how the launch screen should behave
     public void doLaunchScreen() {
         if (mSettingsSingleton.getLaunchScreenActive()) {
             if (mSettingsSingleton.getFirstTimeLaunch()) {
@@ -57,14 +58,15 @@ public class LaunchActivity extends AppCompatActivity {
         }
     }
 
-    //If the there is a logged in user, go straight to main activity, preventing user from logging
-    //in every time
+    // If the there is a logged in user, go straight to main activity, preventing user from logging
+    // in every time
     private void launchActivity() {
         if (mDatabaseHandlerSingleton.getLoggedUser() != null) {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
         } else {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

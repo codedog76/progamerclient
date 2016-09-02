@@ -44,6 +44,7 @@
     <string name="achievement_title">Achievement Title</string>
     <string name="loading">Loading..</string>
     <string name="please_check_your_internet_connection_and_try_again">Please check your internet connection and try again</string>
+    <string name="please_complete_a_level_to_view_other_users">Please complete a level to view other users</string>
     <string name="try_again">Try Again</string>
     <string name="my_score">My Score</string>
     <string name="attempts">Attempts</string>

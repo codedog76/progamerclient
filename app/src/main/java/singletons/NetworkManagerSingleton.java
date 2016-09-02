@@ -54,8 +54,10 @@ public class NetworkManagerSingleton {
     private static final String PUZZLES_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/puzzles";
     private static final String ACHIEVEMENTS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/achievements";
     private static final String USERACHIEVEMENTS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/userachievements";
-    private static final String AVERAGEUSER_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/averagelevel";
+    private static final String AVERAGE_LEVEL_DATA_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/averagelevel";
     private static final String UPDATE_USERACHIEVEMENTS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/updateuserachievements";
+    private static final String AVERAGE_USER_DATA_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/average";
+    private static final String STUDENT_DATA_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/studentdata";
 
     private NetworkManagerSingleton(Context context) {
         mContext = context;
@@ -117,10 +119,16 @@ public class NetworkManagerSingleton {
                                     User user = new User();
                                     user.setUser_student_number_id(response.getString("user_student_number"));
                                     user.setUser_nickname(response.getString("user_nickname"));
+                                    user.setUser_type(response.getString("user_type"));
                                     user.setUser_avatar(response.getInt("user_avatar"));
                                     user.setUser_is_private(response.getInt("user_is_private"));
+
                                     if (mDatabaseHandlerSingleton.insertUser(user) != -1) {
-                                        getAchievementsJsonRequest(user, booleanResponseListener);
+                                        if (user.getUser_type().equals("admin")) {
+                                            booleanResponseListener.getResult(true, "Admin successfully logged in");
+                                        } else {
+                                            getAchievementsJsonRequest(user, booleanResponseListener);
+                                        }
                                     } else {
                                         Log.e(mClassName, "getLoginUserJsonRequest Error: Failed to add user to local database");
                                         booleanResponseListener.getResult(false, "Failed to add user to local database");
@@ -210,6 +218,7 @@ public class NetworkManagerSingleton {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
             jsonParams.put("user_student_number", mDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
+            jsonParams.put("user_type", mDatabaseHandlerSingleton.getLoggedUser().getUser_type());
             JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, LEADERBOARD_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
@@ -224,9 +233,9 @@ public class NetworkManagerSingleton {
                                         user.setUser_student_number_id(jsonObject.getString("user_student_number"));
                                         user.setUser_nickname(jsonObject.getString("user_nickname"));
                                         user.setUser_avatar(jsonObject.getInt("user_avatar"));
-                                        user.setUser_overall_score(jsonObject.getInt("user_overall_score"));
-                                        user.setUser_overall_attempts(jsonObject.getInt("user_overall_attempts"));
-                                        user.setUser_overall_time(jsonObject.getInt("user_overall_time"));
+                                        user.setUser_total_score(jsonObject.getInt("user_total_score"));
+                                        user.setUser_total_attempts(jsonObject.getInt("user_total_attempts"));
+                                        user.setUser_total_time(jsonObject.getInt("user_total_time"));
                                         userList.add(user);
                                     }
                                     objectResponseListener.getResult(userList, true, response.getString("response_message"));
@@ -261,6 +270,64 @@ public class NetworkManagerSingleton {
         }
     }
 
+    public synchronized void getStudentDataJsonRequest(final ObjectResponseListener<ArrayList<User>> objectResponseListener) {
+        if (canSyncData()) {
+            Map<String, Object> jsonParams = new HashMap<>();
+            jsonParams.put("user_student_number", mDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, STUDENT_DATA_URL_STRING, new JSONObject(jsonParams),
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                if (validResponse(response)) {
+                                    ArrayList<User> userList = new ArrayList<>();
+                                    JSONArray jsonArray = response.getJSONArray("user_list");
+                                    for (int x = 0; x < jsonArray.length(); x++) {
+                                        JSONObject jsonObject = jsonArray.getJSONObject(x);
+                                        User user = new User();
+                                        user.setUser_student_number_id(jsonObject.getString("user_student_number"));
+                                        user.setUser_nickname(jsonObject.getString("user_nickname"));
+                                        user.setUser_levels_completed(jsonObject.getInt("user_levels_completed"));
+                                        user.setUser_total_score(jsonObject.getInt("user_total_score"));
+                                        user.setUser_total_attempts(jsonObject.getInt("user_total_attempts"));
+                                        user.setUser_total_time(jsonObject.getInt("user_total_time"));
+                                        user.setUser_average_score(jsonObject.getDouble("user_average_score"));
+                                        user.setUser_average_attempts(jsonObject.getDouble("user_average_attempts"));
+                                        user.setUser_average_time(jsonObject.getDouble("user_average_time"));
+                                        userList.add(user);
+                                    }
+                                    objectResponseListener.getResult(userList, true, response.getString("response_message"));
+                                } else {
+                                    Log.e(mClassName, "getStudentDataJsonRequest Error: " + response.getString("response_message"));
+                                    objectResponseListener.getResult(null, false, response.getString("response_message"));
+                                }
+                            } catch (JSONException ex) {
+                                Log.e(mClassName, "getStudentDataJsonRequest Error: " + ex.getMessage());
+                                objectResponseListener.getResult(null, false, ex.getMessage());
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError ex) {
+                            if (ex != null) {
+                                String error = getVolleyError(ex);
+                                Log.e(mClassName, "getStudentDataJsonRequest Error: " + error);
+                                objectResponseListener.getResult(null, false, error);
+                            }
+                        }
+                    }
+            );
+            RetryPolicy policy = new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+            objectRequest.setRetryPolicy(policy);
+            objectRequest.setTag("getStudentDataJsonRequest");
+            getRequestQueue().add(objectRequest);
+        } else {
+            Log.e(mClassName, "getStudentDataJsonRequest Error: Prevented from syncing");
+            objectResponseListener.getResult(null, false, "");
+        }
+    }
+
     //GET METHOD: fetches all achievements from external database.
     //If successful all achievements are added to local database and getLoggedUserAchievementsJSONRequest is called to continue user sync,
     //else false with error message is passed to listener.
@@ -288,11 +355,11 @@ public class NetworkManagerSingleton {
                                     }
                                     getLoggedUserAchievementsJSONRequest(user, booleanResponseListener);
                                 } else {
-                                    Log.e(mClassName, "downloadAchievementsJSONRequest Error: " + response.getString("response_message"));
+                                    Log.e(mClassName, "getAchievementsJsonRequest Error: " + response.getString("response_message"));
                                     booleanResponseListener.getResult(false, response.getString("response_message"));
                                 }
                             } catch (JSONException ex) {
-                                Log.e(mClassName, "downloadAchievementsJSONRequest Error: " + ex.getMessage());
+                                Log.e(mClassName, "getAchievementsJsonRequest Error: " + ex.getMessage());
                                 booleanResponseListener.getResult(false, ex.getMessage());
                             }
                         }
@@ -302,7 +369,7 @@ public class NetworkManagerSingleton {
                         public void onErrorResponse(VolleyError ex) {
                             if (ex != null) {
                                 String error = getVolleyError(ex);
-                                Log.e(mClassName, "downloadAchievementsJSONRequest Error: " + error);
+                                Log.e(mClassName, "getAchievementsJsonRequest Error: " + error);
                                 booleanResponseListener.getResult(false, error);
                             }
                         }
@@ -310,7 +377,7 @@ public class NetworkManagerSingleton {
             );
             RetryPolicy policy = new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
             objectRequest.setRetryPolicy(policy);
-            objectRequest.setTag("downloadAchievementsJSONRequest");
+            objectRequest.setTag("getAchievementsJsonRequest");
             getRequestQueue().add(objectRequest);
         } else {
             getLoggedUserAchievementsJSONRequest(user, booleanResponseListener);
@@ -321,7 +388,8 @@ public class NetworkManagerSingleton {
     //If successful all user achievements are added to local database and getLevelsJsonRequest is called to continue user sync,
     //else false with error message is passed to listener.
     public synchronized void getLoggedUserAchievementsJSONRequest(final User user, final BooleanResponseListener booleanResponseListener) {
-        if (!mDatabaseHandlerSingleton.checkHasLoggedUserAchievements()) {
+        if (!mDatabaseHandlerSingleton.checkHasLoggedUserAchievements(user)) {
+            Log.e("LoggedUserAch", "called");
             Map<String, Object> jsonParams = new HashMap<>();
             jsonParams.put("user_student_number", user.getUser_student_number_id());
             JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, USERACHIEVEMENTS_URL_STRING, new JSONObject(jsonParams),
@@ -457,18 +525,21 @@ public class NetworkManagerSingleton {
                         try {
                             if (validResponse(response)) {
                                 ArrayList<UserAchievement> userAchievements = new ArrayList<>();
-                                JSONArray jsonArray = response.getJSONArray("achievement_list");
+                                JSONArray jsonArray = response.getJSONArray("userachievement_list");
                                 for (int x = 0; x < jsonArray.length(); x++) {
                                     JSONObject jsonObject = jsonArray.getJSONObject(x);
                                     UserAchievement userAchievement = new UserAchievement();
                                     //pk auto increment
-                                    userAchievement.setUserachievement_database_id(jsonObject.getInt("userachievement_id"));
-                                    userAchievement.setUser_student_number(jsonObject.getString("user_student_number")); //fk
-                                    userAchievement.setAchievement_id(jsonObject.getInt("achievement_id")); //fk
+                                    userAchievement.setAchievement_title(jsonObject.getString("achievement_title"));
+                                    userAchievement.setAchievement_description(jsonObject.getString("achievement_description"));
+                                    userAchievement.setAchievement_total(jsonObject.getInt("achievement_total"));
                                     userAchievement.setUserachievement_progress(jsonObject.getInt("userachievement_progress"));
+                                    userAchievement.setUserachievement_completed(jsonObject.getInt("userachievement_completed"));
+                                    userAchievement.setUserachievement_date_completed(jsonObject.getString("userachievement_date_completed"));
+
                                     userAchievements.add(userAchievement);
                                 }
-                                objectResponseListener.getResult(userAchievements, false, response.getString("response_message"));
+                                objectResponseListener.getResult(userAchievements, true, response.getString("response_message"));
                             } else {
                                 Log.e(mClassName, "getUserAchievementsJSONRequest Error: Invalid response");
                                 objectResponseListener.getResult(null, false, response.getString("response_message"));
@@ -507,19 +578,25 @@ public class NetworkManagerSingleton {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
-                                if (response.getBoolean("response")) {
+                                if (validResponse(response)) {
                                     User user = new User();
                                     user.setUser_student_number_id(response.getString("user_student_number"));
                                     user.setUser_nickname(response.getString("user_nickname"));
                                     user.setUser_avatar(response.getInt("user_avatar"));
                                     user.setUser_is_private(response.getInt("user_is_private"));
+                                    user.setUser_total_score(response.getInt("user_total_score"));
+                                    user.setUser_total_attempts(response.getInt("user_total_attempts"));
+                                    user.setUser_total_time(response.getInt("user_total_time"));
+                                    user.setUser_average_score(response.getInt("user_average_score"));
+                                    user.setUser_average_attempts(response.getInt("user_average_attempts"));
+                                    user.setUser_average_time(response.getInt("user_average_time"));
                                     objectResponseListener.getResult(user, true, "");
                                 } else {
-                                    Log.e(mClassName, "getAverageLevelDataJsonRequest Error: Invalid response");
+                                    Log.e(mClassName, "getUserJsonRequest Error: Invalid response");
                                     objectResponseListener.getResult(null, false, response.getString("response_message"));
                                 }
                             } catch (JSONException ex) {
-                                Log.e(mClassName, "Error downloadUserJSONRequest: " + ex.getMessage());
+                                Log.e(mClassName, "Error getUserJsonRequest: " + ex.getMessage());
                                 objectResponseListener.getResult(null, false, ex.getMessage());
                             }
                         }
@@ -529,7 +606,7 @@ public class NetworkManagerSingleton {
                         public void onErrorResponse(VolleyError ex) {
                             if (ex != null) {
                                 String error = getVolleyError(ex);
-                                Log.e(mClassName, "Error downloadUserJSONRequest: " + error);
+                                Log.e(mClassName, "Error getUserJsonRequest: " + error);
                                 objectResponseListener.getResult(null, false, error);
                             }
                         }
@@ -537,10 +614,10 @@ public class NetworkManagerSingleton {
             );
             RetryPolicy policy = new DefaultRetryPolicy(TIME_OUT_INTERVAL, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
             objectRequest.setRetryPolicy(policy);
-            objectRequest.setTag("downloadUserJSONRequest");
+            objectRequest.setTag("getUserJsonRequest");
             getRequestQueue().add(objectRequest);
         } else {
-            Log.e(mClassName, "Error downloadUserJSONRequest: Prevented from syncing");
+            Log.e(mClassName, "Error getUserJsonRequest: Prevented from syncing");
             objectResponseListener.getResult(null, false, "");
         }
     }
@@ -603,17 +680,22 @@ public class NetworkManagerSingleton {
 
     //PUT METHOD:inserts/updates user in external database
     //If successful true is passed to listener, else false with error message.
-    public synchronized void putUserJsonRequest(User current_user, final BooleanResponseListener booleanResponseListener) {
+    public synchronized void putUserJsonRequest(final BooleanResponseListener booleanResponseListener) {
         if (canSyncData()) {
+            User current_user = mDatabaseHandlerSingleton.getLoggedUser();
+            if (current_user == null) {
+                booleanResponseListener.getResult(false, "putUserJsonRequest Error: user null");
+                return;
+            }
+            if (current_user.getUser_updated() == 0) {
+                putUserLevelsJSONRequest(booleanResponseListener);
+                return;
+            }
             Map<String, Object> jsonParams = new HashMap<>();
             jsonParams.put("user_student_number", current_user.getUser_student_number_id());
             jsonParams.put("user_nickname", current_user.getUser_nickname());
             jsonParams.put("user_avatar", current_user.getUser_avatar());
             jsonParams.put("user_is_private", current_user.getUser_avatar());
-            if (current_user.getUser_updated() == 0) {
-                putUserLevelsJSONRequest(booleanResponseListener);
-                return;
-            }
             JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, UPDATE_USER_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
@@ -623,15 +705,15 @@ public class NetworkManagerSingleton {
                                     if (mDatabaseHandlerSingleton.resetUserUpdated() == 1) {
                                         putUserLevelsJSONRequest(booleanResponseListener);
                                     } else {
-                                        Log.e(mClassName, "putRegisterUserJsonRequest Error: failed to reset user update fields");
-                                        booleanResponseListener.getResult(false, "putRegisterUserJsonRequest Error: failed to reset user update fields");
+                                        Log.e(mClassName, "putUserJsonRequest Error: failed to reset user update fields");
+                                        booleanResponseListener.getResult(false, "putUserJsonRequest Error: failed to reset user update fields");
                                     }
                                 } else {
-                                    Log.e(mClassName, "putRegisterUserJsonRequest Error: " + response.getString("response_message"));
+                                    Log.e(mClassName, "putUserJsonRequest Error: " + response.getString("response_message"));
                                     booleanResponseListener.getResult(false, response.getString("response_message"));
                                 }
                             } catch (JSONException ex) {
-                                Log.e(mClassName, "putRegisterUserJsonRequest Error: " + ex.getMessage());
+                                Log.e(mClassName, "putUserJsonRequest Error: " + ex.getMessage());
                                 booleanResponseListener.getResult(false, ex.getMessage());
                             }
                         }
@@ -641,7 +723,7 @@ public class NetworkManagerSingleton {
                         public void onErrorResponse(VolleyError ex) {
                             if (ex != null) {
                                 String error = getVolleyError(ex);
-                                Log.e(mClassName, "putRegisterUserJsonRequest Error: " + error);
+                                Log.e(mClassName, "putUserJsonRequest Error: " + error);
                                 booleanResponseListener.getResult(false, error);
                             }
                         }
@@ -795,13 +877,13 @@ public class NetworkManagerSingleton {
         getRequestQueue().add(objectRequest);
     }
 
-    //GET METHOD: fetches the average users data from external database
+    //GET METHOD: fetches the average level data from external database
     //If successful the user is passed to listener and true, else false and error message
     public synchronized void getAverageLevelDataJsonRequest(Level current_level, final ObjectResponseListener<Level> objectResponseListener) {
         if (canSyncData()) {
             Map<String, Object> jsonParams = new HashMap<>();
             jsonParams.put("level_id", current_level.getLevel_database_id());
-            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, AVERAGEUSER_URL_STRING, new JSONObject(jsonParams),
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, AVERAGE_LEVEL_DATA_URL_STRING, new JSONObject(jsonParams),
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -812,6 +894,54 @@ public class NetworkManagerSingleton {
                                     level.setLevel_attempts(response.getInt("level_attempts"));
                                     level.setLevel_time(response.getInt("level_time"));
                                     objectResponseListener.getResult(level, true, "");
+                                } else {
+                                    Log.e(mClassName, "getAverageLevelDataJsonRequest Error: Invalid response");
+                                    objectResponseListener.getResult(null, false, response.getString("response_message"));
+                                }
+                            } catch (JSONException ex) {
+                                Log.e(mClassName, "Error getAverageLevelDataJsonRequest: " + ex.getMessage());
+                                objectResponseListener.getResult(null, false, ex.getMessage());
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError ex) {
+                            if (ex != null) {
+                                String error = getVolleyError(ex);
+                                Log.e(mClassName, "Error getAverageLevelDataJsonRequest: " + error);
+                                objectResponseListener.getResult(null, false, error);
+                            }
+                        }
+                    }
+            );
+            RetryPolicy policy = new DefaultRetryPolicy(TIME_OUT_INTERVAL, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+            objectRequest.setRetryPolicy(policy);
+            objectRequest.setTag("getAverageLevelDataJsonRequest");
+            getRequestQueue().add(objectRequest);
+        } else {
+            Log.e(mClassName, "Error getAverageLevelDataJsonRequest: Prevented from syncing");
+            objectResponseListener.getResult(null, false, "");
+        }
+    }
+
+    //GET METHOD: fetches the average users data from external database
+    //If successful the user is passed to listener and true, else false and error message
+    public synchronized void getAverageUserDataJsonRequest(final ObjectResponseListener<User> objectResponseListener) {
+        if (canSyncData()) {
+            Map<String, Object> jsonParams = new HashMap<>();
+            jsonParams.put("user_student_number", mDatabaseHandlerSingleton.getLoggedUser().getUser_student_number_id());
+            JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, AVERAGE_USER_DATA_URL_STRING, new JSONObject(jsonParams),
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            try {
+                                if (validResponse(response)) {
+                                    User user = new User();
+                                    user.setUser_average_score(response.getInt("user_average_score"));
+                                    user.setUser_average_attempts(response.getInt("user_average_attempts"));
+                                    user.setUser_average_time(response.getInt("user_average_time"));
+                                    objectResponseListener.getResult(user, true, "");
                                 } else {
                                     Log.e(mClassName, "getAverageLevelDataJsonRequest Error: Invalid response");
                                     objectResponseListener.getResult(null, false, response.getString("response_message"));

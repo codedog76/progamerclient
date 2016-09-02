@@ -72,11 +72,11 @@ public class LeaderboardAttemptsFragment extends Fragment implements Leaderboard
 
     private void loadData() {
         addList(((LeaderboardFragment) getParentFragment()).getLeaderboardList());
-        if (mLeaderboardAdapter.getItemCount() > 1) {
+        if (mLeaderboardAdapter.getItemCount() > 1 && mDatabaseHandlerSingleton.getLoggedUser().getUser_type().equals("student")) {
             mTextTopNickname.setText(mCurrentUser.getUser_nickname());
-            mTextTopScore.setText(String.valueOf(mCurrentUser.getUser_overall_attempts()));
+            mTextTopScore.setText(String.valueOf(mCurrentUser.getUser_total_attempts()));
             mTextBottomNickname.setText(mCurrentUser.getUser_nickname());
-            mTextBottomScore.setText(String.valueOf(mCurrentUser.getUser_overall_attempts()));
+            mTextBottomScore.setText(String.valueOf(mCurrentUser.getUser_total_attempts()));
             mTextTopRank.setText(getString(R.string.string_rank, mCurrentUserPos + 1));
             mTextBottomRank.setText(getString(R.string.string_rank, mCurrentUserPos + 1));
             int id = getContext().getResources().getIdentifier("avatar_" + String.valueOf(mCurrentUser.getUser_avatar()),
@@ -148,44 +148,46 @@ public class LeaderboardAttemptsFragment extends Fragment implements Leaderboard
     }
 
     private void assignListeners() {
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                LinearLayoutManager LM = (LinearLayoutManager) recyclerView.getLayoutManager();
-                int posTop = LM.findFirstCompletelyVisibleItemPosition();
-                int posBottom = LM.findLastCompletelyVisibleItemPosition();
-                if (posTop > mCurrentUserPos) {
-                    mLinearTop.setVisibility(View.VISIBLE);
-                } else {
-                    mLinearTop.setVisibility(View.GONE);
+        if(mDatabaseHandlerSingleton.getLoggedUser().getUser_type().equals("student")) {
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
                 }
-                if (posBottom < mCurrentUserPos) {
-                    mLinearBottom.setVisibility(View.VISIBLE);
-                } else {
-                    mLinearBottom.setVisibility(View.GONE);
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    LinearLayoutManager LM = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    int posTop = LM.findFirstCompletelyVisibleItemPosition();
+                    int posBottom = LM.findLastCompletelyVisibleItemPosition();
+                    if (posTop > mCurrentUserPos) {
+                        mLinearTop.setVisibility(View.VISIBLE);
+                    } else {
+                        mLinearTop.setVisibility(View.GONE);
+                    }
+                    if (posBottom < mCurrentUserPos) {
+                        mLinearBottom.setVisibility(View.VISIBLE);
+                    } else {
+                        mLinearBottom.setVisibility(View.GONE);
+                    }
                 }
-            }
-        });
+            });
 
-        mLinearTop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mRecyclerView.smoothScrollToPosition(mCurrentUserPos);
-            }
-        });
+            mLinearTop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mRecyclerView.smoothScrollToPosition(mCurrentUserPos);
+                }
+            });
 
-        mLinearBottom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mRecyclerView.smoothScrollToPosition(mCurrentUserPos);
-            }
-        });
+            mLinearBottom.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mRecyclerView.smoothScrollToPosition(mCurrentUserPos);
+                }
+            });
+        }
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -224,9 +226,9 @@ public class LeaderboardAttemptsFragment extends Fragment implements Leaderboard
         Collections.sort(list, new Comparator<User>() {
             @Override
             public int compare(User lhs, User rhs) {
-                if (lhs.getUser_overall_attempts() > rhs.getUser_overall_attempts())
+                if (lhs.getUser_total_attempts() > rhs.getUser_total_attempts())
                     return 1;
-                if (lhs.getUser_overall_attempts() < rhs.getUser_overall_attempts())
+                if (lhs.getUser_total_attempts() < rhs.getUser_total_attempts())
                     return -1;
                 return 0;
             }

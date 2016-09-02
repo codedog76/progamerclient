@@ -52,7 +52,7 @@ public class PuzzleActivity extends AppCompatActivity {
     private int mTimerSeconds, mTimerResumeTime, mAttemptsCount, mLevelId;
     private long mStartTime = 0;
     private String mCurrentFragment;
-    private TextView mTextInstructions, mTextExpectedOutput, mTextTimer, mTextAttempts;
+    private TextView mTextTitle, mTextInstructions, mTextExpectedOutput, mTextTimer, mTextAttempts;
     private View mViewDivider;
     private AlertDialog mDialogPuzzleCorrect, mDialogPuzzleIncorrect, mDialogLevelComplete;
     private View mViewPuzzleCorrect, mViewPuzzleIncorrect, mViewLevelComplete;
@@ -152,6 +152,7 @@ public class PuzzleActivity extends AppCompatActivity {
 
     private void assignViews() {
         mToolbar = (Toolbar) findViewById(R.id.app_actionbar);
+        mTextTitle = (TextView) findViewById(R.id.text_title);
         mTextInstructions = (TextView) findViewById(R.id.text_instructions);
         mTextExpectedOutput = (TextView) findViewById(R.id.text_expected_output);
         mTextTimer = (TextView) findViewById(R.id.text_timer);
@@ -197,11 +198,11 @@ public class PuzzleActivity extends AppCompatActivity {
     private void assignFonts() {
         Typeface Roboto_Medium = Typeface.createFromAsset(getAssets(), "Roboto-Medium.ttf");
         Typeface Roboto_Regular = Typeface.createFromAsset(getAssets(), "Roboto-Regular.ttf");
-        Typeface Lucida_Console = Typeface.createFromAsset(getAssets(), "Lucida-Console.ttf");
-        mTextInstructions.setTypeface(Roboto_Medium);
-        mTextExpectedOutput.setTypeface(Lucida_Console);
+        mTextInstructions.setTypeface(Roboto_Regular);
+        mTextExpectedOutput.setTypeface(Roboto_Regular);
         mTextTimer.setTypeface(Roboto_Regular);
         mTextAttempts.setTypeface(Roboto_Regular);
+        mTextTitle.setTypeface(Roboto_Regular);
         mButtonCheck.setTypeface(Roboto_Medium);
         mCorrectTextCompiledCodeTitle.setTypeface(Roboto_Regular);
         mCorrectTextCompiledCode.setTypeface(Roboto_Regular);
@@ -412,45 +413,38 @@ public class PuzzleActivity extends AppCompatActivity {
     private void loadPuzzleUi() {
         mAttemptsCount++;
         String fragmentToLoad = mCurrentPuzzleCodeBuilder.getPuzzleFragmentType();
-        String typeOfPuzzle = "";
         switch (fragmentToLoad) {
             case "<single>":
-                typeOfPuzzle = "<font color='#FF4081'>Single selection: </font>";
+                mTextTitle.setText("SELECT ONE OF THE FOLLOWING");
                 break;
             case "<multiple>":
-                typeOfPuzzle = "<font color='#FF4081'>Select multiple: </font>";
+                mTextTitle.setText("MULTIPLE CHOICE");
                 break;
             case "<rearrange>":
-                typeOfPuzzle = "<font color='#FF4081'>Rearrange: </font>";
+                mTextTitle.setText("REARRANGE");
                 break;
             case "<truefalse>":
-                typeOfPuzzle = "<font color='#FF4081'>True or false: </font>";
+                mTextTitle.setText("TRUE OR FALSE");
                 break;
         }
-        typeOfPuzzle = typeOfPuzzle + mCurrentPuzzle.getPuzzle_instructions();
-        mTextInstructions.setText(Html.fromHtml(typeOfPuzzle));
+        mTextInstructions.setText(mCurrentPuzzle.getPuzzle_instructions());
         mTextAttempts.setText(getString(R.string.string_attempts_counter, mAttemptsCount));
 
         String expectedOutput = mCurrentPuzzleCodeBuilder.getCSharpCodeToDisplayExpectedOutput();
         if (expectedOutput.equals("")) {
             mTextExpectedOutput.setVisibility(View.GONE);
-            mViewDivider.setVisibility(View.GONE);
         } else {
-            //expectedOutput = expectedOutput.replaceAll("\'(.*)\'", "<font color='#8BC34A'>\'$1\'</font>");
-            expectedOutput = expectedOutput.replaceAll("\\d+", "<font color=#FFB300>$0</font>");
-            expectedOutput = expectedOutput.replaceAll("\\.", "<font color=#FFB300>.</font>");
-            expectedOutput = expectedOutput.replaceAll("int", "<font color=#F06292>int</font>");
-            expectedOutput = expectedOutput.replaceAll("double", "<font color=#F06292>double</font>");
-            expectedOutput = expectedOutput.replaceAll("String", "<font color=#F06292>String</font>");
-            expectedOutput = expectedOutput.replaceAll("char", "<font color=#F06292>char</font>");
-            expectedOutput = expectedOutput.replaceAll("Boolean", "<font color=#F06292>Boolean</font>");
-            expectedOutput = expectedOutput.replaceAll("\"(.*)\"", "<font color=#8BC34A>\"$1\"</font>");
-            expectedOutput = expectedOutput.replaceAll("\'(.*)\'", "<font color=#8BC34A>\'$1\'</font>");
-            expectedOutput = expectedOutput.replaceAll("true", "<font color=#0288D1>true</font>");
-            expectedOutput = expectedOutput.replaceAll("false", "<font color=#0288D1>false</font>");
+            expectedOutput = expectedOutput.replaceAll("int", "<font color=#2962FF>int</font>");
+            expectedOutput = expectedOutput.replaceAll("double", "<font color=#2962FF>double</font>");
+            expectedOutput = expectedOutput.replaceAll("String", "<font color=#2962FF>String</font>");
+            expectedOutput = expectedOutput.replaceAll("char", "<font color=#2962FF>char</font>");
+            expectedOutput = expectedOutput.replaceAll("Boolean", "<font color=#2962FF>Boolean</font>");
+            expectedOutput = expectedOutput.replaceAll("\"(.*)\"", "<font color=#B71C1C>\"$1\"</font>");
+            expectedOutput = expectedOutput.replaceAll("\'(.*)\'", "<font color=#B71C1C>\'$1\'</font>");
+            expectedOutput = expectedOutput.replaceAll("true", "<font color=#2962FF>true</font>");
+            expectedOutput = expectedOutput.replaceAll("false", "<font color=#2962FF>false</font>");
             mTextExpectedOutput.setText(Html.fromHtml(expectedOutput));
             mTextExpectedOutput.setVisibility(View.VISIBLE);
-            mViewDivider.setVisibility(View.VISIBLE);
         }
         setTitle(getString(R.string.puzzle_count, (mCurrentLevel.getLevel_puzzles_completed() + 1),
                 mCurrentLevel.getLevel_puzzles_count()));

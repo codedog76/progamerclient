@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activityPuzzleMainLayout"
     android:layout_width="match_parent"
@@ -34,33 +33,46 @@
                     android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/text_instructions"
+                        android:id="@+id/text_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:ellipsize="none"
-                        android:maxLines="100"
-                        android:scrollHorizontally="false" />
+                        android:gravity="center"
+                        android:text="Title"
+                        android:textColor="@color/accent"
+                        android:textSize="20sp" />
 
                     <View
                         android:id="@+id/view_divider"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:alpha="0.12"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
                         android:background="@color/black" />
 
                     <TextView
-                        android:padding="5dp"
+                        android:id="@+id/text_instructions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="none"
+                        android:maxLines="100"
+                        android:scrollHorizontally="false"
+                        android:text="Instructions" />
+
+
+                    <TextView
                         android:id="@+id/text_expected_output"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@color/grey_800"
-                        android:textColor="@color/white"
-                        android:gravity="center"
                         android:layout_marginTop="10dp"
+                        android:background="@drawable/rectangle_border"
                         android:ellipsize="none"
+                        android:gravity="center"
                         android:maxLines="100"
-                        android:scrollHorizontally="false" />
+                        android:padding="10dp"
+                        android:scrollHorizontally="false"
+                        android:text="Output"
+                        android:textColor="@color/grey_900" />
 
                 </LinearLayout>
 

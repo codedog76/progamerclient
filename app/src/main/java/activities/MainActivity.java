@@ -1,11 +1,17 @@
 package activities;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.media.MediaScannerConnection;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -14,17 +20,26 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.progamer.R;
+import com.opencsv.CSVWriter;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +47,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import fragments.LeaderboardFragment;
 import fragments.LevelsFragment;
 import fragments.NavigationDrawerFragment;
+import models.User;
 import models.UserAchievement;
 import services.SyncService;
 import singletons.AchievementHandlerSingleton;
 import singletons.DatabaseHandlerSingleton;
+import singletons.NetworkManagerSingleton;
 
 public class MainActivity extends AppCompatActivity implements NavigationDrawerFragment.DrawerListener {
 
@@ -51,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private Toolbar mToolbar;
     private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
+    private NetworkManagerSingleton mNetworkManagerSingleton;
     private String mClassName = getClass().toString();
     private final Handler mAchievementHandler = new Handler();
     private final Handler mAchievementCloseHandler = new Handler();
@@ -59,6 +77,12 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
     private TextView mTextTitle, mTextDescription, mTextProgressNumeric;
     private ProgressBar mProgressBarAchievement;
     private List<UserAchievement> mUserAchievementList = new ArrayList<>();
+    private boolean mIsMenuVisible = false;
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +111,105 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         else {
             if (!mLevelsFragmentSelected) loadLevelsFragment();
             else finish();
+        }
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        if (mDatabaseHandlerSingleton.getLoggedUser().getUser_type().equals("admin")) {
+            getMenuInflater().inflate(R.menu.menu_main, menu);
+            MenuItem mMenuItemDownload = menu.findItem(R.id.item_download_student_data);
+            mMenuItemDownload.setVisible(mIsMenuVisible);
+            mMenuItemDownload.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    verifyStoragePermissions(MainActivity.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Save as:");
+                    final EditText input = new EditText(MainActivity.this);
+                    input.setInputType(InputType.TYPE_CLASS_TEXT);
+                    builder.setView(input);
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String filename = input.getText().toString() + ".csv";
+                            downloadStudentData(filename);
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    builder.show();
+                    return false;
+                }
+            });
+        }
+        return true;
+    }
+
+    private void downloadStudentData(final String filename) {
+        mProgressDialog.show();
+        mNetworkManagerSingleton.getStudentDataJsonRequest(new NetworkManagerSingleton.ObjectResponseListener<ArrayList<User>>() {
+            @Override
+            public void getResult(ArrayList<User> object, Boolean response, String message) {
+                if (response) {
+                    try {
+                        CSVWriter writer;
+                        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                        File file = new File(path, filename);
+                        file.createNewFile();
+                        writer = new CSVWriter(new FileWriter(file.getAbsolutePath()));
+                        String[] headers = {"Student number", "Student nickname", "Student levels completed",
+                                "Student total score", "Student total attempts", "Student total time",
+                                "Student average score", "Student average attempts", "Student average time"};
+                        writer.writeNext(headers);
+                        for (User user : object) {
+                            String[] data = {
+                                    user.getUser_student_number_id(),
+                                    user.getUser_nickname(),
+                                    String.valueOf(user.getUser_levels_completed()),
+                                    String.valueOf(user.getUser_total_score()),
+                                    String.valueOf(user.getUser_total_attempts()),
+                                    String.valueOf(user.getUser_total_time()),
+                                    String.valueOf(user.getUser_average_score()),
+                                    String.valueOf(user.getUser_average_attempts()),
+                                    String.valueOf(user.getUser_average_time())
+                            };
+                            writer.writeNext(data);
+                        }
+                        writer.close();
+                        MediaScannerConnection.scanFile(getApplicationContext(),
+                                new String[]{file.getAbsolutePath()}, null, null);
+                    } catch (IOException e) {
+                        Log.e("IOException", e.getMessage());
+                    }
+                    Toast.makeText(getApplicationContext(), "Student data successfully downloaded: Internal " +
+                            "storage/Download/" + filename, Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e("StudentDataJsonRequest", "Failed to download student data " + message);
+                    Toast.makeText(getApplicationContext(), "Failed to download student data " + message, Toast.LENGTH_SHORT).show();
+                }
+                mProgressDialog.hide();
+            }
+        });
+    }
+
+    private void verifyStoragePermissions(Activity activity) {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
         }
     }
 
@@ -141,6 +264,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
 
     private void assignSingletons() {
         mDatabaseHandlerSingleton = DatabaseHandlerSingleton.getInstance(this);
+        mNetworkManagerSingleton = NetworkManagerSingleton.getInstance(this);
     }
 
     private void assignProgressDialog() {
@@ -327,12 +451,16 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
             mTextNavLevels.setAlpha(0.87f);
         }
         if (layout.equals(mLinearNavLeaderboard)) {
+            mIsMenuVisible = true;
+            invalidateOptionsMenu();
             mLinearNavLeaderboardBack.setBackgroundColor(ContextCompat.getColor(this, R.color.grey_300));
             setTitle("Leaderboard");
             mLeaderboardFragmentSelected = true;
             mImageNavLeaderboard.setAlpha(1.0f);
             mTextNavLeaderboard.setAlpha(1.0f);
         } else {
+            mIsMenuVisible = false;
+            invalidateOptionsMenu();
             mLinearNavLeaderboardBack.setBackgroundColor(ContextCompat.getColor(this, R.color.white));
             mLeaderboardFragmentSelected = false;
             mImageNavLeaderboard.setAlpha(0.54f);
