@@ -27,7 +27,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Table user
     private static final String USER_TABLE = "user";
-    private static final String USER_STUDENT_NUMBER_ID = "user_student_number_id";
+    private static final String USER_STUDENT_NUMBER_ID = "user_student_number_id"; //pk
     private static final String USER_NICKNAME = "user_nickname";
     private static final String USER_TYPE = "user_type";
     private static final String USER_LOGGED_IN = "user_logged_in";
