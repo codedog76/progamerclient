@@ -1,23 +1,29 @@
 package activities;
 
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.progamer.R;
+import com.romainpiel.shimmer.Shimmer;
+import com.romainpiel.shimmer.ShimmerTextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +50,8 @@ public class PuzzleActivity extends AppCompatActivity {
     private TrueFalseFragment mTrueFalseFragment;
     private DatabaseHandlerSingleton mDatabaseHandlerSingleton;
     private AchievementHandlerSingleton mAchievementHandlerSingleton;
-    private Button mButtonCheck, mButtonPuzzleCorrectContinue, mButtonPuzzleIncorrectRetry, mButtonLevelCompleteContinue;
+    private Button mButtonCheck, mButtonPuzzleCorrectContinue, mButtonPuzzleIncorrectRetry,
+            mButtonLevelCompleteContinue;
     private Handler mTimerHandler = new Handler();
     private Puzzle mCurrentPuzzle;
     private Level mCurrentLevel;
@@ -54,15 +61,18 @@ public class PuzzleActivity extends AppCompatActivity {
     private String mCurrentFragment;
     private TextView mTextTitle, mTextInstructions, mTextExpectedOutput, mTextTimer, mTextAttempts;
     private View mViewDivider;
-    private AlertDialog mDialogPuzzleCorrect, mDialogPuzzleIncorrect, mDialogLevelComplete;
-    private View mViewPuzzleCorrect, mViewPuzzleIncorrect, mViewLevelComplete;
+    private Dialog mDialogPuzzleCorrect, mDialogPuzzleIncorrect, mDialogLevelComplete;
     private boolean mCorrectAnswer = false, mLevelComplete = false;
-    private List<String> mCompiledCode = new ArrayList<>(), mPuzzleCode = new ArrayList<>();
-    private List<Object> mCompiledResult = new ArrayList<>(), mPuzzleCodeResult = new ArrayList<>();
-    private TextView mCorrectTextCompiledCodeTitle, mCorrectTextCompiledCode, mCorrectTextResultTitle, mCorrectTextResult, mCorrectTextPuzzleCodeTitle, mCorrectTextPuzzleCode,
-            mCorrectTextPuzzleResultTitle, mCorrectTextPuzzleResult;
-    private TextView mIncorrectTextCompiledCodeTitle, mIncorrectTextCompiledCode, mIncorrectTextResultTitle, mIncorrectTextResult, mIncorrectTextPuzzleCodeTitle, mIncorrectTextPuzzleCode,
-            mIncorrectTextPuzzleResultTitle, mIncorrectTextPuzzleResult;
+    private List<String> mCompiledCode = new ArrayList<>();
+    private List<Object> mCompiledResult = new ArrayList<>();
+    private TextView mTextCorrectAttempts, mTextCorrectAttemptsValue, mTextCorrectTime, mTextCorrectTimeValue;
+    private TextView mTextIncorrectCompiledCodeTitle, mTextIncorrectCompiledCode, mTextIncorrectCompiledOutputTitle,
+            mTextIncorrectCompiledOutput;
+    private ImageView mImageTrophyGold, mImageTrophySilver, mImageTrophyBronze;
+    private TextView mTextScore, mTextPrevious, mTextNew, mTextLevelScore, mTextLevelAttempts, mTextLevelTime,
+            mTextPreviousLevelScore, mTextPreviousLevelAttempts, mTextPreviousLevelTime,
+            mTextNewLevelScore, mTextNewLevelAttempts, mTextNewLevelTime;
+    private ShimmerTextView mShimmerTextNewHighScore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,16 +143,8 @@ public class PuzzleActivity extends AppCompatActivity {
         mCompiledCode = compiledCode;
     }
 
-    public void setPuzzleCode(List<String> puzzleCode) {
-        mPuzzleCode = puzzleCode;
-    }
-
     public void setCompiledResult(List<Object> compiledResult) {
         mCompiledResult = compiledResult;
-    }
-
-    public void setPuzzleCodeResult(List<Object> codeResult) {
-        mPuzzleCodeResult = codeResult;
     }
 
     private void assignSingletons() {
@@ -159,40 +161,48 @@ public class PuzzleActivity extends AppCompatActivity {
         mTextAttempts = (TextView) findViewById(R.id.text_attempts);
         mButtonCheck = (Button) findViewById(R.id.button_check);
         mViewDivider = findViewById(R.id.view_divider);
+        mDialogPuzzleCorrect = new Dialog(this);
+        mDialogPuzzleCorrect.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mDialogPuzzleCorrect.setContentView(R.layout.dialog_puzzle_correct);
+        mButtonPuzzleCorrectContinue = (Button) mDialogPuzzleCorrect.findViewById(R.id.button_puzzle_correct_continue);
+        mTextCorrectAttempts = (TextView) mDialogPuzzleCorrect.findViewById(R.id.text_correct_attempts);
+        mTextCorrectAttemptsValue = (TextView) mDialogPuzzleCorrect.findViewById(R.id.text_correct_attempts_value);
+        mTextCorrectTime = (TextView) mDialogPuzzleCorrect.findViewById(R.id.text_correct_time);
+        mTextCorrectTimeValue = (TextView) mDialogPuzzleCorrect.findViewById(R.id.text_correct_time_value);
 
-        mDialogPuzzleCorrect = new AlertDialog.Builder(this).create();
-        mViewPuzzleCorrect = View.inflate(this, R.layout.dialog_puzzle_correct, null);
-        mDialogPuzzleCorrect.setView(mViewPuzzleCorrect);
+        mDialogPuzzleIncorrect = new Dialog(this);
+        mDialogPuzzleIncorrect.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mDialogPuzzleIncorrect.setContentView(R.layout.dialog_puzzle_incorrect);
+        mButtonPuzzleIncorrectRetry = (Button) mDialogPuzzleIncorrect.findViewById(R.id.button_puzzle_incorrect_retry);
+        mTextIncorrectCompiledCodeTitle = (TextView) mDialogPuzzleIncorrect.findViewById(R.id.text_incorrect_compiled_code_title);
+        mTextIncorrectCompiledCode = (TextView) mDialogPuzzleIncorrect.findViewById(R.id.text_incorrect_compiled_code);
+        mTextIncorrectCompiledOutputTitle = (TextView) mDialogPuzzleIncorrect.findViewById(R.id.text_incorrect_compiled_output_title);
+        mTextIncorrectCompiledOutput = (TextView) mDialogPuzzleIncorrect.findViewById(R.id.text_incorrect_compiled_output);
 
-        mButtonPuzzleCorrectContinue = (Button) mViewPuzzleCorrect.findViewById(R.id.button_puzzle_correct_continue);
-        mCorrectTextCompiledCodeTitle = (TextView) mViewPuzzleCorrect.findViewById(R.id.text_compiled_code_title);
-        mCorrectTextCompiledCode = (TextView) mViewPuzzleCorrect.findViewById(R.id.text_compiled_code);
-        mCorrectTextResultTitle = (TextView) mViewPuzzleCorrect.findViewById(R.id.text_result_title);
-        mCorrectTextResult = (TextView) mViewPuzzleCorrect.findViewById(R.id.text_result);
-        mCorrectTextPuzzleCodeTitle = (TextView) mViewPuzzleCorrect.findViewById(R.id.text_puzzle_code_title);
-        mCorrectTextPuzzleCode = (TextView) mViewPuzzleCorrect.findViewById(R.id.text_puzzle_code);
-        mCorrectTextPuzzleResultTitle = (TextView) mViewPuzzleCorrect.findViewById(R.id.text_puzzle_result_title);
-        mCorrectTextPuzzleResult = (TextView) mViewPuzzleCorrect.findViewById(R.id.text_puzzle_result);
 
-        mDialogPuzzleIncorrect = new AlertDialog.Builder(this).create();
-        mViewPuzzleIncorrect = View.inflate(this, R.layout.dialog_puzzle_incorrect, null);
-        mDialogPuzzleIncorrect.setView(mViewPuzzleIncorrect);
+        mDialogLevelComplete = new Dialog(this);
+        mDialogLevelComplete.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mDialogLevelComplete.setContentView(R.layout.dialog_level_complete);
+        mShimmerTextNewHighScore = (ShimmerTextView) mDialogLevelComplete.findViewById(R.id.shimmer_text_new_high_score);
+        Shimmer shimmer = new Shimmer();
+        shimmer.start(mShimmerTextNewHighScore);
+        mImageTrophyGold = (ImageView) mDialogLevelComplete.findViewById(R.id.image_trophy_gold);
+        mImageTrophySilver = (ImageView) mDialogLevelComplete.findViewById(R.id.image_trophy_silver);
+        mImageTrophyBronze = (ImageView) mDialogLevelComplete.findViewById(R.id.image_trophy_bronze);
+        mTextScore = (TextView) mDialogLevelComplete.findViewById(R.id.text_score);
+        mTextPrevious = (TextView) mDialogLevelComplete.findViewById(R.id.text_previous);
+        mTextNew = (TextView) mDialogLevelComplete.findViewById(R.id.text_new);
+        mTextLevelScore = (TextView) mDialogLevelComplete.findViewById(R.id.text_level_score);
+        mTextLevelAttempts = (TextView) mDialogLevelComplete.findViewById(R.id.text_level_attempts);
+        mTextLevelTime = (TextView) mDialogLevelComplete.findViewById(R.id.text_level_time);
+        mTextPreviousLevelScore = (TextView) mDialogLevelComplete.findViewById(R.id.text_previous_level_score);
+        mTextPreviousLevelAttempts = (TextView) mDialogLevelComplete.findViewById(R.id.text_previous_level_attempts);
+        mTextPreviousLevelTime = (TextView) mDialogLevelComplete.findViewById(R.id.text_previous_level_time);
+        mTextNewLevelScore = (TextView) mDialogLevelComplete.findViewById(R.id.text_new_level_score);
+        mTextNewLevelAttempts = (TextView) mDialogLevelComplete.findViewById(R.id.text_new_level_attempts);
+        mTextNewLevelTime = (TextView) mDialogLevelComplete.findViewById(R.id.text_new_level_time);
 
-        mButtonPuzzleIncorrectRetry = (Button) mViewPuzzleIncorrect.findViewById(R.id.button_puzzle_incorrect_retry);
-        mIncorrectTextCompiledCodeTitle = (TextView) mViewPuzzleIncorrect.findViewById(R.id.text_compiled_code_title);
-        mIncorrectTextCompiledCode = (TextView) mViewPuzzleIncorrect.findViewById(R.id.text_compiled_code);
-        mIncorrectTextResultTitle = (TextView) mViewPuzzleIncorrect.findViewById(R.id.text_result_title);
-        mIncorrectTextResult = (TextView) mViewPuzzleIncorrect.findViewById(R.id.text_result);
-        mIncorrectTextPuzzleCodeTitle = (TextView) mViewPuzzleIncorrect.findViewById(R.id.text_puzzle_code_title);
-        mIncorrectTextPuzzleCode = (TextView) mViewPuzzleIncorrect.findViewById(R.id.text_puzzle_code);
-        mIncorrectTextPuzzleResultTitle = (TextView) mViewPuzzleIncorrect.findViewById(R.id.text_puzzle_result_title);
-        mIncorrectTextPuzzleResult = (TextView) mViewPuzzleIncorrect.findViewById(R.id.text_puzzle_result);
-
-        mDialogLevelComplete = new AlertDialog.Builder(this).create();
-        mViewLevelComplete = View.inflate(this, R.layout.dialog_level_complete, null);
-        mDialogLevelComplete.setView(mViewLevelComplete);
-
-        mButtonLevelCompleteContinue = (Button) mViewLevelComplete.findViewById(R.id.button_level_complete_continue);
+        mButtonLevelCompleteContinue = (Button) mDialogLevelComplete.findViewById(R.id.button_level_complete_continue);
     }
 
     private void assignFonts() {
@@ -204,22 +214,27 @@ public class PuzzleActivity extends AppCompatActivity {
         mTextAttempts.setTypeface(Roboto_Regular);
         mTextTitle.setTypeface(Roboto_Regular);
         mButtonCheck.setTypeface(Roboto_Medium);
-        mCorrectTextCompiledCodeTitle.setTypeface(Roboto_Regular);
-        mCorrectTextCompiledCode.setTypeface(Roboto_Regular);
-        mCorrectTextResultTitle.setTypeface(Roboto_Regular);
-        mCorrectTextResult.setTypeface(Roboto_Regular);
-        mCorrectTextPuzzleCodeTitle.setTypeface(Roboto_Regular);
-        mCorrectTextPuzzleCode.setTypeface(Roboto_Regular);
-        mCorrectTextPuzzleResultTitle.setTypeface(Roboto_Regular);
-        mCorrectTextPuzzleResult.setTypeface(Roboto_Regular);
-        mIncorrectTextCompiledCodeTitle.setTypeface(Roboto_Regular);
-        mIncorrectTextCompiledCode.setTypeface(Roboto_Regular);
-        mIncorrectTextResultTitle.setTypeface(Roboto_Regular);
-        mIncorrectTextResult.setTypeface(Roboto_Regular);
-        mIncorrectTextPuzzleCodeTitle.setTypeface(Roboto_Regular);
-        mIncorrectTextPuzzleCode.setTypeface(Roboto_Regular);
-        mIncorrectTextPuzzleResultTitle.setTypeface(Roboto_Regular);
-        mIncorrectTextPuzzleResult.setTypeface(Roboto_Regular);
+        mTextCorrectAttempts.setTypeface(Roboto_Regular);
+        mTextCorrectAttemptsValue.setTypeface(Roboto_Regular);
+        mTextCorrectTime.setTypeface(Roboto_Regular);
+        mTextCorrectTimeValue.setTypeface(Roboto_Regular);
+        mTextIncorrectCompiledCodeTitle.setTypeface(Roboto_Regular);
+        mTextIncorrectCompiledCode.setTypeface(Roboto_Regular);
+        mTextIncorrectCompiledOutputTitle.setTypeface(Roboto_Regular);
+        mTextIncorrectCompiledOutput.setTypeface(Roboto_Regular);
+        mShimmerTextNewHighScore.setTypeface(Roboto_Medium, Typeface.BOLD);
+        mTextScore.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextPrevious.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextNew.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextLevelScore.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextLevelAttempts.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextLevelTime.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextPreviousLevelScore.setTypeface(Roboto_Regular);
+        mTextPreviousLevelAttempts.setTypeface(Roboto_Regular);
+        mTextPreviousLevelTime.setTypeface(Roboto_Regular);
+        mTextNewLevelScore.setTypeface(Roboto_Regular);
+        mTextNewLevelAttempts.setTypeface(Roboto_Regular);
+        mTextNewLevelTime.setTypeface(Roboto_Regular);
         mButtonPuzzleCorrectContinue.setTypeface(Roboto_Medium);
         mButtonPuzzleIncorrectRetry.setTypeface(Roboto_Medium);
         mButtonLevelCompleteContinue.setTypeface(Roboto_Medium);
@@ -242,7 +257,6 @@ public class PuzzleActivity extends AppCompatActivity {
             public void onClick(View v) {
                 pausePuzzleTimer();
                 if (checkFragmentAnswers()) { //if puzzle answer is correct
-                    Log.e(mClassName, "Correct answer");
                     mCorrectAnswer = true;
                     savePuzzleData();
                     mAchievementHandlerSingleton.puzzleWasComplete(mCurrentLevel); //process puzzle completed achievements
@@ -250,14 +264,11 @@ public class PuzzleActivity extends AppCompatActivity {
                     if (mCurrentPuzzle == null || mCurrentLevel.getLevel_puzzles_completed() == mCurrentLevel.getLevel_puzzles_count()) {
                         //if level is complete
                         mLevelComplete = true;
-                        mDatabaseHandlerSingleton.updateLevelData(mCurrentLevel);
-                        mAchievementHandlerSingleton.levelWasComplete(mCurrentLevel);
                     }
                     assignPuzzleCorrectViews();
 
                     mDialogPuzzleCorrect.show();
                 } else {
-                    Log.e(mClassName, "Incorrect answer");
                     mCorrectAnswer = false;
                     mLevelComplete = false;
                     savePuzzleData();
@@ -280,6 +291,7 @@ public class PuzzleActivity extends AppCompatActivity {
                     loadPuzzleUi();
                     resumePuzzleTimer();
                 } else {
+                    assignLevelCompleteViews();
                     mDialogLevelComplete.show();
                 }
             }
@@ -312,85 +324,75 @@ public class PuzzleActivity extends AppCompatActivity {
         });
     }
 
+    private boolean assignLevelCompleteViews() {
+        try {
+            int prevScore = mCurrentLevel.getLevel_score();
+            mTextPreviousLevelScore.setText(String.valueOf(prevScore));
+            mTextPreviousLevelAttempts.setText(String.valueOf(mCurrentLevel.getLevel_attempts()));
+            mTextPreviousLevelTime.setText(String.valueOf(mCurrentLevel.getLevel_time()));
+            Level updatedLevel = mDatabaseHandlerSingleton.updateLevelData(mCurrentLevel);
+            mAchievementHandlerSingleton.levelWasComplete(mCurrentLevel);
+            if (loadLevelData()) {
+                int newScore = updatedLevel.getActual_level_score();
+                mTextNewLevelScore.setText(String.valueOf(newScore));
+                mTextNewLevelAttempts.setText(String.valueOf(updatedLevel.getActual_level_attempts()));
+                mTextNewLevelTime.setText(String.valueOf(updatedLevel.getActual_level_time()));
+                mTextScore.setText(String.valueOf(newScore));
+                if(newScore>prevScore) {
+                    mTextNew.setText("New");
+                    mTextPrevious.setText("Previous");
+                    mShimmerTextNewHighScore.setVisibility(View.VISIBLE);
+                } else {
+                    mTextNew.setText("Attempted");
+                    mTextPrevious.setText("Current");
+                    mShimmerTextNewHighScore.setVisibility(View.GONE);
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            Log.e(mClassName, e.getMessage());
+            return false;
+        }
+    }
+
     private void assignPuzzleCorrectViews() {
-        String compiledCode = "";
-        for (String compiledCodeLine : mCompiledCode) {
-            if (!compiledCodeLine.equals(""))
-                if (mCompiledCode.indexOf(compiledCodeLine) == mCompiledCode.size() - 1)
-                    compiledCode = compiledCode + compiledCodeLine;
-                else
-                    compiledCode = compiledCode + compiledCodeLine + "\n";
-        }
-        mCorrectTextCompiledCode.setText(compiledCode);
-        String compiledResult = "";
-        for (Object compiledResultLine : mCompiledResult) {
-            if (!compiledResultLine.equals(""))
-                if (mCompiledResult.indexOf(compiledResultLine) == mCompiledResult.size() - 1)
-                    compiledResult = compiledResult + compiledResultLine.toString();
-                else
-                    compiledResult = compiledResult + compiledResultLine.toString() + "\n";
-        }
-        mCorrectTextResult.setText(compiledResult);
-        String puzzleCode = "";
-        for (String puzzleCodeLine : mPuzzleCode) {
-            if (!puzzleCodeLine.equals(""))
-                if (mCompiledCode.indexOf(puzzleCodeLine) == mCompiledCode.size() - 1)
-                    puzzleCode = puzzleCode + puzzleCodeLine;
-                else
-                    puzzleCode = puzzleCode + puzzleCodeLine + "\n";
-        }
-        mCorrectTextPuzzleCode.setText(puzzleCode);
-        mCorrectTextCompiledCode.setText(compiledCode);
-        String puzzleResult = "";
-        for (Object puzzleResultLine : mPuzzleCodeResult) {
-            if (!puzzleResultLine.toString().equals(""))
-                if (mCompiledResult.indexOf(puzzleResultLine) == mCompiledResult.size() - 1)
-                    puzzleResult = puzzleResult + puzzleResultLine.toString();
-                else
-                    puzzleResult = puzzleResult + puzzleResultLine.toString() + "\n";
-        }
-        mCorrectTextPuzzleResult.setText(puzzleResult);
+        mTextCorrectAttemptsValue.setText(mTextAttempts.getText().toString().replace("Attempts: ", ""));
+        int displayMinutes = mTimerSeconds / 60;
+        int displaySeconds = mTimerSeconds % 60;
+        mTextCorrectTimeValue.setText(String.format(Locale.UK, "%d:%02d", displayMinutes, displaySeconds));
     }
 
     private void assignPuzzleIncorrectViews() {
-        String compiledCode = "";
+        StringBuilder compiledCode = new StringBuilder();
         for (String compiledCodeLine : mCompiledCode) {
-            if (!compiledCodeLine.equals(""))
+            if (!compiledCodeLine.equals("")) {
+                if (compiledCodeLine.toLowerCase().contains(mCompiledResult.get(0).toString().toLowerCase().trim())) {
+                    compiledCodeLine = "<b><u><font color=#B71C1C>" + compiledCodeLine + "</font></u></b>";
+                } else {
+                    compiledCodeLine = compiledCodeLine.replaceAll("int", "<font color=#2962FF>int</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("float", "<font color=#2962FF>double</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("String", "<font color=#2962FF>String</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("char", "<font color=#2962FF>char</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("Boolean", "<font color=#2962FF>Boolean</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("\"(.*)\"", "<font color=#EF5350>\"$1\"</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("\'(.*)\'", "<font color=#EF5350>\'$1\'</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("true", "<font color=#2962FF>true</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("false", "<font color=#2962FF>false</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("Console", "<font color=#40C4FF>Console</font>");
+                }
                 if (mCompiledCode.indexOf(compiledCodeLine) == mCompiledCode.size() - 1)
-                    compiledCode = compiledCode + compiledCodeLine;
+                    compiledCode.append(compiledCodeLine);
                 else
-                    compiledCode = compiledCode + compiledCodeLine + "\n";
+                    compiledCode.append(compiledCodeLine + "<br />");
+            }
         }
-        mIncorrectTextCompiledCode.setText(compiledCode);
-        String compiledResult = "";
-        Log.e(mClassName, "Compiled result size: " + mCompiledResult.size());
-        for (Object compiledResultLine : mCompiledResult) {
-            if (!compiledResultLine.equals(""))
-                if (mCompiledResult.indexOf(compiledResultLine) == mCompiledResult.size() - 1)
-                    compiledResult = compiledResult + compiledResultLine.toString();
-                else
-                    compiledResult = compiledResult + compiledResultLine.toString() + "\n";
+        mTextIncorrectCompiledCode.setText(Html.fromHtml(compiledCode.toString()));
+        if (mCompiledResult.size() == 1) {
+            mTextIncorrectCompiledOutput.setText(mCompiledResult.get(0).toString());
+        } else {
+            mTextIncorrectCompiledOutput.setText(mCompiledResult.get(1).toString());
         }
-        mIncorrectTextResult.setText(compiledResult);
-        String puzzleCode = "";
-        for (String puzzleCodeLine : mPuzzleCode) {
-            if (!puzzleCodeLine.equals(""))
-                if (mCompiledCode.indexOf(puzzleCodeLine) == mCompiledCode.size() - 1)
-                    puzzleCode = puzzleCode + puzzleCodeLine;
-                else
-                    puzzleCode = puzzleCode + puzzleCodeLine + "\n";
-        }
-        mIncorrectTextPuzzleCode.setText(puzzleCode);
-        mIncorrectTextCompiledCode.setText(compiledCode);
-        String puzzleResult = "";
-        for (Object puzzleResultLine : mPuzzleCodeResult) {
-            if (!puzzleResultLine.toString().equals(""))
-                if (mCompiledResult.indexOf(puzzleResultLine) == mCompiledResult.size() - 1)
-                    puzzleResult = puzzleResult + puzzleResultLine.toString();
-                else
-                    puzzleResult = puzzleResult + puzzleResultLine.toString() + "\n";
-        }
-        mIncorrectTextPuzzleResult.setText(puzzleResult);
+
     }
 
     //loads from database the next incomplete puzzle
@@ -435,7 +437,7 @@ public class PuzzleActivity extends AppCompatActivity {
             mTextExpectedOutput.setVisibility(View.GONE);
         } else {
             expectedOutput = expectedOutput.replaceAll("int", "<font color=#2962FF>int</font>");
-            expectedOutput = expectedOutput.replaceAll("double", "<font color=#2962FF>double</font>");
+            expectedOutput = expectedOutput.replaceAll("float", "<font color=#2962FF>double</font>");
             expectedOutput = expectedOutput.replaceAll("String", "<font color=#2962FF>String</font>");
             expectedOutput = expectedOutput.replaceAll("char", "<font color=#2962FF>char</font>");
             expectedOutput = expectedOutput.replaceAll("Boolean", "<font color=#2962FF>Boolean</font>");
@@ -443,6 +445,7 @@ public class PuzzleActivity extends AppCompatActivity {
             expectedOutput = expectedOutput.replaceAll("\'(.*)\'", "<font color=#B71C1C>\'$1\'</font>");
             expectedOutput = expectedOutput.replaceAll("true", "<font color=#2962FF>true</font>");
             expectedOutput = expectedOutput.replaceAll("false", "<font color=#2962FF>false</font>");
+            expectedOutput = expectedOutput.replaceAll("Console", "<font color=#40C4FF>Console</font>");
             mTextExpectedOutput.setText(Html.fromHtml(expectedOutput));
             mTextExpectedOutput.setVisibility(View.VISIBLE);
         }

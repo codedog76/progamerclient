@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.progamer.R;
@@ -41,12 +42,14 @@ public class LevelActivity extends AppCompatActivity {
     private NetworkManagerSingleton mNetworkManagerSingleton;
     private ProgressDialog mProgressDialog;
     private LinearLayout mLinearFailedRetry, mLinearAverageUserContainer, mLinearAchievementPopup;
-    private TextView mTextLevelTitle, mTextLevelDescription, mTextUserMyScoreTitle, mTextUserScoreValue1, mTextUserScoreValue2,
-            mTextUserScoreTitle, mTextUserAttemptsTitle, mTextUserAttemptsValue, mTextUserTimeTitle, mTextUserTimeValue, mTextAverageUserScoreTitle,
-            mTextAverageScoreValue1, mTextAverageScoreValue2, mTextAverageScoreTitle, mTextAverageAttemptsTitle, mTextAverageAttemptsValue, mTextAverageTimeTitle, mTextAverageTimeValue;
-    private ProgressBar mProgressBarUser, mProgressBarAverage;
-    private ImageView mImageUserTrophy, mImageAverageTrophy;
-    private Button mButtonNext, mButtonTryAgain;
+    private TextView mTextLevelTitle, mTextLevelDescription, mTextPerformanceTitle, mTextUserScoreTitle,
+            mTextUser, mTextAverage, mTextScore, mTextAttempts, mTextTime,
+            mTextUserScoreValue, mTextUserAttemptsValue, mTextUserTimeValue,
+            mTextAverageScoreValue, mTextAverageAttemptsValue, mTextAverageTimeValue;
+    private RelativeLayout mRelativeAverageScore, mRelativeAverageAttempts, mRelativeAverageTime;
+    private ProgressBar mProgressAverageScore, mProgressAverageAttempts, mProgressAverageTime;
+    private ImageView mImageUserTrophy;
+    private Button mButtonNext;
     private String mClassName = getClass().toString();
     private int mLevelId;
     private final Handler mAchievementHandler = new Handler();
@@ -69,8 +72,8 @@ public class LevelActivity extends AppCompatActivity {
         assignListeners();
         assignActionBar();
         getBundle();
-        fetchAverageUserData();
-        fetchMyScoreData();
+        fetchAverageData();
+        fetchUserData();
     }
 
     @Override
@@ -84,7 +87,7 @@ public class LevelActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         mCurrentLevel = mDatabaseHandlerSingleton.getLevel(mLevelId);
-        fetchMyScoreData();
+        fetchUserData();
         loadData();
         AchievementHandlerSingleton achievementHandlerSingleton = AchievementHandlerSingleton.getInstance(this);
         mUserAchievementList = achievementHandlerSingleton.getUserAchievementsNotifications();
@@ -146,59 +149,47 @@ public class LevelActivity extends AppCompatActivity {
         }
     };
 
-    private void fetchMyScoreData() {
-        mTextUserScoreValue1.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_score()));
-        mTextUserScoreValue2.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_score()));
+    private void fetchUserData() {
+        mTextUserScoreTitle.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_score()));
+        mTextUserScoreValue.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_score()));
         mTextUserAttemptsValue.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_attempts()));
         mTextUserTimeValue.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_time()));
         String levelTrophy = mCurrentLevel.getLevel_trophy();
         int id = getResources().getIdentifier(levelTrophy, "drawable", getPackageName());
         Drawable drawable = ContextCompat.getDrawable(this, id);
         mImageUserTrophy.setImageDrawable(drawable);
-        if (mCurrentLevel.getLevel_score() >= 1 && mCurrentLevel.getLevel_score() < 50) {
-            mProgressBarUser.setMax(50);
-        }
-        if (mCurrentLevel.getLevel_score() >= 50 && mCurrentLevel.getLevel_score() < 100) {
-            mProgressBarUser.setMax(100);
-        }
-        if (mCurrentLevel.getLevel_score() >= 100 && mCurrentLevel.getLevel_score() <= 150) {
-            mProgressBarUser.setMax(150);
-        }
-        mProgressBarUser.setProgress(mCurrentLevel.getLevel_score());
     }
 
-    private void fetchAverageUserData() {
-        mLinearFailedRetry.setVisibility(View.GONE);
-        mProgressBar.setVisibility(View.VISIBLE);
+    private void fetchAverageData() {
+        mRelativeAverageScore.setVisibility(View.VISIBLE);
+        mRelativeAverageAttempts.setVisibility(View.VISIBLE);
+        mRelativeAverageTime.setVisibility(View.VISIBLE);
+        mProgressAverageScore.setVisibility(View.VISIBLE);
+        mProgressAverageAttempts.setVisibility(View.VISIBLE);
+        mProgressAverageTime.setVisibility(View.VISIBLE);
         mNetworkManagerSingleton.getAverageLevelDataJsonRequest(mCurrentLevel, new NetworkManagerSingleton.ObjectResponseListener<Level>() {
             @Override
             public void getResult(Level averageLevel, Boolean response, String message) {
                 if (response) {
-                    mProgressBar.setVisibility(View.GONE);
-                    mLinearFailedRetry.setVisibility(View.GONE);
-                    mLinearAverageUserContainer.setVisibility(View.VISIBLE);
-                    mTextAverageScoreValue1.setText(getString(R.string.decimal_value, averageLevel.getLevel_score()));
-                    mTextAverageScoreValue2.setText(getString(R.string.decimal_value, averageLevel.getLevel_score()));
+                    mProgressAverageScore.setVisibility(View.GONE);
+                    mProgressAverageAttempts.setVisibility(View.GONE);
+                    mProgressAverageTime.setVisibility(View.GONE);
+                    mTextAverageScoreValue.setVisibility(View.VISIBLE);
+                    mTextAverageAttemptsValue.setVisibility(View.VISIBLE);
+                    mTextAverageTimeValue.setVisibility(View.VISIBLE);
+                    mTextAverageScoreValue.setText(getString(R.string.decimal_value, averageLevel.getLevel_score()));
                     mTextAverageAttemptsValue.setText(getString(R.string.decimal_value, averageLevel.getLevel_attempts()));
                     mTextAverageTimeValue.setText(getString(R.string.decimal_value, averageLevel.getLevel_time()));
-                    String levelTrophy = mCurrentLevel.getLevel_trophy();
-                    int id = getResources().getIdentifier(levelTrophy, "drawable", getPackageName());
-                    Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), id);
-                    mImageAverageTrophy.setImageDrawable(drawable);
-                    if (mCurrentLevel.getLevel_score() >= 1 && averageLevel.getLevel_score() < 50) {
-                        mProgressBarUser.setMax(50);
-                    }
-                    if (mCurrentLevel.getLevel_score() >= 50 && averageLevel.getLevel_score() < 100) {
-                        mProgressBarAverage.setMax(100);
-                    }
-                    if (mCurrentLevel.getLevel_score() >= 100 && averageLevel.getLevel_score() <= 150) {
-                        mProgressBarUser.setMax(150);
-                    }
-                    mProgressBarAverage.setProgress(averageLevel.getLevel_score());
                 } else {
-                    mLinearFailedRetry.setVisibility(View.VISIBLE);
-                    mProgressBar.setVisibility(View.GONE);
-                    mLinearAverageUserContainer.setVisibility(View.INVISIBLE);
+                    mProgressAverageScore.setVisibility(View.GONE);
+                    mProgressAverageAttempts.setVisibility(View.GONE);
+                    mProgressAverageTime.setVisibility(View.GONE);
+                    mTextAverageScoreValue.setVisibility(View.VISIBLE);
+                    mTextAverageAttemptsValue.setVisibility(View.VISIBLE);
+                    mTextAverageTimeValue.setVisibility(View.VISIBLE);
+                    mTextAverageScoreValue.setText("N/A");
+                    mTextAverageAttemptsValue.setText("N/A");
+                    mTextAverageTimeValue.setText("N/A");
                 }
             }
         });
@@ -212,7 +203,6 @@ public class LevelActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int whichButton) {
                     }
                 }).show();
-        ;
     }
 
     private void assignProgressDialog() {
@@ -239,29 +229,11 @@ public class LevelActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (mCurrentLevel.getPuzzles_completed()) {
                     mProgressDialog.show();
-                    mNetworkManagerSingleton.getPuzzlesJsonRequest(mCurrentLevel, new NetworkManagerSingleton.BooleanResponseListener() {
-                        @Override
-                        public void getResult(Boolean response, String message) {
-                            mProgressDialog.dismiss();
-                            loadPuzzleActivity();
-                        }
-                    });
+                    downloadPuzzles();
                 } else loadPuzzleActivity();
             }
         });
-        mButtonTryAgain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fetchAverageUserData();
-            }
-        });
         mImageUserTrophy.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showExtraInformationDialog();
-            }
-        });
-        mImageAverageTrophy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showExtraInformationDialog();
@@ -277,6 +249,27 @@ public class LevelActivity extends AppCompatActivity {
                 intent.putExtras(bundle);
                 startActivity(intent);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+            }
+        });
+    }
+
+    private void downloadPuzzles() {
+        mNetworkManagerSingleton.getPuzzlesJsonRequest(mCurrentLevel, new NetworkManagerSingleton.BooleanResponseListener() {
+            @Override
+            public void getResult(Boolean response, String message) {
+                if (response) {
+                    mProgressDialog.dismiss();
+                    loadPuzzleActivity();
+                } else {
+                    new AlertDialog.Builder(LevelActivity.this)
+                            .setMessage("Puzzle data failed to download. " + message + " Do you wish to try again?")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    downloadPuzzles();
+                                }
+                            })
+                            .setNegativeButton("No", null).show();
+                }
             }
         });
     }
@@ -313,30 +306,29 @@ public class LevelActivity extends AppCompatActivity {
         mToolbar = (Toolbar) findViewById(R.id.app_actionbar);
         mTextLevelTitle = (TextView) findViewById(R.id.text_level_title);
         mTextLevelDescription = (TextView) findViewById(R.id.text_level_description);
-        mTextUserMyScoreTitle = (TextView) findViewById(R.id.text_user_my_score_title);
-        mTextUserScoreValue1 = (TextView) findViewById(R.id.text_user_score_value_1);
-        mTextUserScoreValue2 = (TextView) findViewById(R.id.text_user_score_value_2);
+        mTextLevelTitle = (TextView) findViewById(R.id.text_level_title);
+        mTextLevelDescription = (TextView) findViewById(R.id.text_level_description);
+        mTextPerformanceTitle = (TextView) findViewById(R.id.text_performance_title);
         mTextUserScoreTitle = (TextView) findViewById(R.id.text_user_score_title);
-        mTextUserAttemptsTitle = (TextView) findViewById(R.id.text_user_attempts_title);
+        mTextUser = (TextView) findViewById(R.id.text_user);
+        mTextAverage = (TextView) findViewById(R.id.text_average);
+        mTextScore = (TextView) findViewById(R.id.text_score);
+        mTextAttempts = (TextView) findViewById(R.id.text_attempts);
+        mTextTime = (TextView) findViewById(R.id.text_time);
+        mTextUserScoreValue = (TextView) findViewById(R.id.text_user_score_value);
         mTextUserAttemptsValue = (TextView) findViewById(R.id.text_user_attempts_value);
-        mTextUserTimeTitle = (TextView) findViewById(R.id.text_user_time_title);
         mTextUserTimeValue = (TextView) findViewById(R.id.text_user_time_value);
-        mTextAverageUserScoreTitle = (TextView) findViewById(R.id.text_average_user_score_title);
-        mTextAverageScoreValue1 = (TextView) findViewById(R.id.text_average_score_value_1);
-        mTextAverageScoreValue2 = (TextView) findViewById(R.id.text_average_score_value_2);
-        mTextAverageScoreTitle = (TextView) findViewById(R.id.text_average_score_title);
-        mTextAverageAttemptsTitle = (TextView) findViewById(R.id.text_average_attempts_title);
+        mTextAverageScoreValue = (TextView) findViewById(R.id.text_average_score_value);
         mTextAverageAttemptsValue = (TextView) findViewById(R.id.text_average_attempts_value);
-        mTextAverageTimeTitle = (TextView) findViewById(R.id.text_average_time_title);
         mTextAverageTimeValue = (TextView) findViewById(R.id.text_average_time_value);
-        mProgressBarUser = (ProgressBar) findViewById(R.id.progress_bar_user);
-        mProgressBarAverage = (ProgressBar) findViewById(R.id.progress_bar_average);
+        mRelativeAverageScore = (RelativeLayout) findViewById(R.id.relative_average_score);
+        mRelativeAverageAttempts = (RelativeLayout) findViewById(R.id.relative_average_attempts);
+        mRelativeAverageTime = (RelativeLayout) findViewById(R.id.relative_average_time);
+        mProgressAverageScore = (ProgressBar) findViewById(R.id.progress_average_score);
+        mProgressAverageAttempts = (ProgressBar) findViewById(R.id.progress_average_attempts);
+        mProgressAverageTime = (ProgressBar) findViewById(R.id.progress_average_time);
         mImageUserTrophy = (ImageView) findViewById(R.id.image_user_trophy);
-        mImageAverageTrophy = (ImageView) findViewById(R.id.image_average_trophy);
-        mLinearFailedRetry = (LinearLayout) findViewById(R.id.linear_failed_retry);
-        mLinearAverageUserContainer = (LinearLayout) findViewById(R.id.linear_average_user_container);
         mButtonNext = (Button) findViewById(R.id.button_next);
-        mButtonTryAgain = (Button) findViewById(R.id.button_try_again);
         mLinearAchievementPopup = (LinearLayout) findViewById(R.id.linear_achievement_popup);
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         mAnimLeftRight = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.left_right);
@@ -352,21 +344,20 @@ public class LevelActivity extends AppCompatActivity {
         Typeface Roboto_Regular = Typeface.createFromAsset(getAssets(), "Roboto-Regular.ttf");
         mTextLevelTitle.setTypeface(Roboto_Regular);
         mTextLevelDescription.setTypeface(Roboto_Regular);
-        mTextUserMyScoreTitle.setTypeface(Roboto_Regular);
-        mTextUserScoreValue1.setTypeface(Roboto_Regular);
-        mTextUserScoreValue2.setTypeface(Roboto_Regular);
+        mTextLevelTitle.setTypeface(Roboto_Regular);
+        mTextLevelDescription.setTypeface(Roboto_Regular);
+        mTextPerformanceTitle.setTypeface(Roboto_Regular);
         mTextUserScoreTitle.setTypeface(Roboto_Regular);
-        mTextUserAttemptsTitle.setTypeface(Roboto_Regular);
+        mTextUser.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextAverage.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextScore.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextAttempts.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextTime.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextUserScoreValue.setTypeface(Roboto_Regular);
         mTextUserAttemptsValue.setTypeface(Roboto_Regular);
-        mTextUserTimeTitle.setTypeface(Roboto_Regular);
         mTextUserTimeValue.setTypeface(Roboto_Regular);
-        mTextAverageUserScoreTitle.setTypeface(Roboto_Regular);
-        mTextAverageScoreValue1.setTypeface(Roboto_Regular);
-        mTextAverageScoreValue2.setTypeface(Roboto_Regular);
-        mTextAverageScoreTitle.setTypeface(Roboto_Regular);
-        mTextAverageAttemptsTitle.setTypeface(Roboto_Regular);
+        mTextAverageScoreValue.setTypeface(Roboto_Regular);
         mTextAverageAttemptsValue.setTypeface(Roboto_Regular);
-        mTextAverageTimeTitle.setTypeface(Roboto_Regular);
         mTextAverageTimeValue.setTypeface(Roboto_Regular);
         mButtonNext.setTypeface(Roboto_Medium);
         mTextTitle.setTypeface(Roboto_Regular);

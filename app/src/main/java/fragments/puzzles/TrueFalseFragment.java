@@ -68,21 +68,23 @@ public class TrueFalseFragment extends Fragment {
                 checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
             }
         }
-
         List<String> codeToRun = new ArrayList<>();
         for (Pair<String, String> pair : mCodePairList) {
             codeToRun.add(pair.second);
         }
-
-        mParentPuzzleActivity.setPuzzleCode(mCurrentPuzzleCodeBuilder.getCSharpCodeToRun());
-        mParentPuzzleActivity.setPuzzleCodeResult(mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer());
         mParentPuzzleActivity.setCompiledCode(codeToRun);
         List<Object> expectedAnswer = new ArrayList<>();
         expectedAnswer.add(mCurrentPuzzleCodeBuilder.getIsValidCode());
         JavaInterpreter javaInterpreter = new JavaInterpreter();
         List<Object> compiledAnswer = javaInterpreter.compileCSharpCode(codeToRun);
-        mParentPuzzleActivity.setCompiledResult(compiledAnswer);
-        return Boolean.valueOf(checkedItem) == mCurrentPuzzleCodeBuilder.getIsValidCode();
+        if(Boolean.valueOf(checkedItem) == mCurrentPuzzleCodeBuilder.getIsValidCode()) {
+            mParentPuzzleActivity.setCompiledResult(compiledAnswer);
+            return true;
+        } else {
+            compiledAnswer.add("The code compiled correctly with output: " + compiledAnswer.get(0).toString());
+            mParentPuzzleActivity.setCompiledResult(compiledAnswer);
+            return false;
+        }
     }
 
     private void assignViews(View view) {

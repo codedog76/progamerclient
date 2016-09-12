@@ -601,7 +601,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    public int updateLevelData(Level current_level) {
+    public Level updateLevelData(Level current_level) {
         current_level = getPuzzlesCompletionData(current_level);
         current_level = getPuzzlesData(current_level);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -614,14 +614,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         int rowsAffected = db.update(LEVEL_TABLE, values, LEVEL_ID + " = ?",
                 new String[]{String.valueOf(current_level.getLevel_id())});
         db.close();
-        return rowsAffected;
+        return current_level;
     }
 
     public int resetLevelsUpdated(User current_user) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(LEVEL_UPDATED, 0);
-        int rowsAffected = db.update(LEVEL_TABLE, values, LEVEL_USER_STUDENT_NUMBER_ID + " = ?",
+        int rowsAffected = db.update(LEVEL_TABLE, values, LEVEL_USER_STUDENT_NUMBER_ID + "=?",
                 new String[]{String.valueOf(current_user.getUser_student_number_id())});
         db.close();
         return rowsAffected;

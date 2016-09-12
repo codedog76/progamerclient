@@ -8,12 +8,16 @@
         android:layout_height="wrap_content"
         android:background="@color/white"
         android:orientation="vertical">
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/linear_nav_top"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/primary"
+            android:layout_height="172dp"
             android:orientation="vertical">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="center"
+                android:src="@drawable/bg_5" />
             <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/circle_image_nav_avatar"
                 android:layout_width="64dp"
@@ -24,6 +28,8 @@
                 app:civ_border_width="0dp"
                 app:civ_fill_color="@color/white" />
             <LinearLayout
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_gravity="center_vertical"
@@ -46,7 +52,7 @@
                     android:textColor="@color/white"
                     android:textSize="14sp" />
             </LinearLayout>
-        </LinearLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

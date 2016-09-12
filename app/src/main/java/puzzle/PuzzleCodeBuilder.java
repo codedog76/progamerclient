@@ -20,7 +20,7 @@ public class PuzzleCodeBuilder {
     private String[] mCharacters = new String[]{"'i'", "'j'", "'k'", "'l'", "'m'", "'n'", "'o'", "'p'", "'q'", "'r'", "'s'", "'t'", "'u'", "'v'", "'w'"};
     private String[] mVariableNames = new String[]{"a", "b", "c", "d", "e", "f", "g", "h", "x", "y", "z"};
     private String[] mExcludedVariableNames = new String[]{"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w"};
-    private String[] mPrimitives = new String[]{"int", "double", "String", "char", "Boolean"};
+    private String[] mPrimitives = new String[]{"int", "float", "String", "char", "Boolean"};
     private String[] mArithmeticOperators = new String[]{"+", "-", "*", "/", "%"};
     private String[] mArithmeticOperatorsVary = new String[]{"++", "--"};
     private String[] mRelationalOperators = new String[]{"==", "!=", ">", "<", ">=", "<="};
@@ -97,14 +97,14 @@ public class PuzzleCodeBuilder {
             for (Object obj : mCSharpCodeToRunAnswer) {
                 mCSharpCodeToDisplayPuzzle.add(new Pair<>(obj.toString(), ""));
             }
-            for (int x = 0; x <= (6 - mCSharpCodeToRunAnswer.size()); x++) {
+            for (int x = 0; x <= (4 - mCSharpCodeToRunAnswer.size()); x++) {
                 if (isInteger(mCSharpCodeToDisplayPuzzle.get(0).first)) {
                     mCSharpCodeToDisplayPuzzle.add(new Pair<>(generateRandomInteger(), ""));
-                } else if (isDouble(mCSharpCodeToDisplayPuzzle.get(0).first)) {
-                    double toReplace = Double.parseDouble(mCSharpCodeToDisplayPuzzle.get(0).first);
+                } else if (isFloat(mCSharpCodeToDisplayPuzzle.get(0).first)) {
+                    float toReplace = Float.parseFloat(mCSharpCodeToDisplayPuzzle.get(0).first);
                     mCSharpCodeToDisplayPuzzle.remove(0);
-                    mCSharpCodeToDisplayPuzzle.add(new Pair<>(Double.toString(round(toReplace, 2)), ""));
-                    mCSharpCodeToDisplayPuzzle.add(new Pair<>(generateRandomDouble(), ""));
+                    mCSharpCodeToDisplayPuzzle.add(new Pair<>(String.valueOf(round(toReplace, 2)), ""));
+                    mCSharpCodeToDisplayPuzzle.add(new Pair<>(generateRandomFloat(), ""));
                 }
             }
             Collections.shuffle(mCSharpCodeToDisplayPuzzle);
@@ -120,21 +120,13 @@ public class PuzzleCodeBuilder {
         }
     }
 
-    private boolean isDouble(String str) {
+    private boolean isFloat(String str) {
         try {
-            Double.parseDouble(str);
+            Float.parseFloat(str);
             return true;
         } catch (NumberFormatException e) {
             return false;
         }
-    }
-
-    public double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
-
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
     }
 
     //Splits input string based on comment tag "//" and removes those tags
@@ -197,9 +189,10 @@ public class PuzzleCodeBuilder {
             cSharpCodeLine = checkForRandomPrimitives(cSharpCodeLine);
 
             cSharpCodeLine = checkForFixedVariableNames(cSharpCodeLine);
+            cSharpCodeLine = checkForRandomUsedVariableNames(cSharpCodeLine);
             cSharpCodeLine = checkForRandomUnusedVariableNames(cSharpCodeLine);
             cSharpCodeLine = checkForRandomExcludedVariableNames(cSharpCodeLine);
-            cSharpCodeLine = checkForRandomUsedVariableNames(cSharpCodeLine);
+
 
             cSharpCodeLine = checkForFixedArithmeticOperators(cSharpCodeLine);
             cSharpCodeLine = checkForRandomArithmeticOperators(cSharpCodeLine);
@@ -264,7 +257,7 @@ public class PuzzleCodeBuilder {
                 List<String> toDisplay1 = new ArrayList<>();
                 for (Pair<String, String> output : mCSharpCodeToDisplayPuzzle) {
                     String expected_output_line = output.first;
-                    if(!expected_output_line.equals("")) {
+                    if (!expected_output_line.equals("")) {
                         toDisplay1.add(expected_output_line);
                     }
                 }
@@ -272,14 +265,14 @@ public class PuzzleCodeBuilder {
                     if (toDisplay1.indexOf(expected_output_line) == toDisplay1.size() - 1)
                         mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line;
                     else
-                        mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line + "\n";
+                        mCSharpCodeToDisplayExpectedOutput = mCSharpCodeToDisplayExpectedOutput + expected_output_line + "<br />";
                 }
                 break;
             case "<result>":
                 List<String> toDisplay2 = new ArrayList<>();
                 for (Object output : mCSharpCodeToRunAnswer) {
                     String expected_output_line = output.toString();
-                    if(!expected_output_line.equals("")) {
+                    if (!expected_output_line.equals("")) {
                         toDisplay2.add(expected_output_line);
                     }
                 }
@@ -294,7 +287,7 @@ public class PuzzleCodeBuilder {
                 List<String> toDisplay3 = new ArrayList<>();
                 for (Object output : mCSharpCodeToRunAnswer) {
                     String expected_output_line = output.toString();
-                    if(!expected_output_line.equals("")) {
+                    if (!expected_output_line.equals("")) {
                         toDisplay3.add(expected_output_line);
                     }
                 }
@@ -496,7 +489,7 @@ public class PuzzleCodeBuilder {
         cSharpCodeLine = cSharpCodeLine.replaceAll("<wv>(.*)</wv>", "$1");
         if (cSharpCodeLine.contains("int"))
             cSharpCodeLine = cSharpCodeLine.replaceAll("<rwv>", generateRandomString());
-        if (cSharpCodeLine.contains("double"))
+        if (cSharpCodeLine.contains("float"))
             cSharpCodeLine = cSharpCodeLine.replaceAll("<rwv>", generateRandomBoolean());
         if (cSharpCodeLine.contains("String"))
             cSharpCodeLine = cSharpCodeLine.replaceAll("<rwv>", generateRandomBoolean());
@@ -512,7 +505,7 @@ public class PuzzleCodeBuilder {
             cSharpCodeLine = cSharpCodeLine.replaceFirst("<riv>", generateRandomInteger());
         }
         while (cSharpCodeLine.contains("<rdv>")) {
-            cSharpCodeLine = cSharpCodeLine.replaceFirst("<rdv>", generateRandomDouble());
+            cSharpCodeLine = cSharpCodeLine.replaceFirst("<rdv>", generateRandomFloat());
         }
         while (cSharpCodeLine.contains("<rsv>")) {
             cSharpCodeLine = cSharpCodeLine.replaceFirst("<rsv>", generateRandomString());
@@ -525,8 +518,8 @@ public class PuzzleCodeBuilder {
         }
         if (cSharpCodeLine.contains("int"))
             cSharpCodeLine = cSharpCodeLine.replaceAll("<rv>", generateRandomInteger());
-        if (cSharpCodeLine.contains("double"))
-            cSharpCodeLine = cSharpCodeLine.replaceAll("<rv>", generateRandomDouble());
+        if (cSharpCodeLine.contains("float"))
+            cSharpCodeLine = cSharpCodeLine.replaceAll("<rv>", generateRandomFloat());
         if (cSharpCodeLine.contains("String"))
             cSharpCodeLine = cSharpCodeLine.replaceAll("<rv>", generateRandomString());
         if (cSharpCodeLine.contains("char"))
@@ -595,9 +588,15 @@ public class PuzzleCodeBuilder {
         return Integer.toString(random.nextInt(20 - 1 + 1) + 1);
     }
 
-    private String generateRandomDouble() {
+    private String generateRandomFloat() {
         Random random = new Random();
-        return Double.toString(Math.round((1 + (20 - 1) * random.nextDouble()) * 100.0) / 100.0);
+        return Float.toString(round(random.nextFloat(), 2));
+    }
+
+    public float round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd.floatValue();
     }
 
     private String generateRandomString() {

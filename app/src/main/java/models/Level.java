@@ -1,7 +1,5 @@
 package models;
 
-import java.io.Serializable;
-
 public class Level {
 
     private int level_id; //PK
@@ -15,7 +13,9 @@ public class Level {
     private int level_attempts;
     private int level_time;
     private int level_updated;
-
+    private int actual_level_score;
+    private int actual_level_attempts;
+    private int actual_level_time;
     private int level_puzzles_completed;
     private int level_puzzles_count;
 
@@ -105,12 +105,24 @@ public class Level {
             level_score = 0;
             return level_score;
         }
-        int calc_score = 150 - (level_time + (level_attempts * 5));
-        if (calc_score < 0)
-            calc_score = 1;
-        if (calc_score > level_score)
-            level_score = calc_score;
+        actual_level_score = 150 - (actual_level_time + (actual_level_attempts * 5));
+        if (actual_level_score < 0)
+            actual_level_score = 1;
+        if (actual_level_score > level_score)
+            level_score = actual_level_score;
         return level_score;
+    }
+
+    public int getActual_level_score() {
+        return actual_level_score;
+    }
+
+    public int getActual_level_attempts() {
+        return actual_level_attempts;
+    }
+
+    public int getActual_level_time() {
+        return actual_level_time;
     }
 
     public int getLevel_updated() {
@@ -130,6 +142,7 @@ public class Level {
     }
 
     public int updateLevel_attempts(int new_level_attempts) {
+        actual_level_attempts = new_level_attempts;
         if (new_level_attempts < level_attempts || level_attempts == 0)
             level_attempts = new_level_attempts;
         return level_attempts;
@@ -144,6 +157,7 @@ public class Level {
     }
 
     public int updateLevel_time(int new_level_time) {
+        actual_level_time = new_level_time;
         if (new_level_time < level_time || level_time == 0)
             level_time = new_level_time;
         return level_time;

@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
@@ -21,16 +22,20 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +64,8 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
     private LevelsFragment mLevelsFragment;
     private LeaderboardFragment mLeaderboardFragment;
     private LinearLayout mLinearNavLevels, mLinearNavLevelsBack, mLinearNavLeaderboard, mLinearAchievementPopup,
-            mLinearNavLeaderboardBack, mLinearNavSettings, mLinearNavLogout, mLinearNavTop;
+            mLinearNavLeaderboardBack, mLinearNavSettings, mLinearNavLogout;
+    private RelativeLayout mRelativeNavTop;
     private TextView mTextNavLevels, mTextNavLeaderboard, mTextNavLogout, mTextNavSettings, mTextNavNickname, mTextNavStudentNumber;
     private ImageView mImageNavLevels, mImageNavLeaderboard;
     private CircleImageView mCircleImageNavAvatar;
@@ -282,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
         mLinearNavLeaderboardBack = (LinearLayout) findViewById(R.id.linear_nav_leaderboard_back);
         mLinearNavSettings = (LinearLayout) findViewById(R.id.linear_nav_settings);
         mLinearNavLogout = (LinearLayout) findViewById(R.id.linear_nav_logout);
-        mLinearNavTop = (LinearLayout) findViewById(R.id.linear_nav_top);
+        mRelativeNavTop = (RelativeLayout) findViewById(R.id.linear_nav_top);
         mCircleImageNavAvatar = (CircleImageView) findViewById(R.id.circle_image_nav_avatar);
         mImageNavLevels = (ImageView) findViewById(R.id.image_nav_levels);
         mImageNavLeaderboard = (ImageView) findViewById(R.id.image_nav_leaderboard);
@@ -328,6 +334,15 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
     private void assignNavigationDrawer() {
         mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_navigation_drawer);
+        ViewGroup.LayoutParams params = mNavigationDrawerFragment.getView().getLayoutParams();
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x - dpToPx(56);
+        params.width = width;
+        mRelativeNavTop.getLayoutParams().width = width;
+        mRelativeNavTop.getLayoutParams().height = (width/16)*9;
+        mNavigationDrawerFragment.getView().setLayoutParams(params);
         mNavigationDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_navigation), mToolbar);
         mNavigationDrawerFragment.setListener(this);
         mTextNavNickname.setText(mDatabaseHandlerSingleton.getLoggedUser().getUser_nickname());
@@ -336,6 +351,12 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
                         String.valueOf(mDatabaseHandlerSingleton.getLoggedUser().getUser_avatar()),
                 "drawable", getPackageName());
         mCircleImageNavAvatar.setImageDrawable(ContextCompat.getDrawable(this, id));
+    }
+
+    public int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
     }
 
     private void assignListeners() {
@@ -368,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements NavigationDrawerF
                 showLogoutDialog();
             }
         });
-        mLinearNavTop.setOnClickListener(new View.OnClickListener() {
+        mRelativeNavTop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), UserProfileActivity.class);

@@ -1,6 +1,7 @@
 package fragments.puzzles;
 
 
+import android.net.ParseException;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,7 @@ import android.widget.ListView;
 
 import com.example.progamer.R;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,18 +77,38 @@ public class SingleChoiceListFragment extends Fragment {
             Log.e(mClassName, "this1");
             String checkedItem = "";
             SparseBooleanArray checked = mListView.getCheckedItemPositions();
-
             for (int i = 0; i < checked.size(); i++) {
                 if (checked.valueAt(i)) {
-
-                    //checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
+                    checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
                 }
             }
-            if(checkedItem.equals("")) return false;
+            if (checkedItem.equals("")) return false;
+            List<String> names = mCurrentPuzzleCodeBuilder.getCSharpCodeToRun();
+            mParentPuzzleActivity.setCompiledCode(names);
+            for (String ave : names) {
+                Log.e("asd", ave);
+            }
+
             List<Object> expectedAnswer = mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer();
-            return checkedItem.equals(expectedAnswer.get(0).toString());
+            mParentPuzzleActivity.setCompiledResult(expectedAnswer);
+            String answer = "";
+            String floatChecked = "";
+            try {
+                float floatValue = Float.parseFloat(expectedAnswer.get(0).toString());
+                answer = String.valueOf(round(floatValue, 2));
+                floatValue = Float.parseFloat(checkedItem);
+                floatChecked = String.valueOf(floatValue);
+                Log.e("floatValue", floatValue+"");
+
+            } catch (NumberFormatException e) {
+                Log.e("ParseException", expectedAnswer.get(0).toString());
+            }
+
+            Log.e("checkItem", floatChecked);
+            Log.e("expectedAnswer", answer);
+
+            return floatChecked.toLowerCase().trim().equals(answer.toLowerCase().trim());
         } else {
-            Log.e(mClassName, "this2");
             List<String> codeToRun = new ArrayList<>();
             String checkedItem = "";
             SparseBooleanArray checked = mListView.getCheckedItemPositions();
@@ -95,9 +117,7 @@ public class SingleChoiceListFragment extends Fragment {
                     checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
                 }
             }
-            if(checkedItem.equals("")) return false;
-            Log.e(mClassName, checkedItem);
-
+            if (checkedItem.equals("")) return false;
             String[] splited = checkedItem.split("\\s+");
             if (mCurrentPuzzleCodeBuilder.getProcessCodeSelected()) {
                 for (Pair<String, String> pair : mCodePairList) {
@@ -116,8 +136,6 @@ public class SingleChoiceListFragment extends Fragment {
                     }
                 }
             }
-            mParentPuzzleActivity.setPuzzleCode(mCurrentPuzzleCodeBuilder.getCSharpCodeToRun());
-            mParentPuzzleActivity.setPuzzleCodeResult(mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer());
             mParentPuzzleActivity.setCompiledCode(codeToRun);
             JavaInterpreter javaInterpreter = new JavaInterpreter();
             List<Object> compiledAnswer = javaInterpreter.compileCSharpCode(codeToRun);
@@ -131,9 +149,14 @@ public class SingleChoiceListFragment extends Fragment {
                     return false;
                 }
             }
-
             return true;
         }
+    }
+
+    public float round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd.floatValue();
     }
 
     private void assignViews(View view) {

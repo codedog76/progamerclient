@@ -48,6 +48,8 @@ public class NetworkManagerSingleton {
     private static final String REGISTER_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/register";
     private static final String LEADERBOARD_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/leaderboard";
     private static final String LEVELS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/levels";
+    private static final String ADMIN_LEVELS_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/adminlevels";
+    private static final String ADMIN_PUZZLES_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/adminpuzzles";
     private static final String USER_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/user";
     private static final String UPDATE_USER_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/updateuser";
     private static final String UPDATE_USERLEVEL_URL_STRING = "http://progamer.csdev.nmmu.ac.za/api/data/updateuserlevel";
@@ -124,11 +126,7 @@ public class NetworkManagerSingleton {
                                     user.setUser_is_private(response.getInt("user_is_private"));
 
                                     if (mDatabaseHandlerSingleton.insertUser(user) != -1) {
-                                        if (user.getUser_type().equals("admin")) {
-                                            booleanResponseListener.getResult(true, "Admin successfully logged in");
-                                        } else {
-                                            getAchievementsJsonRequest(user, booleanResponseListener);
-                                        }
+                                        getAchievementsJsonRequest(user, booleanResponseListener);
                                     } else {
                                         Log.e(mClassName, "getLoginUserJsonRequest Error: Failed to add user to local database");
                                         booleanResponseListener.getResult(false, "Failed to add user to local database");
@@ -388,8 +386,7 @@ public class NetworkManagerSingleton {
     //If successful all user achievements are added to local database and getLevelsJsonRequest is called to continue user sync,
     //else false with error message is passed to listener.
     public synchronized void getLoggedUserAchievementsJSONRequest(final User user, final BooleanResponseListener booleanResponseListener) {
-        if (!mDatabaseHandlerSingleton.checkHasLoggedUserAchievements(user)) {
-            Log.e("LoggedUserAch", "called");
+        if (!mDatabaseHandlerSingleton.checkHasLoggedUserAchievements(user) && !user.getUser_type().equals("admin")) {
             Map<String, Object> jsonParams = new HashMap<>();
             jsonParams.put("user_student_number", user.getUser_student_number_id());
             JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, USERACHIEVEMENTS_URL_STRING, new JSONObject(jsonParams),
@@ -512,6 +509,110 @@ public class NetworkManagerSingleton {
             booleanResponseListener.getResult(true, "User data complete");
         }
     }
+
+    //GET METHOD: fetches all admin's levels from external database
+    //If successful all user levels are added to local database and true is passed to listener, else false and error message
+    public synchronized void getAdminLevelsJsonRequest(User user, final ObjectResponseListener<ArrayList<Level>> objectResponseListener) {
+        Map<String, Object> jsonParams = new HashMap<>();
+        jsonParams.put("user_student_number", user.getUser_student_number_id());
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, ADMIN_LEVELS_URL_STRING, new JSONObject(jsonParams),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if (validResponse(response)) {
+                                JSONArray jsonArray = response.getJSONArray("level_list");
+                                ArrayList<Level> level_list = new ArrayList<>();
+                                for (int x = 0; x < jsonArray.length(); x++) {
+                                    JSONObject jsonObject = jsonArray.getJSONObject(x);
+                                    Level level = new Level();
+                                    //pk auto increment
+                                    level.setLevel_database_id(jsonObject.getInt("level_id"));
+                                    level.setLevel_id(jsonObject.getInt("level_id"));
+                                    level.setLevel_number(jsonObject.getInt("level_number"));
+                                    level.setLevel_title(jsonObject.getString("level_title"));
+                                    level_list.add(level);
+                                }
+                                objectResponseListener.getResult(level_list, true, response.getString("response_message"));
+                            } else {
+                                Log.e(mClassName, "getAdminLevelsJsonRequest Error: Invalid response");
+                                objectResponseListener.getResult(null, false, response.getString("response_message"));
+                            }
+                        } catch (JSONException ex) {
+                            Log.e(mClassName, "getAdminLevelsJsonRequest Error: " + ex.getMessage());
+                            objectResponseListener.getResult(null, false, ex.getMessage());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError ex) {
+                        if (ex != null) {
+                            String error = getVolleyError(ex);
+                            Log.e(mClassName, "getAdminLevelsJsonRequest Error: " + error);
+                            objectResponseListener.getResult(null, false, error);
+                        }
+                    }
+                }
+        );
+        RetryPolicy policy = new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        objectRequest.setRetryPolicy(policy);
+        objectRequest.setTag("getAdminLevelsJsonRequest");
+        getRequestQueue().add(objectRequest);
+    }
+
+    //GET METHOD: fetches all admin's levels from external database
+    //If successful all user levels are added to local database and true is passed to listener, else false and error message
+    public synchronized void getAdminPuzzlesJsonRequest(int level_id, final ObjectResponseListener<ArrayList<Puzzle>> objectResponseListener) {
+        Map<String, Object> jsonParams = new HashMap<>();
+        jsonParams.put("level_id", level_id);
+        Log.e("asd", level_id+"");
+        JsonObjectRequest objectRequest = new JsonObjectRequest(Request.Method.POST, ADMIN_PUZZLES_URL_STRING, new JSONObject(jsonParams),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if (validResponse(response)) {
+                                JSONArray jsonArray = response.getJSONArray("puzzle_list");
+                                ArrayList<Puzzle> puzzle_list = new ArrayList<>();
+                                for (int x = 0; x < jsonArray.length(); x++) {
+                                    JSONObject jsonObject = jsonArray.getJSONObject(x);
+                                    Puzzle puzzle = new Puzzle();
+                                    //pk auto increment
+                                    puzzle.setPuzzle_database_id(jsonObject.getInt("puzzle_id"));
+                                    puzzle.setPuzzle_id(jsonObject.getInt("puzzle_id"));
+                                    puzzle.setPuzzle_instructions(jsonObject.getString("puzzle_instructions"));
+                                    puzzle.setPuzzle_data(jsonObject.getString("puzzle_data"));
+                                    puzzle_list.add(puzzle);
+                                }
+                                objectResponseListener.getResult(puzzle_list, true, response.getString("response_message"));
+                            } else {
+                                Log.e(mClassName, "getAdminPuzzlesJsonRequest Error: Invalid response");
+                                objectResponseListener.getResult(null, false, response.getString("response_message"));
+                            }
+                        } catch (JSONException ex) {
+                            Log.e(mClassName, "getAdminPuzzlesJsonRequest Error: " + ex.getMessage());
+                            objectResponseListener.getResult(null, false, ex.getMessage());
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError ex) {
+                        if (ex != null) {
+                            String error = getVolleyError(ex);
+                            Log.e(mClassName, "getAdminPuzzlesJsonRequest Error: " + error);
+                            objectResponseListener.getResult(null, false, error);
+                        }
+                    }
+                }
+        );
+        RetryPolicy policy = new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        objectRequest.setRetryPolicy(policy);
+        objectRequest.setTag("getAdminPuzzlesJsonRequest");
+        getRequestQueue().add(objectRequest);
+    }
+
 
     //GET METHOD: fetches all of a user's achievements from external database.
     //If successful a list of user achievements passed to listener and true, else false with error message.
@@ -753,10 +854,12 @@ public class NetworkManagerSingleton {
                 outgoing_level.put("level_score", current_level.getLevel_score());
                 outgoing_level.put("level_attempts", current_level.getLevel_attempts());
                 outgoing_level.put("level_time", current_level.getLevel_time());
+                Log.e("levelUpdate", current_level.getLevel_id() + " : " + current_level.getLevel_updated());
                 if (current_level.getLevel_updated() == 1)
                     outgoing_levels.put(outgoing_level);
             }
             if (outgoing_levels.length() == 0) {
+                Log.e("outgoing_levels", "length: " + outgoing_levels.length());
                 putUserAchievementsJSONRequest(booleanResponseListener);
                 return;
             }
@@ -772,7 +875,8 @@ public class NetworkManagerSingleton {
                     public void onResponse(JSONObject response) {
                         try {
                             if (validResponse(response)) {
-                                if (mDatabaseHandlerSingleton.resetLevelsUpdated() == 1) {
+                                Log.e("updateLevels", "called");
+                                if (mDatabaseHandlerSingleton.resetLevelsUpdated() > 0) {
                                     putUserAchievementsJSONRequest(booleanResponseListener);
                                 } else {
                                     Log.e(mClassName, "putUserLevelsJSONRequest Error: failed to reset user update fields\"");
@@ -977,13 +1081,13 @@ public class NetworkManagerSingleton {
         if (ex instanceof TimeoutError || ex instanceof NoConnectionError) {
             return "No internet access or server is down.";
         } else if (ex instanceof AuthFailureError) {
-            return "Authentication error";
+            return "Authentication error.";
         } else if (ex instanceof ServerError) {
-            return "Server error";
+            return "Server error.";
         } else if (ex instanceof NetworkError) {
-            return "Network error";
+            return "Network error.";
         } else if (ex instanceof ParseError) {
-            return "Parse error";
+            return "Parse error.";
         }
         if (ex.getMessage() != null)
             return ex.getMessage();

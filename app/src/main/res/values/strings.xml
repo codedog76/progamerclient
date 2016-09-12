@@ -13,6 +13,8 @@
     <string name="puzzle_count">Puzzle %1$d/%2$d</string>
     <string name="string_timer">Time: %1$s</string>
     <string name="string_level_number">Level %1$s</string>
+    <string name="string_level_id">Id: %1$d</string>
+    <string name="string_puzzle_id">Id: %1$d</string>
     <string name="string_out_of">%1$d/%2$d</string>
     <string name="string_rank">#%1$d</string>
     <string name="decimal_value">%1$d</string>
@@ -26,14 +28,12 @@
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="register_required">* Required</string>
-
     <string name="nav_levels">Levels</string>
     <string name="nav_leaderboard">Leaderboard</string>
     <string name="nav_logout">Logout</string>
     <string name="level_puzzle_progress">0/0</string>
     <string name="level_name">Level name</string>
     <string name="level_number">Level number</string>
-
     <string name="puzzle_check_button">Check</string>
     <string name="nav_settings">Settings</string>
     <string name="level_title">Level Title</string>
@@ -43,6 +43,7 @@
     <string name="achievement_description">Achievement Description</string>
     <string name="achievement_title">Achievement Title</string>
     <string name="loading">Loading..</string>
+    <string name="no_puzzles_found">No puzzles found</string>
     <string name="please_check_your_internet_connection_and_try_again">Please check your internet connection and try again</string>
     <string name="please_complete_a_level_to_view_other_users">Please complete a level to view other users</string>
     <string name="try_again">Try Again</string>
@@ -52,5 +53,8 @@
     <string name="cancel">Cancel</string>
     <string name="average_user_score">Average User Score</string>
     <string name="failed_to_load_average_user_data_please_try_again">Failed to load average user data. Please try again.</string>
+    <string name="puzzle_id">Puzzle Id</string>
+    <string name="puzzle_instructions">Puzzle Instructions</string>
+    <string name="puzzle_data">Puzzle data</string>
 
 </resources>

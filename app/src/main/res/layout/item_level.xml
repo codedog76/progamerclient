@@ -30,6 +30,14 @@
                 android:textSize="16sp" />
 
             <TextView
+                android:id="@+id/text_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Level Id"
+                android:textSize="14sp"
+                android:visibility="gone"/>
+
+            <TextView
                 android:id="@+id/text_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -73,8 +81,8 @@
 
             <ImageView
                 android:id="@+id/image_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:src="@drawable/trophy_bronze" />
@@ -83,6 +91,7 @@
                 android:id="@+id/text_score"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@color/accent"
                 android:text="000" />
         </LinearLayout>
 

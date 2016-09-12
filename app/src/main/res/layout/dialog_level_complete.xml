@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/text_level_complete_title"
@@ -20,41 +21,249 @@
         android:layout_below="@+id/text_level_complete_title"
         android:background="@drawable/layout_bottom_shadow" />
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/view_shadow"
-        android:fitsSystemWindows="true">
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        <ImageView
+            android:id="@+id/image_trophy_silver"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/trophy_grey" />
+
+        <ImageView
+            android:id="@+id/image_trophy_gold"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/trophy_grey" />
+
+        <ImageView
+            android:id="@+id/image_trophy_bronze"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/trophy_grey" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/text_score"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:text="2130"
+        android:textColor="@color/accent"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <com.romainpiel.shimmer.ShimmerTextView
+        android:id="@+id/shimmer_text_new_high_score"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:text="NEW HIGH SCORE!"
+        android:textColor="@color/gold"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*"
+        android:layout_marginBottom="0dp"
+        android:paddingBottom="0dp">
+
+        <TableRow android:layout_height="wrap_content">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:alpha="0.12"
+                android:background="@color/black" />
+        </TableRow>
+
+        <TableRow android:minHeight="25dp">
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_weight="1.5" />
+
+            <TextView
+                android:id="@+id/text_previous"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Previous"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/text_new"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Current"
+                android:textStyle="bold" />
 
 
-        </LinearLayout>
+        </TableRow>
+
+        <TableRow android:layout_height="wrap_content">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:alpha="0.12"
+                android:background="@color/black" />
+        </TableRow>
+
+        <TableRow android:minHeight="25dp">
+
+            <TextView
+                android:id="@+id/text_level_score"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.5"
+                android:gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:text="Level Score" />
+
+            <TextView
+                android:id="@+id/text_previous_level_score"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="230" />
+
+            <TextView
+                android:id="@+id/text_new_level_score"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="230" />
+
+        </TableRow>
+
+        <TableRow android:layout_height="wrap_content">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:alpha="0.12"
+                android:background="@color/black" />
+        </TableRow>
+
+        <TableRow android:minHeight="25dp">
+
+            <TextView
+                android:id="@+id/text_level_attempts"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.5"
+                android:gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:text="Level Attempts" />
+
+            <TextView
+                android:id="@+id/text_previous_level_attempts"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="230" />
+
+            <TextView
+                android:id="@+id/text_new_level_attempts"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="230" />
 
 
-    </ScrollView>
+        </TableRow>
+
+        <TableRow android:layout_height="wrap_content">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:alpha="0.12"
+                android:background="@color/black" />
+        </TableRow>
+
+        <TableRow android:minHeight="25dp">
+
+            <TextView
+                android:id="@+id/text_level_time"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.5"
+                android:gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:text="Level Time" />
+
+            <TextView
+                android:id="@+id/text_previous_level_time"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="230" />
+
+            <TextView
+                android:id="@+id/text_new_level_time"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="230" />
+
+
+        </TableRow>
+
+        <TableRow android:layout_height="wrap_content">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:alpha="0.12"
+                android:background="@color/black" />
+        </TableRow>
+
+    </TableLayout>
 
     <LinearLayout
         android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:layout_alignParentBottom="true"
-        android:gravity="end|center_vertical">
+        android:background="@color/white">
 
         <Button
             android:id="@+id/button_level_complete_continue"
             style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginRight="8dp"
-            android:minWidth="64dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="Continue"
             android:textColor="@color/accent"
             android:textSize="14sp" />
     </LinearLayout>
 
 
-</RelativeLayout>
+</LinearLayout>

@@ -138,11 +138,11 @@ public class DatabaseHandlerSingleton {
         return getDatabaseHandler().getLevel(level_id);
     }
 
-    public int updateLevelData(Level current_level) {
+    public Level updateLevelData(Level current_level) {
         if (current_level != null) {
             return getDatabaseHandler().updateLevelData(current_level);
         }
-        return -1;
+        return null;
     }
 
     public int resetLevelsUpdated() {

@@ -244,8 +244,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="3dp"
                             android:text="Average Performance"
-                            android:textColor="@color/accent"
-                            android:textSize="16sp" />
+                            android:textColor="@color/primary_dark"
+                            android:textSize="20sp" />
 
                         <TableLayout
                             android:layout_width="match_parent"
@@ -307,6 +307,7 @@
                                         android:layout_height="match_parent"
                                         android:layout_centerInParent="true"
                                         android:gravity="center"
+                                        android:text="@string/decimal_value"
                                         android:visibility="gone" />
 
                                     <ProgressBar
@@ -330,6 +331,7 @@
                                         android:layout_height="match_parent"
                                         android:layout_centerInParent="true"
                                         android:gravity="center"
+                                        android:text="@string/decimal_value"
                                         android:visibility="gone" />
 
                                     <ProgressBar
@@ -352,6 +354,7 @@
                                         android:layout_height="match_parent"
                                         android:layout_centerInParent="true"
                                         android:gravity="center"
+                                        android:text="@string/decimal_value"
                                         android:visibility="gone" />
 
                                     <ProgressBar
@@ -390,6 +393,7 @@
                                         android:layout_height="match_parent"
                                         android:layout_centerInParent="true"
                                         android:gravity="center"
+                                        android:text="@string/decimal_value"
                                         android:visibility="gone" />
 
                                     <ProgressBar
@@ -412,6 +416,7 @@
                                         android:layout_height="match_parent"
                                         android:layout_centerInParent="true"
                                         android:gravity="center"
+                                        android:text="@string/decimal_value"
                                         android:visibility="gone" />
 
                                     <ProgressBar
@@ -441,7 +446,8 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="30dp"
                                         android:layout_centerInParent="true"
-                                        android:gravity="center" />
+                                        android:gravity="center"
+                                        android:text="@string/decimal_value" />
                                 </RelativeLayout>
 
                             </TableRow>
@@ -470,6 +476,7 @@
                                         android:layout_height="match_parent"
                                         android:layout_centerInParent="true"
                                         android:gravity="center"
+                                        android:text="@string/decimal_value"
                                         android:visibility="gone" />
 
                                     <ProgressBar
@@ -491,6 +498,7 @@
                                         android:layout_height="match_parent"
                                         android:layout_centerInParent="true"
                                         android:gravity="center"
+                                        android:text="@string/decimal_value"
                                         android:visibility="gone" />
 
                                     <ProgressBar
@@ -513,6 +521,7 @@
                                         android:layout_height="match_parent"
                                         android:layout_centerInParent="true"
                                         android:gravity="center"
+                                        android:text="@string/decimal_value"
                                         android:visibility="gone" />
 
                                     <ProgressBar

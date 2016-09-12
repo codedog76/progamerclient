@@ -2,6 +2,7 @@ package activities;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -196,34 +197,41 @@ public class UserProfileActivity extends AppCompatActivity {
     private void assignPerformanceViews(String user_student_number) {
         User currentUser = mDatabaseHandlerSingleton.getLoggedUser();
         int total_score = 0, total_attempts = 0, total_time = 0, total_count = 0;
-        int average_score, average_attempts, average_time;
-        List<Level> levelList = mDatabaseHandlerSingleton.getLevels();
-        for (Level level : levelList) {
-            if (level.getLevel_completed() == 1) {
-                total_score += level.getLevel_score();
-                total_attempts += level.getLevel_attempts();
-                total_time += level.getLevel_time();
-                total_count += 1;
+        double average_score = 0, average_attempts = 0, average_time = 0;
+        if(!currentUser.getUser_type().equals("admin")) {
+            List<Level> levelList = mDatabaseHandlerSingleton.getLevels();
+            for (Level level : levelList) {
+                if (level.getLevel_completed() == 1) {
+                    total_score += level.getLevel_score();
+                    total_attempts += level.getLevel_attempts();
+                    total_time += level.getLevel_time();
+                    total_count += 1;
+                }
+
             }
-
+            average_score = total_score / total_count;
+            average_attempts = total_attempts / total_count;
+            average_time = total_time / total_count;
         }
-        average_score = total_score / total_count;
-        average_attempts = total_attempts / total_count;
-        average_time = total_time / total_count;
-
         if (mIsVisitor) {
             //assign the visitor column, which will always be the logged in user.
             mTextVisitorPerfTitle.setText(currentUser.getUser_nickname());
             mTextVisitorPerfAverageScore.setText(String.valueOf(average_score));
             mTextVisitorPerfAverageAttempts.setText(String.valueOf(average_attempts));
             mTextVisitorPerfAverageTime.setText(String.valueOf(average_time));
-            mTextVisitorPerfTitle.setVisibility(View.VISIBLE);
-            mTextVisitorPerfAverageScore.setVisibility(View.VISIBLE);
             mProgressVisitorPerfAverageScore.setVisibility(View.GONE);
-            mTextVisitorPerfAverageAttempts.setVisibility(View.VISIBLE);
             mProgressVisitorPerfAverageAttempts.setVisibility(View.GONE);
-            mTextVisitorPerfAverageTime.setVisibility(View.VISIBLE);
             mProgressVisitorPerfAverageTime.setVisibility(View.GONE);
+            if(!currentUser.getUser_type().equals("admin")) {
+                mTextVisitorPerfAverageScore.setVisibility(View.VISIBLE);
+                mTextVisitorPerfAverageAttempts.setVisibility(View.VISIBLE);
+                mTextVisitorPerfAverageTime.setVisibility(View.VISIBLE);
+            } else {
+                mTextVisitorPerfTitle.setVisibility(View.GONE);
+                mRelativeVisitorPerfAverageScore.setVisibility(View.GONE);
+                mRelativeVisitorPerfAverageAttempts.setVisibility(View.GONE);
+                mRelativeVisitorPerfAverageTime.setVisibility(View.GONE);
+            }
             final User user = new User();
             user.setUser_student_number_id(user_student_number);
             //get data of the user being visited
@@ -231,7 +239,6 @@ public class UserProfileActivity extends AppCompatActivity {
                 @Override
                 public void getResult(User object, Boolean response, String message) {
                     if (response) {
-
                         //assign user column to visited user values
                         mTextUserPerfTitle.setText(object.getUser_nickname());
                         mTextUserPerfAverageScore.setText(String.valueOf(object.getUser_average_score()));
@@ -273,8 +280,6 @@ public class UserProfileActivity extends AppCompatActivity {
                                 }
                             }
                         });
-
-
                     } else {
                         Log.e(mClassName, message);
                         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
@@ -284,6 +289,10 @@ public class UserProfileActivity extends AppCompatActivity {
                 }
             });
         } else {
+            if(currentUser.getUser_type().equals("admin")) {
+                finish();
+                return;
+            }
             //if it is the logged in user there is no need for visitor column.
             mTextVisitorPerfTitle.setVisibility(View.GONE);
             mTextVisitorPerfAverageScore.setVisibility(View.GONE);
@@ -338,11 +347,12 @@ public class UserProfileActivity extends AppCompatActivity {
                     mTextAveragePerfAverageAttempts.setVisibility(View.VISIBLE);
                     mTextAveragePerfAverageTime.setVisibility(View.VISIBLE);
                 } else {
-                    //if get average user data failed, hide average column
-                    mTextAveragePerfTitle.setVisibility(View.GONE);
-                    mTextAveragePerfAverageScore.setVisibility(View.GONE);
-                    mTextAveragePerfAverageAttempts.setVisibility(View.GONE);
-                    mTextAveragePerfAverageTime.setVisibility(View.GONE);
+                    mTextAveragePerfAverageScore.setVisibility(View.VISIBLE);
+                    mTextAveragePerfAverageAttempts.setVisibility(View.VISIBLE);
+                    mTextAveragePerfAverageTime.setVisibility(View.VISIBLE);
+                    mTextAveragePerfAverageScore.setText("N/A");
+                    mTextAveragePerfAverageAttempts.setText("N/A");
+                    mTextAveragePerfAverageTime.setText("N/A");
                 }
                 mProgressAveragePerfAverageScore.setVisibility(View.GONE);
                 mProgressAveragePerfAverageAttempts.setVisibility(View.GONE);

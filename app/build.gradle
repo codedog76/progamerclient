@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
 
     defaultConfig {
         applicationId "com.example.progamer"
@@ -26,16 +26,17 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.android.support:design:23.3.0'
-    compile 'com.android.support:support-v4:23.3.0'
-    compile 'com.android.support:recyclerview-v7:23.3.0'
-    compile 'com.android.support:cardview-v7:23.3.0'
+    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:design:24.2.0'
+    compile 'com.android.support:support-v4:24.2.0'
+    compile 'com.android.support:recyclerview-v7:24.2.0'
+    compile 'com.android.support:cardview-v7:24.2.0'
     compile 'com.mcxiaoke.volley:library:1.0.18'
     compile 'de.hdodenhof:circleimageview:2.1.0'
-    compile 'com.github.PhilJay:MPAndroidChart:v2.2.5'
     compile 'com.xwray:passwordview:0.1'
     compile 'com.github.woxthebox:draglistview:1.2.8'
     compile 'org.beanshell:bsh:2.0b4'
     compile 'net.sf.opencsv:opencsv:2.3'
+    compile 'com.robinhood.ticker:ticker:1.1.0'
+    compile 'com.romainpiel.shimmer:library:1.4.0@aar'
 }
