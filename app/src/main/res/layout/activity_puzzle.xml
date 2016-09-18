@@ -10,10 +10,17 @@
         android:id="@+id/app_actionbar"
         layout="@layout/app_actionbar" />
 
+    <View
+        android:id="@+id/view_shadow"
+        android:layout_below="@+id/app_actionbar"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:background="@drawable/layout_bottom_shadow" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/app_actionbar"
+        android:layout_below="@id/view_shadow"
         android:fillViewport="true">
 
         <LinearLayout

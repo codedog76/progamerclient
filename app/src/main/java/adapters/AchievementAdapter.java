@@ -48,6 +48,7 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         UserAchievement achievement = mAchievementList.get(position);
+        holder.setIsRecyclable(false);
         holder.mTextTitle.setText(achievement.getAchievement_title());
         holder.mTextDescription.setText(achievement.getAchievement_description());
         holder.mProgressBar.setProgress(achievement.getUserachievement_progress());

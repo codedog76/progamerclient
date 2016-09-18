@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -150,11 +151,18 @@ public class LevelActivity extends AppCompatActivity {
     };
 
     private void fetchUserData() {
-        mTextUserScoreTitle.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_score()));
-        mTextUserScoreValue.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_score()));
+        int levelScore = mCurrentLevel.getLevel_score();
+        mTextUserScoreTitle.setText(getString(R.string.decimal_value, levelScore));
+        mTextUserScoreValue.setText(getString(R.string.decimal_value, levelScore));
         mTextUserAttemptsValue.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_attempts()));
         mTextUserTimeValue.setText(getString(R.string.decimal_value, mCurrentLevel.getLevel_time()));
         String levelTrophy = mCurrentLevel.getLevel_trophy();
+        if (levelTrophy.equals("trophy_bronze"))
+            mTextUserScoreTitle.setTextColor(ContextCompat.getColor(this, R.color.bronze));
+        if (levelTrophy.equals("trophy_silver"))
+            mTextUserScoreTitle.setTextColor(ContextCompat.getColor(this, R.color.silver));
+        if (levelTrophy.equals("trophy_gold"))
+            mTextUserScoreTitle.setTextColor(ContextCompat.getColor(this, R.color.gold));
         int id = getResources().getIdentifier(levelTrophy, "drawable", getPackageName());
         Drawable drawable = ContextCompat.getDrawable(this, id);
         mImageUserTrophy.setImageDrawable(drawable);
@@ -350,9 +358,9 @@ public class LevelActivity extends AppCompatActivity {
         mTextUserScoreTitle.setTypeface(Roboto_Regular);
         mTextUser.setTypeface(Roboto_Regular, Typeface.BOLD);
         mTextAverage.setTypeface(Roboto_Regular, Typeface.BOLD);
-        mTextScore.setTypeface(Roboto_Regular, Typeface.BOLD);
-        mTextAttempts.setTypeface(Roboto_Regular, Typeface.BOLD);
-        mTextTime.setTypeface(Roboto_Regular, Typeface.BOLD);
+        mTextScore.setTypeface(Roboto_Regular);
+        mTextAttempts.setTypeface(Roboto_Regular);
+        mTextTime.setTypeface(Roboto_Regular);
         mTextUserScoreValue.setTypeface(Roboto_Regular);
         mTextUserAttemptsValue.setTypeface(Roboto_Regular);
         mTextUserTimeValue.setTypeface(Roboto_Regular);

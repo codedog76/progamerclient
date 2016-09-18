@@ -854,12 +854,10 @@ public class NetworkManagerSingleton {
                 outgoing_level.put("level_score", current_level.getLevel_score());
                 outgoing_level.put("level_attempts", current_level.getLevel_attempts());
                 outgoing_level.put("level_time", current_level.getLevel_time());
-                Log.e("levelUpdate", current_level.getLevel_id() + " : " + current_level.getLevel_updated());
                 if (current_level.getLevel_updated() == 1)
                     outgoing_levels.put(outgoing_level);
             }
             if (outgoing_levels.length() == 0) {
-                Log.e("outgoing_levels", "length: " + outgoing_levels.length());
                 putUserAchievementsJSONRequest(booleanResponseListener);
                 return;
             }
@@ -921,9 +919,6 @@ public class NetworkManagerSingleton {
         try {
             JSONArray outgoing_userachievements = new JSONArray();
             for (UserAchievement current_userachievement : current_userachievements) {
-                Log.e(mClassName, "userachievement_progress: " + current_userachievement.getUserachievement_progress());
-                Log.e(mClassName, "userachievement_progress: " + current_userachievement.getUserachievement_completed());
-                Log.e(mClassName, "userachievement_notified: " + current_userachievement.getUserachievement_notified());
                 JSONObject outgoing_userachievement = new JSONObject();
                 outgoing_userachievement.put("userachievement_id", current_userachievement.getUserachievement_id());
                 outgoing_userachievement.put("userachievement_progress", current_userachievement.getUserachievement_progress());

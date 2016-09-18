@@ -242,10 +242,16 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="3dp"
+                            android:layout_marginBottom="5dp"
                             android:text="Average Performance"
-                            android:textColor="@color/primary_dark"
+                            android:textColor="@color/accent"
                             android:textSize="20sp" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:alpha="0.2"
+                            android:background="@color/black" />
 
                         <TableLayout
                             android:layout_width="match_parent"
@@ -253,7 +259,8 @@
 
                             <TableRow
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="wrap_content"
+                                android:minHeight="35dp">
 
                                 <android.support.v4.widget.Space
                                     android:layout_height="match_parent"
@@ -261,44 +268,55 @@
 
                                 <TextView
                                     android:id="@+id/text_visitor_perf_title"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1"
                                     android:gravity="center"
                                     android:text="Visitor" />
 
-
                                 <TextView
                                     android:id="@+id/text_user_perf_title"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1"
                                     android:gravity="center"
                                     android:text="User" />
 
                                 <TextView
                                     android:id="@+id/text_average_perf_title"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1"
                                     android:gravity="center"
                                     android:text="Average" />
 
                             </TableRow>
 
+                            <TableRow>
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="1dp"
+                                    android:layout_weight="1"
+                                    android:alpha="0.2"
+                                    android:background="@color/black" />
+                            </TableRow>
+
                             <TableRow
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="wrap_content"
+                                android:minHeight="35dp">
 
                                 <TextView
                                     android:id="@+id/text_average_score_perf"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1"
                                     android:gravity="center_vertical"
                                     android:paddingEnd="3dp"
                                     android:paddingStart="3dp"
-                                    android:text="Average Score" />
+                                    android:text="Average Score"
+                                    android:textColor="@color/green_900" />
 
                                 <RelativeLayout
                                     android:id="@+id/relative_visitor_perf_average_score"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1">
 
                                     <TextView
@@ -313,7 +331,7 @@
                                     <ProgressBar
                                         android:id="@+id/progress_visitor_perf_average_score"
                                         android:layout_width="match_parent"
-                                        android:layout_height="30dp"
+                                        android:layout_height="35dp"
                                         android:layout_centerInParent="true"
                                         android:gravity="center" />
 
@@ -322,7 +340,7 @@
 
                                 <RelativeLayout
                                     android:id="@+id/relative_user_perf_average_score"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1">
 
                                     <TextView
@@ -337,7 +355,7 @@
                                     <ProgressBar
                                         android:id="@+id/progress_user_perf_average_score"
                                         android:layout_width="match_parent"
-                                        android:layout_height="30dp"
+                                        android:layout_height="35dp"
                                         android:layout_centerInParent="true"
                                         android:gravity="center" />
 
@@ -345,7 +363,7 @@
 
                                 <RelativeLayout
                                     android:id="@+id/relative_average_perf_average_score"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1">
 
                                     <TextView
@@ -360,7 +378,7 @@
                                     <ProgressBar
                                         android:id="@+id/progress_average_perf_average_score"
                                         android:layout_width="match_parent"
-                                        android:layout_height="30dp"
+                                        android:layout_height="35dp"
                                         android:layout_centerInParent="true"
                                         android:gravity="center" />
 
@@ -369,22 +387,35 @@
 
                             </TableRow>
 
+
+                            <TableRow>
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="1dp"
+                                    android:layout_weight="1"
+                                    android:alpha="0.2"
+                                    android:background="@color/black" />
+                            </TableRow>
+
                             <TableRow
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="wrap_content"
+                                android:minHeight="35dp">
 
                                 <TextView
                                     android:id="@+id/text_average_attempts_perf"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1"
                                     android:gravity="center_vertical"
                                     android:paddingEnd="3dp"
                                     android:paddingStart="3dp"
-                                    android:text="Average Attempts" />
+                                    android:text="Average Attempts"
+                                    android:textColor="@color/indigo_900" />
 
                                 <RelativeLayout
                                     android:id="@+id/relative_visitor_perf_average_attempts"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1">
 
                                     <TextView
@@ -399,7 +430,7 @@
                                     <ProgressBar
                                         android:id="@+id/progress_visitor_perf_average_attempts"
                                         android:layout_width="match_parent"
-                                        android:layout_height="30dp"
+                                        android:layout_height="35dp"
                                         android:layout_centerInParent="true"
                                         android:gravity="center" />
 
@@ -407,7 +438,7 @@
 
                                 <RelativeLayout
                                     android:id="@+id/relative_user_perf_average_attempts"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1">
 
                                     <TextView
@@ -422,7 +453,7 @@
                                     <ProgressBar
                                         android:id="@+id/progress_user_perf_average_attempts"
                                         android:layout_width="match_parent"
-                                        android:layout_height="30dp"
+                                        android:layout_height="35dp"
                                         android:layout_centerInParent="true"
                                         android:gravity="center" />
 
@@ -430,7 +461,7 @@
 
                                 <RelativeLayout
                                     android:id="@+id/relative_average_perf_average_attempts"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1">
 
                                     <TextView
@@ -444,7 +475,7 @@
                                     <ProgressBar
                                         android:id="@+id/progress_average_perf_average_attempts"
                                         android:layout_width="match_parent"
-                                        android:layout_height="30dp"
+                                        android:layout_height="35dp"
                                         android:layout_centerInParent="true"
                                         android:gravity="center"
                                         android:text="@string/decimal_value" />
@@ -452,22 +483,35 @@
 
                             </TableRow>
 
+
+                            <TableRow>
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="1dp"
+                                    android:layout_weight="1"
+                                    android:alpha="0.2"
+                                    android:background="@color/black" />
+                            </TableRow>
+
                             <TableRow
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                                android:layout_height="wrap_content"
+                                android:minHeight="35dp">
 
                                 <TextView
                                     android:id="@+id/text_average_time_perf"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1"
                                     android:gravity="center_vertical"
                                     android:paddingEnd="3dp"
                                     android:paddingStart="3dp"
-                                    android:text="Average Time" />
+                                    android:text="Average Time"
+                                    android:textColor="@color/orange_900" />
 
                                 <RelativeLayout
                                     android:id="@+id/relative_visitor_perf_average_time"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1">
 
                                     <TextView
@@ -482,14 +526,14 @@
                                     <ProgressBar
                                         android:id="@+id/progress_visitor_perf_average_time"
                                         android:layout_width="match_parent"
-                                        android:layout_height="30dp"
+                                        android:layout_height="35dp"
                                         android:layout_centerInParent="true"
                                         android:gravity="center" />
                                 </RelativeLayout>
 
                                 <RelativeLayout
                                     android:id="@+id/relative_user_perf_average_time"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1">
 
                                     <TextView
@@ -504,7 +548,7 @@
                                     <ProgressBar
                                         android:id="@+id/progress_user_perf_average_time"
                                         android:layout_width="match_parent"
-                                        android:layout_height="30dp"
+                                        android:layout_height="35dp"
                                         android:layout_centerInParent="true"
                                         android:gravity="center" />
 
@@ -512,7 +556,7 @@
 
                                 <RelativeLayout
                                     android:id="@+id/relative_average_perf_average_time"
-                                    android:layout_height="30dp"
+                                    android:layout_height="match_parent"
                                     android:layout_weight="1">
 
                                     <TextView
@@ -527,13 +571,23 @@
                                     <ProgressBar
                                         android:id="@+id/progress_average_perf_average_time"
                                         android:layout_width="match_parent"
-                                        android:layout_height="30dp"
+                                        android:layout_height="35dp"
                                         android:layout_centerInParent="true"
                                         android:gravity="center" />
 
                                 </RelativeLayout>
 
 
+                            </TableRow>
+
+                            <TableRow>
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="1dp"
+                                    android:layout_weight="1"
+                                    android:alpha="0.2"
+                                    android:background="@color/black" />
                             </TableRow>
 
                         </TableLayout>

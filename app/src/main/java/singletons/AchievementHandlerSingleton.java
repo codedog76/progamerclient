@@ -28,9 +28,6 @@ public class AchievementHandlerSingleton {
     }
 
     public void levelWasComplete(Level current_level) {
-        Log.e("score", current_level.getLevel_score()+"");
-        Log.e("attempts", current_level.getLevel_attempts()+"");
-        Log.e("time", current_level.getLevel_time()+"");
         levelScore(current_level);
         levelAttempts(current_level);
         levelTime(current_level);

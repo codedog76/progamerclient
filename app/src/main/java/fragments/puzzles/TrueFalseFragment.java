@@ -63,6 +63,10 @@ public class TrueFalseFragment extends Fragment {
     public Boolean checkIfCorrect() {
         String checkedItem = "";
         SparseBooleanArray checked = mListView.getCheckedItemPositions();
+        if(checked.size()==0) {
+            mParentPuzzleActivity.showNoSelectionAlert();
+            return null;
+        }
         for (int i = 0; i < checked.size(); i++) {
             if (checked.valueAt(i)) {
                 checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();

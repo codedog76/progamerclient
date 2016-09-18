@@ -180,19 +180,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         userAchievement.setUserachievement_completed(1);
                         userAchievement.setUserachievement_notified(0);
                         amount = userAchievement.getAchievement_total();
+                        SQLiteDatabase db = this.getWritableDatabase();
+                        String strSQL = "UPDATE userachievement SET "
+                                + "userachievement_progress=" + amount + ", "
+                                + "userachievement_completed=" + userAchievement.getUserachievement_completed() + ", "
+                                + "userachievement_updated=1, "
+                                + "userachievement_notified=" + userAchievement.getUserachievement_notified()
+                                + " WHERE "
+                                + "userachievement_user_student_number_id='" + current_user.getUser_student_number_id() + "'"
+                                + " AND "
+                                + "userachievement_achievement_id=" + userAchievementId + ";";
+                        db.execSQL(strSQL);
+                        db.close();
                     }
-                    SQLiteDatabase db = this.getWritableDatabase();
-                    String strSQL = "UPDATE userachievement SET "
-                            + "userachievement_progress=" + amount + ", "
-                            + "userachievement_completed=" + userAchievement.getUserachievement_completed() + ", "
-                            + "userachievement_updated=1, "
-                            + "userachievement_notified=" + userAchievement.getUserachievement_notified()
-                            + " WHERE "
-                            + "userachievement_user_student_number_id='" + current_user.getUser_student_number_id() + "'"
-                            + " AND "
-                            + "userachievement_achievement_id=" + userAchievementId + ";";
-                    db.execSQL(strSQL);
-                    db.close();
                 }
             }
         }
@@ -224,8 +224,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(USERACHIEVEMENT_DATE_COMPLETED, userAchievement.getUserachievement_date_completed());
         values.put(USERACHIEVEMENT_UPDATED, userAchievement.getUserachievement_updated());
-        int rowsAffected = db.update(USERACHIEVEMENT_TABLE, values, USERACHIEVEMENT_USER_STUDENT_NUMBER_ID + " = ? AND " + USERACHIEVEMENT_ACHIEVEMENT_ID + " = ?",
-                new String[]{userAchievement.getUser_student_number(), String.valueOf(userAchievement.getAchievement_id())});
+        Log.e("AchievementsUpdated", "attempt " +userAchievement.getUserachievement_date_completed());
+        Log.e("asd", String.valueOf(userAchievement.getUserachievement_database_id()));
+        int rowsAffected = db.update(USERACHIEVEMENT_TABLE, values, "userachievement_database_id = ?",
+                new String[]{String.valueOf(userAchievement.getUserachievement_database_id())});
         db.close();
         return rowsAffected;
     }

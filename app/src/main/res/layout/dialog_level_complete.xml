@@ -73,9 +73,9 @@
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:stretchColumns="*"
         android:layout_marginBottom="0dp"
-        android:paddingBottom="0dp">
+        android:paddingBottom="0dp"
+        android:stretchColumns="*">
 
         <TableRow android:layout_height="wrap_content">
 
@@ -134,7 +134,8 @@
                 android:layout_weight="1.5"
                 android:gravity="center_vertical"
                 android:paddingLeft="10dp"
-                android:text="Level Score" />
+                android:text="Level Score"
+                android:textColor="@color/green_900" />
 
             <TextView
                 android:id="@+id/text_previous_level_score"
@@ -174,7 +175,8 @@
                 android:layout_weight="1.5"
                 android:gravity="center_vertical"
                 android:paddingLeft="10dp"
-                android:text="Level Attempts" />
+                android:text="Level Attempts"
+                android:textColor="@color/indigo_900" />
 
             <TextView
                 android:id="@+id/text_previous_level_attempts"
@@ -215,7 +217,8 @@
                 android:layout_weight="1.5"
                 android:gravity="center_vertical"
                 android:paddingLeft="10dp"
-                android:text="Level Time" />
+                android:text="Level Time"
+                android:textColor="@color/orange_900" />
 
             <TextView
                 android:id="@+id/text_previous_level_time"
@@ -247,23 +250,22 @@
                 android:background="@color/black" />
         </TableRow>
 
+        <TableRow
+            android:background="@color/white"
+            android:minHeight="52dp">
+
+            <Button
+                android:id="@+id/button_level_complete_continue"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:text="Continue"
+                android:textColor="@color/accent"
+                android:textSize="14sp" />
+
+        </TableRow>
+
     </TableLayout>
-
-    <LinearLayout
-        android:id="@+id/bottomLayout"
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:background="@color/white">
-
-        <Button
-            android:id="@+id/button_level_complete_continue"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Continue"
-            android:textColor="@color/accent"
-            android:textSize="14sp" />
-    </LinearLayout>
-
 
 </LinearLayout>

@@ -1,7 +1,6 @@
 package adapters;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
@@ -54,7 +53,7 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
         holder.mTextNumber.setText(mContext.getString(R.string.string_level_number,
                 current_level.getLevel_number()));
         holder.mTextTitle.setText(current_level.getLevel_title());
-        if(user_type.equals("admin")) {
+        if (user_type.equals("admin")) {
             holder.mProgressBar.setVisibility(View.GONE);
             holder.mTextProgressNumeric.setVisibility(View.GONE);
             holder.mImageIcon.setVisibility(View.GONE);
@@ -66,11 +65,18 @@ public class LevelAdapter extends RecyclerView.Adapter<LevelAdapter.ViewHolder> 
             holder.mProgressBar.setVisibility(View.VISIBLE);
             holder.mTextProgressNumeric.setText(mContext.getString(R.string.string_out_of,
                     current_level.getLevel_puzzles_completed(), current_level.getLevel_puzzles_count()));
-            if (current_level.getLevel_score() != 0) {
-                holder.mTextScore.setText(String.valueOf(current_level.getLevel_score()));
+            String levelTrophy = current_level.getLevel_trophy();
+            int levelScore = current_level.getLevel_score();
+            if (levelScore != 0) {
+                holder.mTextScore.setText(String.valueOf(levelScore));
+                if (levelTrophy.equals("trophy_bronze"))
+                    holder.mTextScore.setTextColor(ContextCompat.getColor(mContext, R.color.bronze));
+                if (levelTrophy.equals("trophy_silver"))
+                    holder.mTextScore.setTextColor(ContextCompat.getColor(mContext, R.color.silver));
+                if (levelTrophy.equals("trophy_gold"))
+                    holder.mTextScore.setTextColor(ContextCompat.getColor(mContext, R.color.gold));
                 holder.mTextScore.setVisibility(View.VISIBLE);
             } else holder.mTextScore.setVisibility(View.GONE);
-            String levelTrophy = current_level.getLevel_trophy();
             int id = mContext.getResources().getIdentifier(levelTrophy, "drawable", mContext.getPackageName());
             Drawable drawable = ContextCompat.getDrawable(mContext, id);
             holder.mImageIcon.setImageDrawable(drawable);

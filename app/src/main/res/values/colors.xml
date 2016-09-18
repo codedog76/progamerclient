@@ -289,7 +289,7 @@
     <color name="white">#FFFFFF</color>
 
     <color name="gold">#CFB53B</color>
-    <color name="silver">#E6E8FA</color>
+    <color name="silver">#6c7a86</color>
     <color name="bronze">#8C7853</color>
 
     <!-- Colors for the app -->
@@ -298,5 +298,6 @@
     <color name="primary">@color/light_blue_A200</color>
     <color name="primary_dark">@color/light_blue_A700</color>
     <color name="accent">@color/pink_A200</color>
+    <color name="accent_secondary">@color/green_500</color>
 
 </resources>

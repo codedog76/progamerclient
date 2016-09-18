@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
@@ -20,6 +21,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.progamer.R;
 import com.romainpiel.shimmer.Shimmer;
@@ -97,16 +99,14 @@ public class PuzzleActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        finish();
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        showBackAlert();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
-                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                showBackAlert();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -133,6 +133,22 @@ public class PuzzleActivity extends AppCompatActivity {
         super.onDestroy();
         pausePuzzleTimer();
         savePuzzleData();
+    }
+
+    public void showBackAlert() {
+        new AlertDialog.Builder(PuzzleActivity.this)
+                .setMessage("Are you sure you want discard this attempt?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        finish();
+                        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                    }
+                })
+                .setNegativeButton("No", null).show();
+    }
+
+    public void showNoSelectionAlert() {
+        Toast.makeText(this, "Please select an option", Toast.LENGTH_SHORT).show();
     }
 
     public PuzzleCodeBuilder getCurrentPuzzleCodeBuilder() {
@@ -256,25 +272,30 @@ public class PuzzleActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 pausePuzzleTimer();
-                if (checkFragmentAnswers()) { //if puzzle answer is correct
-                    mCorrectAnswer = true;
-                    savePuzzleData();
-                    mAchievementHandlerSingleton.puzzleWasComplete(mCurrentLevel); //process puzzle completed achievements
-                    loadNextIncompletePuzzle();
-                    if (mCurrentPuzzle == null || mCurrentLevel.getLevel_puzzles_completed() == mCurrentLevel.getLevel_puzzles_count()) {
-                        //if level is complete
-                        mLevelComplete = true;
-                    }
-                    assignPuzzleCorrectViews();
+                Boolean checkedAnswer = checkFragmentAnswers();
+                if (checkedAnswer != null) {
+                    if (checkedAnswer) { //if puzzle answer is correct
+                        mCorrectAnswer = true;
+                        savePuzzleData();
+                        mAchievementHandlerSingleton.puzzleWasComplete(mCurrentLevel); //process puzzle completed achievements
+                        loadNextIncompletePuzzle();
+                        if (mCurrentPuzzle == null || mCurrentLevel.getLevel_puzzles_completed() == mCurrentLevel.getLevel_puzzles_count()) {
+                            //if level is complete
+                            mLevelComplete = true;
+                        }
+                        assignPuzzleCorrectViews();
 
-                    mDialogPuzzleCorrect.show();
+                        mDialogPuzzleCorrect.show();
+                    } else {
+                        mCorrectAnswer = false;
+                        mLevelComplete = false;
+                        savePuzzleData();
+                        loadNextIncompletePuzzle();
+                        assignPuzzleIncorrectViews();
+                        mDialogPuzzleIncorrect.show();
+                    }
                 } else {
-                    mCorrectAnswer = false;
-                    mLevelComplete = false;
-                    savePuzzleData();
-                    loadNextIncompletePuzzle();
-                    assignPuzzleIncorrectViews();
-                    mDialogPuzzleIncorrect.show();
+                    resumePuzzleTimer();
                 }
             }
         });
@@ -338,7 +359,20 @@ public class PuzzleActivity extends AppCompatActivity {
                 mTextNewLevelAttempts.setText(String.valueOf(updatedLevel.getActual_level_attempts()));
                 mTextNewLevelTime.setText(String.valueOf(updatedLevel.getActual_level_time()));
                 mTextScore.setText(String.valueOf(newScore));
-                if(newScore>prevScore) {
+                if (newScore >= 1) {
+                    mTextScore.setTextColor(ContextCompat.getColor(this, R.color.bronze));
+                    mImageTrophyBronze.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.trophy_bronze));
+                }
+                if (newScore >= 50 ) {
+                    mTextScore.setTextColor(ContextCompat.getColor(this, R.color.silver));
+                    mImageTrophySilver.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.trophy_silver));
+                }
+                if (newScore >= 100) {
+                    mTextScore.setTextColor(ContextCompat.getColor(this, R.color.gold));
+                    mImageTrophyGold.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.trophy_gold));
+                }
+
+                if (newScore > prevScore) {
                     mTextNew.setText("New");
                     mTextPrevious.setText("Previous");
                     mShimmerTextNewHighScore.setVisibility(View.VISIBLE);
@@ -370,7 +404,7 @@ public class PuzzleActivity extends AppCompatActivity {
                     compiledCodeLine = "<b><u><font color=#B71C1C>" + compiledCodeLine + "</font></u></b>";
                 } else {
                     compiledCodeLine = compiledCodeLine.replaceAll("int", "<font color=#2962FF>int</font>");
-                    compiledCodeLine = compiledCodeLine.replaceAll("float", "<font color=#2962FF>double</font>");
+                    compiledCodeLine = compiledCodeLine.replaceAll("float", "<font color=#2962FF>float</font>");
                     compiledCodeLine = compiledCodeLine.replaceAll("String", "<font color=#2962FF>String</font>");
                     compiledCodeLine = compiledCodeLine.replaceAll("char", "<font color=#2962FF>char</font>");
                     compiledCodeLine = compiledCodeLine.replaceAll("Boolean", "<font color=#2962FF>Boolean</font>");
@@ -437,7 +471,7 @@ public class PuzzleActivity extends AppCompatActivity {
             mTextExpectedOutput.setVisibility(View.GONE);
         } else {
             expectedOutput = expectedOutput.replaceAll("int", "<font color=#2962FF>int</font>");
-            expectedOutput = expectedOutput.replaceAll("float", "<font color=#2962FF>double</font>");
+            expectedOutput = expectedOutput.replaceAll("float", "<font color=#2962FF>float</font>");
             expectedOutput = expectedOutput.replaceAll("String", "<font color=#2962FF>String</font>");
             expectedOutput = expectedOutput.replaceAll("char", "<font color=#2962FF>char</font>");
             expectedOutput = expectedOutput.replaceAll("Boolean", "<font color=#2962FF>Boolean</font>");

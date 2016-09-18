@@ -74,9 +74,12 @@ public class SingleChoiceListFragment extends Fragment {
 
     public Boolean checkIfCorrect() {
         if (mCurrentPuzzleCodeBuilder.getPuzzleExpectedOutputType().equals("<code>")) {
-            Log.e(mClassName, "this1");
             String checkedItem = "";
             SparseBooleanArray checked = mListView.getCheckedItemPositions();
+            if(checked.size()==0) {
+                mParentPuzzleActivity.showNoSelectionAlert();
+                return null;
+            }
             for (int i = 0; i < checked.size(); i++) {
                 if (checked.valueAt(i)) {
                     checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
@@ -85,10 +88,6 @@ public class SingleChoiceListFragment extends Fragment {
             if (checkedItem.equals("")) return false;
             List<String> names = mCurrentPuzzleCodeBuilder.getCSharpCodeToRun();
             mParentPuzzleActivity.setCompiledCode(names);
-            for (String ave : names) {
-                Log.e("asd", ave);
-            }
-
             List<Object> expectedAnswer = mCurrentPuzzleCodeBuilder.getCSharpCodeToRunAnswer();
             mParentPuzzleActivity.setCompiledResult(expectedAnswer);
             String answer = "";
@@ -98,20 +97,18 @@ public class SingleChoiceListFragment extends Fragment {
                 answer = String.valueOf(round(floatValue, 2));
                 floatValue = Float.parseFloat(checkedItem);
                 floatChecked = String.valueOf(floatValue);
-                Log.e("floatValue", floatValue+"");
-
             } catch (NumberFormatException e) {
                 Log.e("ParseException", expectedAnswer.get(0).toString());
             }
-
-            Log.e("checkItem", floatChecked);
-            Log.e("expectedAnswer", answer);
-
             return floatChecked.toLowerCase().trim().equals(answer.toLowerCase().trim());
         } else {
             List<String> codeToRun = new ArrayList<>();
             String checkedItem = "";
             SparseBooleanArray checked = mListView.getCheckedItemPositions();
+            if(checked.size()==0) {
+                mParentPuzzleActivity.showNoSelectionAlert();
+                return null;
+            }
             for (int i = 0; i < checked.size(); i++) {
                 if (checked.valueAt(i)) {
                     checkedItem = mListView.getItemAtPosition(checked.keyAt(i)).toString();
@@ -153,7 +150,7 @@ public class SingleChoiceListFragment extends Fragment {
         }
     }
 
-    public float round(float d, int decimalPlace) {
+    private float round(float d, int decimalPlace) {
         BigDecimal bd = new BigDecimal(Float.toString(d));
         bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
         return bd.floatValue();
